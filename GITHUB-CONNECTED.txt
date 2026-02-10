@@ -1,0 +1,7 @@
+GitHub Auto-Deploy Enabled: 2026-02-10 12:00 CST
+
+Repository: https://github.com/MagicWifiMoney/sermon-clips
+Vercel Project: church-clips-landing
+Domain: sermon-clips.com
+
+Auto-deployment is now active! Push to main branch will trigger automatic Vercel deployments.
