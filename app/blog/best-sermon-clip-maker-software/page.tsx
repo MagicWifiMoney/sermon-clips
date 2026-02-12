@@ -692,7 +692,7 @@ export default function BlogPost() {
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle2 className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
-                      <span>Quality of each clip > quantity of clips</span>
+                      <span>Quality of each clip &gt; quantity of clips</span>
                     </li>
                   </ul>
                 </div>
