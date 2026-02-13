@@ -42,38 +42,34 @@ export default function SettingsPage() {
 
         {/* Account Tab */}
         <TabsContent value="account">
-          <div className="space-y-8">
-            <div>
-              <h2 className="text-lg font-semibold text-[#2D2D2D] mb-4">Account</h2>
-              <div className="rounded-2xl overflow-hidden border border-[#E8E4DC]">
-                <UserProfile
-                  appearance={{
-                    elements: {
-                      rootBox: "w-full",
-                      cardBox: "shadow-none border-0 w-full",
-                      navbar: "hidden",
-                      pageScrollBox: "p-0",
-                    },
-                  }}
-                />
-              </div>
+          <div className="space-y-6">
+            <div className="rounded-2xl overflow-hidden border border-[#E8E4DC] [&_.cl-navbar]:hidden [&_.cl-headerTitle]:hidden [&_.cl-headerSubtitle]:hidden">
+              <UserProfile
+                appearance={{
+                  elements: {
+                    rootBox: "w-full",
+                    cardBox: "shadow-none border-0 w-full max-w-none",
+                    navbar: "hidden",
+                    navbarMobileMenuRow: "hidden",
+                    pageScrollBox: "p-4 pt-2",
+                    profileSection: "gap-4",
+                  },
+                }}
+              />
             </div>
 
-            <div>
-              <h2 className="text-lg font-semibold text-[#2D2D2D] mb-4">Plan</h2>
-              <Card className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-[#2D2D2D]">Free Trial</p>
-                  <p className="text-sm text-[#5c5c5c] mt-0.5">
-                    Upgrade to process more sermons and unlock premium features
-                  </p>
-                </div>
-                <Button variant="secondary" disabled>
-                  Upgrade Plan
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
-              </Card>
-            </div>
+            <Card className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-[#2D2D2D]">Current Plan: Free Trial</p>
+                <p className="text-sm text-[#5c5c5c] mt-0.5">
+                  Upgrade to process more sermons and unlock premium features
+                </p>
+              </div>
+              <Button variant="secondary" disabled>
+                Upgrade Plan
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </Card>
           </div>
         </TabsContent>
 
