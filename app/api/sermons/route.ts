@@ -5,8 +5,24 @@ import { prisma } from "@/lib/prisma";
 
 const createSermonSchema = z.object({
   title: z.string().min(1).max(200),
-  sourceType: z.enum(["youtube", "upload"]),
+  sourceType: z.enum(["youtube", "upload", "url"]),
   sourceUrl: z.string().url().optional(),
+  processingOptions: z.object({
+    clipCount: z.number().min(1).max(15),
+    clipDuration: z.enum(["short", "medium", "long"]),
+    captionStyle: z.enum(["none", "standard", "cinematic", "with-emojis"]),
+    outputFormats: z.array(z.enum(["vertical", "landscape", "square"])).min(1),
+    features: z.object({
+      silenceRemoval: z.boolean().optional(),
+      audioEnhancement: z.boolean().optional(),
+      colorCorrection: z.boolean().optional(),
+      aiBackgroundMusic: z.boolean().optional(),
+      aiBRoll: z.boolean().optional(),
+      motionGraphics: z.boolean().optional(),
+    }),
+    applyBranding: z.boolean(),
+  }).optional(),
+  publishMode: z.enum(["auto", "review", "draft"]).optional(),
 });
 
 // GET /api/sermons — list user's sermons + stats
@@ -89,7 +105,7 @@ async function createSermon(request: NextRequest, userId: string) {
     );
   }
 
-  const { title, sourceType, sourceUrl } = parsed.data;
+  const { title, sourceType, sourceUrl, processingOptions, publishMode } = parsed.data;
 
   const sermon = await prisma.sermon.create({
     data: {
@@ -97,7 +113,9 @@ async function createSermon(request: NextRequest, userId: string) {
       title,
       sourceType,
       sourceUrl,
-      status: sourceType === "youtube" ? "PENDING" : "UPLOADING",
+      processingOptions: processingOptions ?? undefined,
+      publishMode: publishMode ?? "review",
+      status: sourceType === "upload" ? "UPLOADING" : "PENDING",
     },
   });
 

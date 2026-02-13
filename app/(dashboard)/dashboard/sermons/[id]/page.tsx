@@ -1,15 +1,21 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import useSWR from "swr";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ClipCard } from "@/components/dashboard/clip-card";
 import { ProcessingStatus } from "@/components/dashboard/processing-status";
+import { PublishTab } from "@/components/dashboard/publish-tab";
+import { DripSchedule } from "@/components/dashboard/drip-schedule";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { formatDate, formatDurationLong } from "@/lib/utils";
-import { ArrowLeft, Download, Youtube, Upload } from "lucide-react";
+import { ArrowLeft, Download, Youtube, Upload, Trash2 } from "lucide-react";
 import type { SermonWithClips } from "@/types";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
@@ -24,6 +30,9 @@ const statusConfig = {
 
 export default function SermonDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const router = useRouter();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const { data, isLoading } = useSWR<{ data: SermonWithClips }>(
     `/api/sermons/${id}`,
@@ -33,6 +42,44 @@ export default function SermonDetailPage({ params }: { params: Promise<{ id: str
 
   const sermon = data?.data;
   const isProcessing = sermon && ["UPLOADING", "PENDING", "PROCESSING"].includes(sermon.status);
+
+  const handleDownloadAll = () => {
+    if (!sermon?.clips?.length) {
+      toast.error("No clips to download");
+      return;
+    }
+    for (const clip of sermon.clips) {
+      if (clip.videoUrl) {
+        window.open(`/api/clips/${clip.id}/download`, "_blank");
+      }
+    }
+    toast.success(`Downloading ${sermon.clips.length} clips`);
+  };
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/sermons/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Delete failed");
+      toast.success("Sermon deleted");
+      router.push("/dashboard");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Delete failed");
+    } finally {
+      setDeleting(false);
+      setShowDeleteDialog(false);
+    }
+  };
+
+  const handleRetry = async () => {
+    try {
+      const res = await fetch(`/api/sermons/${id}/retry`, { method: "POST" });
+      if (!res.ok) throw new Error("Retry failed");
+      toast.success("Re-processing queued!");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Retry failed");
+    }
+  };
 
   if (isLoading) {
     return (
@@ -82,7 +129,7 @@ export default function SermonDetailPage({ params }: { params: Promise<{ id: str
               ) : (
                 <Upload className="w-4 h-4" />
               )}
-              {sermon.sourceType === "youtube" ? "YouTube" : "Upload"}
+              {sermon.sourceType === "youtube" ? "YouTube" : sermon.sourceType === "url" ? "URL" : "Upload"}
             </span>
             {sermon.status === "COMPLETED" && (
               <span>{sermon.clips.length} clips</span>
@@ -94,40 +141,69 @@ export default function SermonDetailPage({ params }: { params: Promise<{ id: str
           </div>
         </div>
 
-        {sermon.status === "COMPLETED" && sermon.clips.length > 0 && (
-          <Button variant="secondary">
-            <Download className="w-4 h-4" />
-            Download All
+        <div className="flex items-center gap-2">
+          {sermon.status === "COMPLETED" && sermon.clips.length > 0 && (
+            <Button variant="secondary" onClick={handleDownloadAll}>
+              <Download className="w-4 h-4" />
+              Download All
+            </Button>
+          )}
+          <Button variant="ghost" onClick={() => setShowDeleteDialog(true)} className="text-red-500 hover:text-red-600">
+            <Trash2 className="w-4 h-4" />
           </Button>
-        )}
+        </div>
       </div>
 
       {/* Content based on status */}
-      {isProcessing ? (
+      {isProcessing || sermon.status === "FAILED" ? (
         <ProcessingStatus
           status={sermon.status}
           progress={sermon.progress}
           errorMessage={sermon.errorMessage}
-        />
-      ) : sermon.status === "FAILED" ? (
-        <ProcessingStatus
-          status={sermon.status}
-          progress={0}
-          errorMessage={sermon.errorMessage}
+          onRetry={handleRetry}
         />
       ) : sermon.status === "COMPLETED" ? (
-        sermon.clips.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {sermon.clips.map((clip, i) => (
-              <ClipCard key={clip.id} clip={clip} index={i} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-16 text-[#5c5c5c]">
-            <p>Processing completed but no clips were generated.</p>
-          </div>
-        )
+        <Tabs defaultValue="clips" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="clips">Clips</TabsTrigger>
+            <TabsTrigger value="publish">Publish</TabsTrigger>
+            <TabsTrigger value="schedule">Schedule</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="clips">
+            {sermon.clips.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {sermon.clips.map((clip, i) => (
+                  <ClipCard key={clip.id} clip={clip} index={i} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16 text-[#5c5c5c]">
+                <p>Processing completed but no clips were generated.</p>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="publish">
+            <PublishTab clips={sermon.clips} sermonTitle={sermon.title} />
+          </TabsContent>
+
+          <TabsContent value="schedule">
+            <DripSchedule sermonId={sermon.id} />
+          </TabsContent>
+        </Tabs>
       ) : null}
+
+      {/* Delete confirmation */}
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirm={handleDelete}
+        title="Delete Sermon"
+        message={`Are you sure you want to delete "${sermon.title}"? This will also delete all clips and publications. This action cannot be undone.`}
+        confirmLabel={deleting ? "Deleting..." : "Delete Sermon"}
+        danger
+      />
     </div>
   );
 }

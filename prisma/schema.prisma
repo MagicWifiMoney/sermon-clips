@@ -7,14 +7,18 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  clerkId   String   @unique
-  email     String   @unique
-  name      String?
-  imageUrl  String?
-  sermons   Sermon[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                      String          @id @default(cuid())
+  clerkId                 String          @unique
+  email                   String          @unique
+  name                    String?
+  imageUrl                String?
+  plan                    String          @default("starter")
+  brandingConfig          Json?
+  connectedYoutubeChannel Json?
+  sermons                 Sermon[]
+  socialAccounts          SocialAccount[]
+  createdAt               DateTime        @default(now())
+  updatedAt               DateTime        @updatedAt
 }
 
 enum SermonStatus {
@@ -26,36 +30,107 @@ enum SermonStatus {
 }
 
 model Sermon {
-  id              String       @id @default(cuid())
-  userId          String
-  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  title           String
-  sourceType      String
-  sourceUrl       String?
-  durationSeconds Int?
-  mosaicRunId     String?      @unique
-  status          SermonStatus @default(PENDING)
-  progress        Int          @default(0)
-  errorMessage    String?
-  clips           Clip[]
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  id                String         @id @default(cuid())
+  userId            String
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title             String
+  sourceType        String
+  sourceUrl         String?
+  durationSeconds   Int?
+  mosaicRunId       String?        @unique
+  status            SermonStatus   @default(PENDING)
+  progress          Int            @default(0)
+  errorMessage      String?
+  processingOptions Json?
+  publishMode       String         @default("review")
+  clips             Clip[]
+  scheduledPosts    ScheduledPost[]
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
 
   @@index([userId, createdAt(sort: Desc)])
 }
 
 model Clip {
-  id              String   @id @default(cuid())
+  id              String            @id @default(cuid())
   sermonId        String
-  sermon          Sermon   @relation(fields: [sermonId], references: [id], onDelete: Cascade)
+  sermon          Sermon            @relation(fields: [sermonId], references: [id], onDelete: Cascade)
   title           String?
   durationSeconds Float?
   format          String?
   videoUrl        String?
   thumbnailUrl    String?
-  downloadCount   Int      @default(0)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  downloadCount   Int               @default(0)
+  publications    ClipPublication[]
+  analytics       ClipAnalytics[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
 
   @@index([sermonId])
+}
+
+model SocialAccount {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  platform    String
+  accountName String?
+  accountId   String?
+  accessToken String?
+  connected   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, platform])
+  @@index([userId])
+}
+
+model ClipPublication {
+  id           String    @id @default(cuid())
+  clipId       String
+  clip         Clip      @relation(fields: [clipId], references: [id], onDelete: Cascade)
+  platform     String
+  caption      String?
+  scheduledAt  DateTime?
+  publishedAt  DateTime?
+  status       String    @default("draft")
+  externalUrl  String?
+  errorMessage String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([clipId])
+  @@index([status])
+}
+
+model ClipAnalytics {
+  id        String   @id @default(cuid())
+  clipId    String
+  clip      Clip     @relation(fields: [clipId], references: [id], onDelete: Cascade)
+  platform  String
+  views     Int      @default(0)
+  likes     Int      @default(0)
+  shares    Int      @default(0)
+  comments  Int      @default(0)
+  date      DateTime
+  createdAt DateTime @default(now())
+
+  @@index([clipId, platform, date])
+}
+
+model ScheduledPost {
+  id           String    @id @default(cuid())
+  sermonId     String
+  sermon       Sermon    @relation(fields: [sermonId], references: [id], onDelete: Cascade)
+  clipId       String?
+  platform     String
+  caption      String?
+  scheduledFor DateTime
+  publishedAt  DateTime?
+  status       String    @default("pending")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([sermonId])
+  @@index([scheduledFor, status])
 }

@@ -6,7 +6,9 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Youtube, Upload, FileVideo, ArrowRight, Loader2 } from "lucide-react";
+import { ProcessingOptionsPanel, DEFAULT_PROCESSING_OPTIONS } from "@/components/dashboard/processing-options";
+import { Youtube, Upload, FileVideo, ArrowRight, Loader2, Link as LinkIcon } from "lucide-react";
+import type { ProcessingOptions, PublishMode } from "@/types";
 
 export function UploadForm() {
   const router = useRouter();
@@ -16,25 +18,32 @@ export function UploadForm() {
   const [ytTitle, setYtTitle] = useState("");
   const [ytUrl, setYtUrl] = useState("");
 
+  // URL tab state
+  const [urlTitle, setUrlTitle] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
+
   // Upload tab state
   const [uploadTitle, setUploadTitle] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleYoutubeSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!ytTitle.trim() || !ytUrl.trim()) return;
+  // Shared processing options
+  const [processingOptions, setProcessingOptions] = useState<ProcessingOptions>(DEFAULT_PROCESSING_OPTIONS);
+  const [publishMode, setPublishMode] = useState<PublishMode>("review");
 
+  const submitSermon = async (title: string, sourceType: string, sourceUrl?: string) => {
     setIsSubmitting(true);
     try {
       const res = await fetch("/api/sermons", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title: ytTitle.trim(),
-          sourceType: "youtube",
-          sourceUrl: ytUrl.trim(),
+          title: title.trim(),
+          sourceType,
+          sourceUrl: sourceUrl?.trim(),
+          processingOptions,
+          publishMode,
         }),
       });
 
@@ -53,19 +62,32 @@ export function UploadForm() {
     }
   };
 
+  const handleYoutubeSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!ytTitle.trim() || !ytUrl.trim()) return;
+    await submitSermon(ytTitle, "youtube", ytUrl);
+  };
+
+  const handleUrlSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!urlTitle.trim() || !videoUrl.trim()) return;
+    await submitSermon(urlTitle, "url", videoUrl);
+  };
+
   const handleFileUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!uploadTitle.trim() || !file) return;
 
     setIsSubmitting(true);
     try {
-      // Step 1: Create sermon record
       const res = await fetch("/api/sermons", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: uploadTitle.trim(),
           sourceType: "upload",
+          processingOptions,
+          publishMode,
         }),
       });
 
@@ -76,7 +98,6 @@ export function UploadForm() {
 
       const { data } = await res.json();
 
-      // Step 2: Start upload (stub — Mosaic team implements)
       try {
         await fetch("/api/upload/start", {
           method: "POST",
@@ -107,156 +128,169 @@ export function UploadForm() {
     }
   }, []);
 
+  const inputClasses = "w-full px-4 py-2.5 rounded-lg border border-[#E8E4DC] bg-white text-[#2D2D2D] placeholder:text-[#5c5c5c]/50 focus:outline-none focus:ring-2 focus:ring-[#E8725A]/50 focus:border-[#E8725A]";
+
   return (
-    <Tabs defaultValue="youtube" className="space-y-6">
-      <TabsList>
-        <TabsTrigger value="youtube">
-          <span className="flex items-center gap-2">
-            <Youtube className="w-4 h-4" />
-            YouTube Link
-          </span>
-        </TabsTrigger>
-        <TabsTrigger value="upload">
-          <span className="flex items-center gap-2">
-            <Upload className="w-4 h-4" />
-            Upload File
-          </span>
-        </TabsTrigger>
-      </TabsList>
+    <div className="space-y-6">
+      <Tabs defaultValue="youtube" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="youtube">
+            <span className="flex items-center gap-2">
+              <Youtube className="w-4 h-4" />
+              YouTube Link
+            </span>
+          </TabsTrigger>
+          <TabsTrigger value="url">
+            <span className="flex items-center gap-2">
+              <LinkIcon className="w-4 h-4" />
+              Video URL
+            </span>
+          </TabsTrigger>
+          <TabsTrigger value="upload">
+            <span className="flex items-center gap-2">
+              <Upload className="w-4 h-4" />
+              Upload File
+            </span>
+          </TabsTrigger>
+        </TabsList>
 
-      {/* YouTube Tab */}
-      <TabsContent value="youtube">
-        <Card>
-          <form onSubmit={handleYoutubeSubmit} className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-[#2D2D2D] mb-1.5">
-                Sermon Title
-              </label>
-              <input
-                type="text"
-                value={ytTitle}
-                onChange={(e) => setYtTitle(e.target.value)}
-                placeholder="e.g. Sunday Sermon - Feb 9"
-                className="w-full px-4 py-2.5 rounded-lg border border-[#E8E4DC] bg-white text-[#2D2D2D] placeholder:text-[#5c5c5c]/50 focus:outline-none focus:ring-2 focus:ring-[#E8725A]/50 focus:border-[#E8725A]"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-[#2D2D2D] mb-1.5">
-                YouTube URL
-              </label>
-              <input
-                type="url"
-                value={ytUrl}
-                onChange={(e) => setYtUrl(e.target.value)}
-                placeholder="https://youtube.com/watch?v=..."
-                className="w-full px-4 py-2.5 rounded-lg border border-[#E8E4DC] bg-white text-[#2D2D2D] placeholder:text-[#5c5c5c]/50 focus:outline-none focus:ring-2 focus:ring-[#E8725A]/50 focus:border-[#E8725A]"
-                required
-              />
-            </div>
-            <Button
-              type="submit"
-              size="lg"
-              className="w-full"
-              disabled={isSubmitting || !ytTitle.trim() || !ytUrl.trim()}
-            >
-              {isSubmitting ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <>
-                  Start Processing
-                  <ArrowRight className="w-5 h-5" />
-                </>
-              )}
-            </Button>
-          </form>
-        </Card>
-      </TabsContent>
+        {/* YouTube Tab */}
+        <TabsContent value="youtube">
+          <Card>
+            <form onSubmit={handleYoutubeSubmit} className="space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-[#2D2D2D] mb-1.5">Sermon Title</label>
+                <input
+                  type="text"
+                  value={ytTitle}
+                  onChange={(e) => setYtTitle(e.target.value)}
+                  placeholder="e.g. Sunday Sermon - Feb 9"
+                  className={inputClasses}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#2D2D2D] mb-1.5">YouTube URL</label>
+                <input
+                  type="url"
+                  value={ytUrl}
+                  onChange={(e) => setYtUrl(e.target.value)}
+                  placeholder="https://youtube.com/watch?v=..."
+                  className={inputClasses}
+                  required
+                />
+              </div>
+              <Button type="submit" size="lg" className="w-full" disabled={isSubmitting || !ytTitle.trim() || !ytUrl.trim()}>
+                {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <><span>Start Processing</span><ArrowRight className="w-5 h-5" /></>}
+              </Button>
+            </form>
+          </Card>
+        </TabsContent>
 
-      {/* Upload Tab */}
-      <TabsContent value="upload">
-        <Card>
-          <form onSubmit={handleFileUpload} className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-[#2D2D2D] mb-1.5">
-                Sermon Title
-              </label>
-              <input
-                type="text"
-                value={uploadTitle}
-                onChange={(e) => setUploadTitle(e.target.value)}
-                placeholder="e.g. Sunday Sermon - Feb 9"
-                className="w-full px-4 py-2.5 rounded-lg border border-[#E8E4DC] bg-white text-[#2D2D2D] placeholder:text-[#5c5c5c]/50 focus:outline-none focus:ring-2 focus:ring-[#E8725A]/50 focus:border-[#E8725A]"
-                required
-              />
-            </div>
+        {/* Video URL Tab */}
+        <TabsContent value="url">
+          <Card>
+            <form onSubmit={handleUrlSubmit} className="space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-[#2D2D2D] mb-1.5">Sermon Title</label>
+                <input
+                  type="text"
+                  value={urlTitle}
+                  onChange={(e) => setUrlTitle(e.target.value)}
+                  placeholder="e.g. Sunday Sermon - Feb 9"
+                  className={inputClasses}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#2D2D2D] mb-1.5">Video URL</label>
+                <input
+                  type="url"
+                  value={videoUrl}
+                  onChange={(e) => setVideoUrl(e.target.value)}
+                  placeholder="Vimeo, Dropbox, Google Drive link..."
+                  className={inputClasses}
+                  required
+                />
+                <p className="text-xs text-[#5c5c5c] mt-1">Supports Vimeo, Dropbox, and Google Drive links</p>
+              </div>
+              <Button type="submit" size="lg" className="w-full" disabled={isSubmitting || !urlTitle.trim() || !videoUrl.trim()}>
+                {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <><span>Start Processing</span><ArrowRight className="w-5 h-5" /></>}
+              </Button>
+            </form>
+          </Card>
+        </TabsContent>
 
-            {/* Drop zone */}
-            <div
-              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-              onDragLeave={() => setDragOver(false)}
-              onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
-              className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-colors ${
-                dragOver
-                  ? "border-[#E8725A] bg-[#E8725A]/5"
-                  : file
-                  ? "border-green-400 bg-green-50"
-                  : "border-[#E8E4DC] hover:border-[#E8725A]/50"
-              }`}
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="video/*"
-                className="hidden"
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) setFile(f);
-                }}
-              />
-              {file ? (
-                <div className="space-y-2">
-                  <FileVideo className="w-10 h-10 text-green-500 mx-auto" />
-                  <p className="text-sm font-medium text-[#2D2D2D]">{file.name}</p>
-                  <p className="text-xs text-[#5c5c5c]">
-                    {(file.size / (1024 * 1024)).toFixed(1)} MB
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <Upload className="w-10 h-10 text-[#5c5c5c]/50 mx-auto" />
-                  <p className="text-sm text-[#5c5c5c]">
-                    Drag & drop your video file here
-                  </p>
-                  <p className="text-xs text-[#5c5c5c]/70">
-                    or click to browse
-                  </p>
-                  <p className="text-xs text-[#5c5c5c]/50 mt-2">
-                    MP4, MOV, AVI &middot; Max 5GB
-                  </p>
-                </div>
-              )}
-            </div>
+        {/* Upload Tab */}
+        <TabsContent value="upload">
+          <Card>
+            <form onSubmit={handleFileUpload} className="space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-[#2D2D2D] mb-1.5">Sermon Title</label>
+                <input
+                  type="text"
+                  value={uploadTitle}
+                  onChange={(e) => setUploadTitle(e.target.value)}
+                  placeholder="e.g. Sunday Sermon - Feb 9"
+                  className={inputClasses}
+                  required
+                />
+              </div>
 
-            <Button
-              type="submit"
-              size="lg"
-              className="w-full"
-              disabled={isSubmitting || !uploadTitle.trim() || !file}
-            >
-              {isSubmitting ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <>
-                  Upload & Process
-                  <ArrowRight className="w-5 h-5" />
-                </>
-              )}
-            </Button>
-          </form>
-        </Card>
-      </TabsContent>
-    </Tabs>
+              <div
+                onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                onDragLeave={() => setDragOver(false)}
+                onDrop={handleDrop}
+                onClick={() => fileInputRef.current?.click()}
+                className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-colors ${
+                  dragOver
+                    ? "border-[#E8725A] bg-[#E8725A]/5"
+                    : file
+                    ? "border-green-400 bg-green-50"
+                    : "border-[#E8E4DC] hover:border-[#E8725A]/50"
+                }`}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="video/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) setFile(f);
+                  }}
+                />
+                {file ? (
+                  <div className="space-y-2">
+                    <FileVideo className="w-10 h-10 text-green-500 mx-auto" />
+                    <p className="text-sm font-medium text-[#2D2D2D]">{file.name}</p>
+                    <p className="text-xs text-[#5c5c5c]">{(file.size / (1024 * 1024)).toFixed(1)} MB</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Upload className="w-10 h-10 text-[#5c5c5c]/50 mx-auto" />
+                    <p className="text-sm text-[#5c5c5c]">Drag & drop your video file here</p>
+                    <p className="text-xs text-[#5c5c5c]/70">or click to browse</p>
+                    <p className="text-xs text-[#5c5c5c]/50 mt-2">MP4, MOV, AVI &middot; Max 5GB</p>
+                  </div>
+                )}
+              </div>
+
+              <Button type="submit" size="lg" className="w-full" disabled={isSubmitting || !uploadTitle.trim() || !file}>
+                {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <><span>Upload & Process</span><ArrowRight className="w-5 h-5" /></>}
+              </Button>
+            </form>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* Processing Options (shared across all tabs) */}
+      <ProcessingOptionsPanel
+        value={processingOptions}
+        onChange={setProcessingOptions}
+        publishMode={publishMode}
+        onPublishModeChange={setPublishMode}
+      />
+    </div>
   );
 }

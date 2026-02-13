@@ -10,6 +10,7 @@ interface ProcessingStatusProps {
   status: SermonStatus;
   progress: number;
   errorMessage?: string | null;
+  onRetry?: () => void;
 }
 
 const statusMessages: Record<string, string[]> = {
@@ -25,7 +26,7 @@ const statusMessages: Record<string, string[]> = {
   ],
 };
 
-export function ProcessingStatus({ status, progress, errorMessage }: ProcessingStatusProps) {
+export function ProcessingStatus({ status, progress, errorMessage, onRetry }: ProcessingStatusProps) {
   if (status === "FAILED") {
     return (
       <Card className="text-center py-12">
@@ -37,11 +38,14 @@ export function ProcessingStatus({ status, progress, errorMessage }: ProcessingS
           {errorMessage || "Something went wrong while processing your sermon."}
         </p>
         <div className="flex items-center justify-center gap-3">
-          <Button variant="secondary">
+          <Button variant="secondary" onClick={onRetry}>
             <RefreshCw className="w-4 h-4" />
             Try Again
           </Button>
-          <Button variant="ghost">
+          <Button
+            variant="ghost"
+            onClick={() => window.location.href = "mailto:support@sermon-clips.com"}
+          >
             <Mail className="w-4 h-4" />
             Contact Support
           </Button>
