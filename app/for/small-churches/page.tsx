@@ -1,4 +1,4 @@
-'use client';
+
 
 import { CheckCircle2, DollarSign, Heart, Zap, ArrowRight, Quote, Users, Shield, Sparkles, Clock } from "lucide-react";
 import Link from "next/link";

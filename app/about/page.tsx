@@ -1,4 +1,4 @@
-'use client';
+
 
 import { Heart, Shield, Sparkles, ArrowRight, Award, Target, Users, Church, Video, Clock } from "lucide-react";
 import Link from "next/link";

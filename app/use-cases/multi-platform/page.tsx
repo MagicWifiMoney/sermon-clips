@@ -1,4 +1,4 @@
-'use client';
+
 
 import { CheckCircle2, Clock, ArrowRight, Quote, Zap, TrendingUp, Instagram, Youtube, Facebook } from "lucide-react";
 import Link from "next/link";

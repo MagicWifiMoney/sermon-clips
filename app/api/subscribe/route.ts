@@ -2,7 +2,11 @@ import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { WelcomeEmail } from '@/emails/WelcomeEmail';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) throw new Error("RESEND_API_KEY is not set");
+  return new Resend(key);
+}
 
 export async function POST(request: Request) {
   try {
@@ -22,7 +26,7 @@ export async function POST(request: Request) {
     console.log(`New subscriber: ${email}`);
 
     // Send welcome email
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await getResend().emails.send({
       from: 'Sermon Clips <hello@dogbathroomart.com>', // TODO: Update to hello@sermon-clips.com when domain is added
       to: [email],
       subject: 'Welcome to Sermon Clips — Get Your First 3 Clips Free',

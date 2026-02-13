@@ -1,4 +1,4 @@
-'use client';
+
 
 import { Smartphone, MessageSquare, Youtube, TrendingUp, ArrowRight } from "lucide-react";
 import Link from "next/link";

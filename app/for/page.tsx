@@ -1,4 +1,4 @@
-'use client';
+
 
 import { Users, MessageSquare, Video, Church, Building2, ArrowRight } from "lucide-react";
 import Link from "next/link";
