@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, DM_Sans } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "sonner";
+import { PostHogProvider } from "@/components/posthog-provider";
 import "./globals.css";
 
 const inter = Inter({
@@ -45,7 +46,9 @@ export default function RootLayout({
         <body
           className={`${inter.variable} ${dmSans.variable} font-sans antialiased`}
         >
-          {children}
+          <PostHogProvider>
+            {children}
+          </PostHogProvider>
           <Toaster position="bottom-right" richColors />
         </body>
       </html>
