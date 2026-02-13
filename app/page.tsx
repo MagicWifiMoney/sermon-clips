@@ -6,6 +6,7 @@ import {
   GitBranch, Languages, Youtube, BarChart3, Volume2, Type, Maximize2,
   Zap, Shield, Church, Megaphone, X
 } from "lucide-react";
+import EmailCapturePopup from "@/components/EmailCapturePopup";
 
 export default function Home() {
   return (
@@ -801,6 +802,9 @@ export default function Home() {
           animation: float 3s ease-in-out infinite 1.5s;
         }
       `}</style>
+
+      {/* Email Capture Popup */}
+      <EmailCapturePopup />
     </div>
   );
 }
