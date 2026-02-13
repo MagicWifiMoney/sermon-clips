@@ -2,21 +2,27 @@
 
 import { useEffect, useState } from "react";
 import { UserProfile } from "@clerk/nextjs";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { BrandingSettings } from "@/components/dashboard/branding-settings";
 import { IntegrationsSettings } from "@/components/dashboard/integrations-settings";
 import { SeriesManager } from "@/components/dashboard/series-manager";
 import { CampusManager } from "@/components/dashboard/campus-manager";
 import { TemplateManager } from "@/components/dashboard/template-manager";
-import { ArrowRight } from "lucide-react";
-import type { BrandingConfig, YouTubeChannelConfig } from "@/types";
+import { PlanStatusCard } from "@/components/dashboard/plan-status-card";
+import { Skeleton } from "@/components/ui/skeleton";
+import useSWR from "swr";
+import type { BrandingConfig, YouTubeChannelConfig, PlanTier } from "@/types";
+
+const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 export default function SettingsPage() {
   const [brandingConfig, setBrandingConfig] = useState<BrandingConfig | null>(null);
   const [youtubeConfig, setYoutubeConfig] = useState<YouTubeChannelConfig | null>(null);
   const [loaded, setLoaded] = useState(false);
+
+  const { data: meData } = useSWR<{
+    data: { plan: PlanTier; sermonsProcessed: number };
+  }>("/api/me", fetcher);
 
   useEffect(() => {
     fetch("/api/settings/branding")
@@ -64,18 +70,14 @@ export default function SettingsPage() {
               />
             </div>
 
-            <Card className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-[#2D2D2D]">Current Plan: Free Trial</p>
-                <p className="text-sm text-[#5c5c5c] mt-0.5">
-                  Upgrade to process more sermons and unlock premium features
-                </p>
-              </div>
-              <Button variant="secondary" disabled>
-                Upgrade Plan
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </Card>
+            {meData?.data ? (
+              <PlanStatusCard
+                plan={meData.data.plan}
+                sermonsProcessed={meData.data.sermonsProcessed}
+              />
+            ) : (
+              <Skeleton className="h-32 rounded-2xl" />
+            )}
           </div>
         </TabsContent>
 

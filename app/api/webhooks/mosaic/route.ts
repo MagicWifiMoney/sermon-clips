@@ -64,6 +64,10 @@ export async function POST(request: NextRequest) {
               where: { id: sermon.id },
               data: { status: "COMPLETED", progress: 100 },
             }),
+            prisma.user.update({
+              where: { id: sermon.userId },
+              data: { sermonsProcessed: { increment: 1 } },
+            }),
             ...outputs.map((output) =>
               prisma.clip.create({
                 data: {

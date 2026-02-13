@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -11,16 +11,19 @@ import { Youtube, Upload, FileVideo, ArrowRight, Loader2, Link as LinkIcon } fro
 import { usePostHog } from "posthog-js/react";
 import { TemplateSelector } from "@/components/dashboard/template-selector";
 import { SeriesSelector } from "@/components/dashboard/series-selector";
+import { fetchYouTubeTitle } from "@/lib/utils";
 import type { ProcessingOptions, PublishMode } from "@/types";
 
-export function UploadForm() {
+export function UploadForm({ simplified = false }: { simplified?: boolean }) {
   const router = useRouter();
   const posthog = usePostHog();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showFullForm, setShowFullForm] = useState(false);
 
   // YouTube tab state
   const [ytTitle, setYtTitle] = useState("");
   const [ytUrl, setYtUrl] = useState("");
+  const [fetchingTitle, setFetchingTitle] = useState(false);
 
   // URL tab state
   const [urlTitle, setUrlTitle] = useState("");
@@ -37,6 +40,24 @@ export function UploadForm() {
   const [publishMode, setPublishMode] = useState<PublishMode>("review");
   const [seriesId, setSeriesId] = useState<string | null>(null);
 
+  // Auto-fetch YouTube title when URL is pasted (simplified mode)
+  useEffect(() => {
+    if (!simplified || !ytUrl.trim()) return;
+    const isYouTube = /(?:youtube\.com\/watch|youtu\.be\/)/.test(ytUrl);
+    if (!isYouTube) return;
+
+    const timer = setTimeout(async () => {
+      setFetchingTitle(true);
+      const title = await fetchYouTubeTitle(ytUrl);
+      if (title && !ytTitle.trim()) {
+        setYtTitle(title);
+      }
+      setFetchingTitle(false);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [ytUrl, simplified, ytTitle]);
+
   const submitSermon = async (title: string, sourceType: string, sourceUrl?: string) => {
     setIsSubmitting(true);
     try {
@@ -47,8 +68,8 @@ export function UploadForm() {
           title: title.trim(),
           sourceType,
           sourceUrl: sourceUrl?.trim(),
-          processingOptions,
-          publishMode,
+          processingOptions: simplified && !showFullForm ? undefined : processingOptions,
+          publishMode: simplified && !showFullForm ? "review" : publishMode,
           seriesId: seriesId || undefined,
         }),
       });
@@ -59,8 +80,17 @@ export function UploadForm() {
       }
 
       const { data } = await res.json();
-      posthog.capture("sermon_created", { source_type: sourceType, has_processing_options: !!processingOptions, publish_mode: publishMode });
-      toast.success("Sermon submitted! Processing will begin shortly.");
+      posthog.capture(simplified ? "free_upload_started" : "sermon_created", {
+        source_type: sourceType,
+        has_processing_options: !simplified || showFullForm,
+        publish_mode: publishMode,
+        simplified,
+      });
+      toast.success(
+        simplified
+          ? "Your sermon is processing! We'll have clips in about 5 minutes."
+          : "Sermon submitted! Processing will begin shortly."
+      );
       router.push(`/dashboard/sermons/${data.id}`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Something went wrong");
@@ -87,15 +117,14 @@ export function UploadForm() {
 
     setIsSubmitting(true);
     try {
-      // Step 1: Create sermon record
       const res = await fetch("/api/sermons", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: uploadTitle.trim(),
           sourceType: "upload",
-          processingOptions,
-          publishMode,
+          processingOptions: simplified && !showFullForm ? undefined : processingOptions,
+          publishMode: simplified && !showFullForm ? "review" : publishMode,
           seriesId: seriesId || undefined,
         }),
       });
@@ -107,7 +136,6 @@ export function UploadForm() {
 
       const { data } = await res.json();
 
-      // Step 2: Get signed upload URL from Mosaic
       const startRes = await fetch("/api/upload/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -120,7 +148,6 @@ export function UploadForm() {
 
       const { uploadUrl, uploadFields, videoId } = await startRes.json();
 
-      // Step 3: Upload file directly to Mosaic's signed URL
       const formData = new FormData();
       if (uploadFields) {
         Object.entries(uploadFields).forEach(([key, value]) => {
@@ -138,7 +165,6 @@ export function UploadForm() {
         throw new Error("File upload failed");
       }
 
-      // Step 4: Finalize upload + trigger processing
       const finalizeRes = await fetch("/api/upload/finalize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -171,6 +197,68 @@ export function UploadForm() {
   }, []);
 
   const inputClasses = "w-full px-4 py-2.5 rounded-lg border border-[#E8E4DC] bg-white text-[#2D2D2D] placeholder:text-[#5c5c5c]/50 focus:outline-none focus:ring-2 focus:ring-[#E8725A]/50 focus:border-[#E8725A]";
+
+  // Simplified mode: YouTube-only form
+  if (simplified && !showFullForm) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <form onSubmit={handleYoutubeSubmit} className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-[#2D2D2D] mb-1.5">YouTube URL</label>
+              <input
+                type="url"
+                value={ytUrl}
+                onChange={(e) => setYtUrl(e.target.value)}
+                placeholder="https://youtube.com/watch?v=..."
+                className={inputClasses}
+                required
+                autoFocus
+              />
+              <p className="text-xs text-[#5c5c5c] mt-1">Paste your sermon&apos;s YouTube link</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-[#2D2D2D] mb-1.5">
+                Sermon Title
+                {fetchingTitle && <span className="ml-2 text-xs text-[#5c5c5c]">Fetching...</span>}
+              </label>
+              <input
+                type="text"
+                value={ytTitle}
+                onChange={(e) => setYtTitle(e.target.value)}
+                placeholder="e.g. Sunday Sermon - Feb 9"
+                className={inputClasses}
+                required
+              />
+            </div>
+            <div className="space-y-3">
+              <Button type="submit" size="lg" className="w-full" disabled={isSubmitting || !ytTitle.trim() || !ytUrl.trim()}>
+                {isSubmitting ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <>
+                    <span>Create My Clips — It&apos;s Free</span>
+                    <ArrowRight className="w-5 h-5" />
+                  </>
+                )}
+              </Button>
+              <p className="text-xs text-center text-[#5c5c5c]">
+                We&apos;ll find the best moments, add captions, and format for social. Takes about 5 minutes.
+              </p>
+            </div>
+          </form>
+        </Card>
+        <p className="text-center">
+          <button
+            onClick={() => setShowFullForm(true)}
+            className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] underline underline-offset-2"
+          >
+            Want more control? Show full options
+          </button>
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

@@ -12,7 +12,11 @@ model User {
   email                   String               @unique
   name                    String?
   imageUrl                String?
-  plan                    String               @default("starter")
+  plan                    String               @default("free")
+  sermonsProcessed        Int                  @default(0)
+  onboardingStep          String?
+  onboardingData          Json?
+  onboardingCompletedAt   DateTime?
   brandingConfig          Json?
   connectedYoutubeChannel Json?
   sermons                 Sermon[]

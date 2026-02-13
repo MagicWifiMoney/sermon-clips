@@ -311,28 +311,55 @@ export type GenerateCourseRequest = {
 
 // --- Plans ---
 
-export type PlanTier = "starter" | "growth" | "automation" | "professional" | "suite";
+export type PlanTier = "free" | "starter" | "growth" | "automation" | "professional" | "suite";
+
+export type OnboardingData = {
+  churchName?: string;
+  role?: "pastor" | "comms-director" | "volunteer" | "other";
+  primaryGoal?: "grow-social" | "save-time" | "reach-more-people" | "repurpose-content";
+};
 
 export const PLAN_LIMITS: Record<
   PlanTier,
-  { clipCount: number; formats: number; features: string[]; monthlyPrice: number }
+  {
+    clipCount: number;
+    formats: number;
+    features: string[];
+    monthlyPrice: number;
+    yearlyPrice: number;
+    sermonsPerMonth: number;
+  }
 > = {
+  free: {
+    clipCount: 5,
+    formats: 1,
+    monthlyPrice: 0,
+    yearlyPrice: 0,
+    sermonsPerMonth: 1,
+    features: [],
+  },
   starter: {
     clipCount: 3,
     formats: 1,
     monthlyPrice: 29,
+    yearlyPrice: 278,
+    sermonsPerMonth: 4,
     features: [],
   },
   growth: {
     clipCount: 5,
     formats: 3,
     monthlyPrice: 59,
+    yearlyPrice: 566,
+    sermonsPerMonth: 8,
     features: ["reframe"],
   },
   automation: {
     clipCount: 10,
     formats: 3,
     monthlyPrice: 149,
+    yearlyPrice: 1430,
+    sermonsPerMonth: -1,
     features: [
       "reframe", "youtubeAutoSync", "socialPublishing", "dripScheduling",
       "aiCaptions", "contentGeneration", "transcript", "templates", "series",
@@ -342,6 +369,8 @@ export const PLAN_LIMITS: Record<
     clipCount: 15,
     formats: 3,
     monthlyPrice: 299,
+    yearlyPrice: 2870,
+    sermonsPerMonth: -1,
     features: [
       "reframe", "youtubeAutoSync", "socialPublishing", "dripScheduling",
       "aiCaptions", "branding", "audioEnhancement", "silenceRemoval", "analytics",
@@ -353,6 +382,8 @@ export const PLAN_LIMITS: Record<
     clipCount: 15,
     formats: 3,
     monthlyPrice: 599,
+    yearlyPrice: 5750,
+    sermonsPerMonth: -1,
     features: [
       "reframe", "youtubeAutoSync", "socialPublishing", "dripScheduling",
       "aiCaptions", "branding", "audioEnhancement", "silenceRemoval", "analytics",

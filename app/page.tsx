@@ -78,7 +78,7 @@ export default function Home() {
               <div className="space-y-6">
                 <div className="flex flex-col sm:flex-row gap-4">
                   <a href="/sign-up" className="bg-[#E8725A] hover:bg-[#d4654f] text-white px-8 py-4 rounded-full font-medium transition-all hover:shadow-xl hover:shadow-[#E8725A]/30 inline-flex items-center justify-center gap-2 text-base">
-                    Get Your First 5 Clips Free
+                    Try Free — No Card Required
                     <ArrowRight className="w-5 h-5" />
                   </a>
                   <a href="#how-it-works" className="border-2 border-[#2D2D2D]/20 hover:border-[#2D2D2D]/40 text-[#2D2D2D] px-8 py-4 rounded-full font-medium transition-all inline-flex items-center justify-center gap-2">
@@ -541,6 +541,9 @@ export default function Home() {
               Simple, transparent pricing
             </h2>
             <p className="text-lg text-white/60 max-w-xl mx-auto">
+              Process your first sermon completely free. See your clips in minutes.
+            </p>
+            <p className="text-sm text-white/40">
               No contracts. No surprises. Cancel anytime.
             </p>
           </div>
@@ -570,7 +573,7 @@ export default function Home() {
                 ))}
               </ul>
               <a href="/sign-up" className="block w-full py-3 rounded-full border border-white/20 text-white hover:bg-white/10 transition-colors font-medium text-center">
-                Start Free Trial
+                Try Free — No Card Required
               </a>
             </div>
 
@@ -603,7 +606,7 @@ export default function Home() {
                 ))}
               </ul>
               <a href="/sign-up" className="block w-full py-3 rounded-full bg-white text-[#E8725A] hover:bg-white/90 transition-colors font-bold text-center">
-                Start Free Trial
+                Try Free — No Card Required
               </a>
             </div>
 
@@ -633,7 +636,7 @@ export default function Home() {
                 ))}
               </ul>
               <a href="/sign-up" className="block w-full py-3 rounded-full border border-white/20 text-white hover:bg-white/10 transition-colors font-medium text-center">
-                Start Free Trial
+                Try Free — No Card Required
               </a>
             </div>
           </div>
@@ -649,7 +652,7 @@ export default function Home() {
           </div>
 
           <p className="text-center text-white/50 mt-10">
-            First 5 clips free — no credit card required
+            Your first sermon is free — no credit card required
           </p>
         </div>
       </section>
@@ -731,7 +734,7 @@ export default function Home() {
           </p>
 
           <a href="/sign-up" className="bg-[#E8725A] hover:bg-[#d4654f] text-white px-10 py-4 rounded-full font-medium text-lg transition-all hover:shadow-xl hover:shadow-[#E8725A]/30 inline-flex items-center gap-2">
-            Get Your First 5 Clips Free
+            Try Free — No Card Required
             <ArrowRight className="w-5 h-5" />
           </a>
           <p className="text-sm text-[#5c5c5c] mt-6">No credit card required. Results in 24 hours.</p>

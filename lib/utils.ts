@@ -37,3 +37,15 @@ export function formatDurationLong(seconds: number): string {
   if (hours > 0) return `${hours}h ${mins}m`;
   return `${mins} min`;
 }
+
+export async function fetchYouTubeTitle(url: string): Promise<string | null> {
+  try {
+    const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`;
+    const res = await fetch(oembedUrl);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.title ?? null;
+  } catch {
+    return null;
+  }
+}
