@@ -329,5 +329,17 @@ sermon-clips/
 ---
 
 **Integration completed by:** Botti  
-**Ready to push to GitHub:** Yes ✅  
-**Ready for production:** After Resend domain upgrade + Vercel env var
+**Pushed to GitHub:** Yes ✅ (commit df0b231 + 24dc17f)  
+**Ready for production:** After Resend domain upgrade + Vercel env var + Clerk keys
+
+---
+
+## ⚠️ Build Note
+
+The site has dashboard pages that require Clerk authentication environment variables:
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
+- `CLERK_SECRET_KEY`
+
+The email integration components (popup, API route, email template) are built successfully. The build fails on dashboard pages, which is unrelated to this email integration work.
+
+To fix the build, add Clerk keys to Vercel environment variables or remove/disable the dashboard pages temporarily.
