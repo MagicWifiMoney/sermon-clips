@@ -30,11 +30,12 @@ export default function Home() {
           </a>
 
           <div className="hidden md:flex items-center gap-10">
+            <a href="/for" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">For</a>
+            <a href="/use-cases" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">Use Cases</a>
             <a href="#features" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">Features</a>
-            <a href="#how-it-works" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">How It Works</a>
             <a href="#pricing" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">Pricing</a>
-            <a href="#faq" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">FAQ</a>
-            <a href="/blog" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">Blog</a>
+            <a href="/about" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">About</a>
+            <a href="/mission" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">Mission</a>
           </div>
 
           <div className="flex items-center gap-4">
