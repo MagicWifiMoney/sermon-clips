@@ -33,11 +33,17 @@ export default function Home() {
             <a href="#how-it-works" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">How It Works</a>
             <a href="#pricing" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">Pricing</a>
             <a href="#faq" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">FAQ</a>
+            <a href="/blog" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">Blog</a>
           </div>
 
-          <button className="bg-[#E8725A] hover:bg-[#d4654f] text-white px-6 py-2.5 rounded-full text-sm font-medium transition-all hover:shadow-lg hover:shadow-[#E8725A]/25">
-            Try Free
-          </button>
+          <div className="flex items-center gap-4">
+            <a href="/sign-in" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors hidden md:inline">
+              Sign In
+            </a>
+            <a href="/sign-up" className="bg-[#E8725A] hover:bg-[#d4654f] text-white px-6 py-2.5 rounded-full text-sm font-medium transition-all hover:shadow-lg hover:shadow-[#E8725A]/25">
+              Try Free
+            </a>
+          </div>
         </nav>
       </header>
 
@@ -49,7 +55,7 @@ export default function Home() {
               {/* Tagline Badge */}
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#2D2D2D]/5 mb-6">
                 <Sparkles className="w-4 h-4 text-[#E8725A]" />
-                <span className="text-sm text-[#2D2D2D]/70">Powered by AI. Perfected by humans.</span>
+                <span className="text-sm text-[#2D2D2D]/70">AI-powered sermon clipping in minutes</span>
               </div>
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[#2D2D2D] leading-[1.1] tracking-tight mb-6">
@@ -71,10 +77,10 @@ export default function Home() {
               {/* CTA + Social Proof */}
               <div className="space-y-6">
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <button className="bg-[#E8725A] hover:bg-[#d4654f] text-white px-8 py-4 rounded-full font-medium transition-all hover:shadow-xl hover:shadow-[#E8725A]/30 inline-flex items-center justify-center gap-2 text-base">
+                  <a href="/sign-up" className="bg-[#E8725A] hover:bg-[#d4654f] text-white px-8 py-4 rounded-full font-medium transition-all hover:shadow-xl hover:shadow-[#E8725A]/30 inline-flex items-center justify-center gap-2 text-base">
                     Get Your First 5 Clips Free
                     <ArrowRight className="w-5 h-5" />
-                  </button>
+                  </a>
                   <a href="#how-it-works" className="border-2 border-[#2D2D2D]/20 hover:border-[#2D2D2D]/40 text-[#2D2D2D] px-8 py-4 rounded-full font-medium transition-all inline-flex items-center justify-center gap-2">
                     <Play className="w-4 h-4" />
                     See How It Works
@@ -563,9 +569,9 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <button className="w-full py-3 rounded-full border border-white/20 text-white hover:bg-white/10 transition-colors font-medium">
+              <a href="/sign-up" className="block w-full py-3 rounded-full border border-white/20 text-white hover:bg-white/10 transition-colors font-medium text-center">
                 Start Free Trial
-              </button>
+              </a>
             </div>
 
             {/* Growth - Featured */}
@@ -596,9 +602,9 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <button className="w-full py-3 rounded-full bg-white text-[#E8725A] hover:bg-white/90 transition-colors font-bold">
+              <a href="/sign-up" className="block w-full py-3 rounded-full bg-white text-[#E8725A] hover:bg-white/90 transition-colors font-bold text-center">
                 Start Free Trial
-              </button>
+              </a>
             </div>
 
             {/* Auto-Pilot */}
@@ -626,9 +632,9 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <button className="w-full py-3 rounded-full border border-white/20 text-white hover:bg-white/10 transition-colors font-medium">
+              <a href="/sign-up" className="block w-full py-3 rounded-full border border-white/20 text-white hover:bg-white/10 transition-colors font-medium text-center">
                 Start Free Trial
-              </button>
+              </a>
             </div>
           </div>
 
@@ -724,10 +730,10 @@ export default function Home() {
             AI-powered editing. Human-quality results. Zero learning curve.
           </p>
 
-          <button className="bg-[#E8725A] hover:bg-[#d4654f] text-white px-10 py-4 rounded-full font-medium text-lg transition-all hover:shadow-xl hover:shadow-[#E8725A]/30 inline-flex items-center gap-2">
+          <a href="/sign-up" className="bg-[#E8725A] hover:bg-[#d4654f] text-white px-10 py-4 rounded-full font-medium text-lg transition-all hover:shadow-xl hover:shadow-[#E8725A]/30 inline-flex items-center gap-2">
             Get Your First 5 Clips Free
             <ArrowRight className="w-5 h-5" />
-          </button>
+          </a>
           <p className="text-sm text-[#5c5c5c] mt-6">No credit card required. Results in 24 hours.</p>
         </div>
       </section>

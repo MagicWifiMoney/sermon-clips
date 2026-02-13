@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String   @unique
+  name      String?
+  imageUrl  String?
+  sermons   Sermon[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum SermonStatus {
+  UPLOADING
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model Sermon {
+  id              String       @id @default(cuid())
+  userId          String
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title           String
+  sourceType      String
+  sourceUrl       String?
+  durationSeconds Int?
+  mosaicRunId     String?      @unique
+  status          SermonStatus @default(PENDING)
+  progress        Int          @default(0)
+  errorMessage    String?
+  clips           Clip[]
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([userId, createdAt(sort: Desc)])
+}
+
+model Clip {
+  id              String   @id @default(cuid())
+  sermonId        String
+  sermon          Sermon   @relation(fields: [sermonId], references: [id], onDelete: Cascade)
+  title           String?
+  durationSeconds Float?
+  format          String?
+  videoUrl        String?
+  thumbnailUrl    String?
+  downloadCount   Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([sermonId])
+}

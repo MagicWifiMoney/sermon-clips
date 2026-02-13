@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, DM_Sans } from "next/font/google";
+import { ClerkProvider } from "@clerk/nextjs";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const inter = Inter({
@@ -32,12 +34,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${inter.variable} ${dmSans.variable} font-sans antialiased`}
-      >
-        {children}
-      </body>
-    </html>
+    <ClerkProvider
+      appearance={{
+        variables: {
+          colorPrimary: "#E8725A",
+        },
+      }}
+    >
+      <html lang="en">
+        <body
+          className={`${inter.variable} ${dmSans.variable} font-sans antialiased`}
+        >
+          {children}
+          <Toaster position="bottom-right" richColors />
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
