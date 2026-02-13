@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { BrandingSettings } from "@/components/dashboard/branding-settings";
 import { IntegrationsSettings } from "@/components/dashboard/integrations-settings";
+import { SeriesManager } from "@/components/dashboard/series-manager";
+import { CampusManager } from "@/components/dashboard/campus-manager";
+import { TemplateManager } from "@/components/dashboard/template-manager";
 import { ArrowRight } from "lucide-react";
 import type { BrandingConfig, YouTubeChannelConfig } from "@/types";
 
@@ -38,6 +41,9 @@ export default function SettingsPage() {
           <TabsTrigger value="account">Account</TabsTrigger>
           <TabsTrigger value="branding">Branding</TabsTrigger>
           <TabsTrigger value="integrations">Integrations</TabsTrigger>
+          <TabsTrigger value="templates">Templates</TabsTrigger>
+          <TabsTrigger value="series">Series</TabsTrigger>
+          <TabsTrigger value="campuses">Campuses</TabsTrigger>
         </TabsList>
 
         {/* Account Tab */}
@@ -81,6 +87,21 @@ export default function SettingsPage() {
         {/* Integrations Tab */}
         <TabsContent value="integrations">
           {loaded && <IntegrationsSettings initialYoutubeConfig={youtubeConfig} />}
+        </TabsContent>
+
+        {/* Templates Tab */}
+        <TabsContent value="templates">
+          <TemplateManager />
+        </TabsContent>
+
+        {/* Series Tab */}
+        <TabsContent value="series">
+          <SeriesManager />
+        </TabsContent>
+
+        {/* Campuses Tab */}
+        <TabsContent value="campuses">
+          <CampusManager />
         </TabsContent>
       </Tabs>
     </div>

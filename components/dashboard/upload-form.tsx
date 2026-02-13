@@ -8,6 +8,8 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ProcessingOptionsPanel, DEFAULT_PROCESSING_OPTIONS } from "@/components/dashboard/processing-options";
 import { Youtube, Upload, FileVideo, ArrowRight, Loader2, Link as LinkIcon } from "lucide-react";
+import { TemplateSelector } from "@/components/dashboard/template-selector";
+import { SeriesSelector } from "@/components/dashboard/series-selector";
 import type { ProcessingOptions, PublishMode } from "@/types";
 
 export function UploadForm() {
@@ -31,6 +33,7 @@ export function UploadForm() {
   // Shared processing options
   const [processingOptions, setProcessingOptions] = useState<ProcessingOptions>(DEFAULT_PROCESSING_OPTIONS);
   const [publishMode, setPublishMode] = useState<PublishMode>("review");
+  const [seriesId, setSeriesId] = useState<string | null>(null);
 
   const submitSermon = async (title: string, sourceType: string, sourceUrl?: string) => {
     setIsSubmitting(true);
@@ -44,6 +47,7 @@ export function UploadForm() {
           sourceUrl: sourceUrl?.trim(),
           processingOptions,
           publishMode,
+          seriesId: seriesId || undefined,
         }),
       });
 
@@ -80,6 +84,7 @@ export function UploadForm() {
 
     setIsSubmitting(true);
     try {
+      // Step 1: Create sermon record
       const res = await fetch("/api/sermons", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -88,6 +93,7 @@ export function UploadForm() {
           sourceType: "upload",
           processingOptions,
           publishMode,
+          seriesId: seriesId || undefined,
         }),
       });
 
@@ -98,17 +104,49 @@ export function UploadForm() {
 
       const { data } = await res.json();
 
-      try {
-        await fetch("/api/upload/start", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sermonId: data.id }),
-        });
-      } catch {
-        // Expected to fail — stub not implemented
+      // Step 2: Get signed upload URL from Mosaic
+      const startRes = await fetch("/api/upload/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sermonId: data.id }),
+      });
+
+      if (!startRes.ok) {
+        throw new Error("Failed to get upload URL");
       }
 
-      toast.success("Sermon created! Upload integration coming soon.");
+      const { uploadUrl, uploadFields, videoId } = await startRes.json();
+
+      // Step 3: Upload file directly to Mosaic's signed URL
+      const formData = new FormData();
+      if (uploadFields) {
+        Object.entries(uploadFields).forEach(([key, value]) => {
+          formData.append(key, value as string);
+        });
+      }
+      formData.append("file", file);
+
+      const uploadRes = await fetch(uploadUrl, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!uploadRes.ok) {
+        throw new Error("File upload failed");
+      }
+
+      // Step 4: Finalize upload + trigger processing
+      const finalizeRes = await fetch("/api/upload/finalize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sermonId: data.id, videoId }),
+      });
+
+      if (!finalizeRes.ok) {
+        throw new Error("Failed to finalize upload");
+      }
+
+      toast.success("Video uploaded! Processing has started.");
       router.push(`/dashboard/sermons/${data.id}`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Something went wrong");
@@ -283,6 +321,16 @@ export function UploadForm() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Template + Series Selectors */}
+      <div className="flex items-center gap-4 flex-wrap">
+        <TemplateSelector
+          processingOptions={processingOptions}
+          publishMode={publishMode}
+          onLoad={(opts, pm) => { setProcessingOptions(opts); setPublishMode(pm); }}
+        />
+        <SeriesSelector value={seriesId} onChange={setSeriesId} />
+      </div>
 
       {/* Processing Options (shared across all tabs) */}
       <ProcessingOptionsPanel

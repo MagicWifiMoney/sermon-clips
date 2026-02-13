@@ -23,6 +23,10 @@ export async function GET(
     where: { id, userId: user.id },
     include: {
       clips: { orderBy: { createdAt: "asc" } },
+      contentPieces: { orderBy: { createdAt: "desc" } },
+      graphics: { orderBy: { createdAt: "desc" } },
+      suggestedClips: { orderBy: { hookScore: "desc" } },
+      series: true,
     },
   });
 

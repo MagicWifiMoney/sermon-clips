@@ -13,6 +13,10 @@ import { ClipCard } from "@/components/dashboard/clip-card";
 import { ProcessingStatus } from "@/components/dashboard/processing-status";
 import { PublishTab } from "@/components/dashboard/publish-tab";
 import { DripSchedule } from "@/components/dashboard/drip-schedule";
+import { ContentTab } from "@/components/dashboard/content-tab";
+import { TranscriptTab } from "@/components/dashboard/transcript-tab";
+import { SuggestedClipsPanel } from "@/components/dashboard/suggested-clips";
+import { GraphicsSection } from "@/components/dashboard/graphics-section";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { formatDate, formatDurationLong } from "@/lib/utils";
 import { ArrowLeft, Download, Youtube, Upload, Trash2 } from "lucide-react";
@@ -166,11 +170,14 @@ export default function SermonDetailPage({ params }: { params: Promise<{ id: str
         <Tabs defaultValue="clips" className="space-y-4">
           <TabsList>
             <TabsTrigger value="clips">Clips</TabsTrigger>
+            <TabsTrigger value="content">Content</TabsTrigger>
+            <TabsTrigger value="transcript">Transcript</TabsTrigger>
             <TabsTrigger value="publish">Publish</TabsTrigger>
             <TabsTrigger value="schedule">Schedule</TabsTrigger>
           </TabsList>
 
           <TabsContent value="clips">
+            <SuggestedClipsPanel sermonId={id} />
             {sermon.clips.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {sermon.clips.map((clip, i) => (
@@ -182,6 +189,17 @@ export default function SermonDetailPage({ params }: { params: Promise<{ id: str
                 <p>Processing completed but no clips were generated.</p>
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="content">
+            <ContentTab sermonId={id} sermonTitle={sermon.title} />
+            <div className="mt-6">
+              <GraphicsSection sermonId={id} />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="transcript">
+            <TranscriptTab sermonId={id} mosaicRunId={sermon.mosaicRunId} />
           </TabsContent>
 
           <TabsContent value="publish">

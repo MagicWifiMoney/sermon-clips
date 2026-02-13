@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { startSermonProcessing } from "@/lib/mosaic";
 
 const createSermonSchema = z.object({
   title: z.string().min(1).max(200),
@@ -23,6 +24,8 @@ const createSermonSchema = z.object({
     applyBranding: z.boolean(),
   }).optional(),
   publishMode: z.enum(["auto", "review", "draft"]).optional(),
+  seriesId: z.string().optional(),
+  campusId: z.string().optional(),
 });
 
 // GET /api/sermons — list user's sermons + stats
@@ -105,7 +108,7 @@ async function createSermon(request: NextRequest, userId: string) {
     );
   }
 
-  const { title, sourceType, sourceUrl, processingOptions, publishMode } = parsed.data;
+  const { title, sourceType, sourceUrl, processingOptions, publishMode, seriesId, campusId } = parsed.data;
 
   const sermon = await prisma.sermon.create({
     data: {
@@ -116,14 +119,34 @@ async function createSermon(request: NextRequest, userId: string) {
       processingOptions: processingOptions ?? undefined,
       publishMode: publishMode ?? "review",
       status: sourceType === "upload" ? "UPLOADING" : "PENDING",
+      seriesId: seriesId ?? undefined,
+      campusId: campusId ?? undefined,
     },
   });
 
-  // TODO: Mosaic team — trigger processing here
-  // import { startSermonProcessing } from '@/lib/mosaic';
-  // const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/mosaic`;
-  // const run = await startSermonProcessing(sourceUrl, callbackUrl);
-  // await prisma.sermon.update({ where: { id: sermon.id }, data: { mosaicRunId: run.run_id, status: 'PROCESSING' } });
+  // Trigger Mosaic processing for YouTube/URL sources
+  if ((sourceType === "youtube" || sourceType === "url") && sourceUrl) {
+    try {
+      const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/mosaic`;
+      const run = await startSermonProcessing(sourceUrl, callbackUrl, {
+        processingOptions,
+        publishMode,
+      });
+      await prisma.sermon.update({
+        where: { id: sermon.id },
+        data: { mosaicRunId: run.run_id, status: "PROCESSING", progress: 0 },
+      });
+      sermon.mosaicRunId = run.run_id;
+      sermon.status = "PROCESSING";
+    } catch (error) {
+      console.error("[Sermons] Failed to start Mosaic processing:", error);
+      await prisma.sermon.update({
+        where: { id: sermon.id },
+        data: { status: "FAILED", errorMessage: "Failed to start processing" },
+      });
+      sermon.status = "FAILED";
+    }
+  }
 
   return NextResponse.json({ data: sermon }, { status: 201 });
 }

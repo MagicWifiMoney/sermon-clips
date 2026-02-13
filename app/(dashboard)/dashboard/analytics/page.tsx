@@ -4,10 +4,10 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { AnalyticsOverview } from "@/components/dashboard/analytics-overview";
 import { ClipPerformanceTable } from "@/components/dashboard/clip-performance-table";
+import { RoiSection } from "@/components/dashboard/roi-section";
 import { BarChart3 } from "lucide-react";
 import type { AnalyticsSummary, ClipPerformanceRow, DateRange, SocialPlatform } from "@/types";
 
-// Empty state data — will be replaced by real Mosaic analytics
 const EMPTY_SUMMARY: AnalyticsSummary = {
   totalViews: 0,
   engagementRate: 0,
@@ -23,7 +23,6 @@ const PLATFORMS: SocialPlatform[] = ["instagram", "tiktok", "youtube", "facebook
 export default function AnalyticsPage() {
   const [dateRange, setDateRange] = useState<DateRange>("30d");
 
-  // TODO: replace with SWR fetch from /api/analytics?range={dateRange}
   const summary = EMPTY_SUMMARY;
   const rows = EMPTY_ROWS;
 
@@ -80,6 +79,9 @@ export default function AnalyticsPage() {
           </div>
         )}
       </Card>
+
+      {/* ROI Dashboard */}
+      <RoiSection />
     </div>
   );
 }

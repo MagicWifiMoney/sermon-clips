@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Upload, Send, BarChart3, Settings, X } from "lucide-react";
+import { LayoutDashboard, Upload, Send, BarChart3, Settings, X, Clapperboard } from "lucide-react";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/upload", label: "Upload", icon: Upload },
   { href: "/dashboard/publishing", label: "Publishing", icon: Send },
+  { href: "/dashboard/montage", label: "Montage", icon: Clapperboard },
   { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];

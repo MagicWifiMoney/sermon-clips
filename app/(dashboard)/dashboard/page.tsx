@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import useSWR from "swr";
@@ -8,21 +8,34 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SermonCard } from "@/components/dashboard/sermon-card";
+import { BatchToolbar } from "@/components/dashboard/batch-toolbar";
 import { Film, Mic2, Loader2, Upload, ArrowRight } from "lucide-react";
-import type { Sermon, DashboardStats } from "@/types";
+import type { Sermon, DashboardStats, SermonSeries } from "@/types";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 export default function DashboardPage() {
   const { user } = useUser();
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [batchMode, setBatchMode] = useState(false);
+
   const { data, isLoading } = useSWR<{
-    sermons: (Sermon & { _count: { clips: number } })[];
+    sermons: (Sermon & { _count: { clips: number }; series?: SermonSeries | null })[];
     stats: DashboardStats;
   }>("/api/sermons", fetcher, { refreshInterval: 10000 });
 
   const sermons = data?.sermons ?? [];
   const stats = data?.stats;
   const hasSermons = sermons.length > 0;
+
+  const toggleSelect = (id: string, selected: boolean) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (selected) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  };
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
@@ -77,14 +90,29 @@ export default function DashboardPage() {
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-[#2D2D2D]">Recent Sermons</h2>
-          {hasSermons && (
-            <Link href="/dashboard/upload">
-              <Button size="sm">
-                <Upload className="w-4 h-4" />
-                Upload New
-              </Button>
-            </Link>
-          )}
+          <div className="flex items-center gap-2">
+            {hasSermons && (
+              <>
+                <Button
+                  size="sm"
+                  variant={batchMode ? "secondary" : "ghost"}
+                  onClick={() => {
+                    setBatchMode(!batchMode);
+                    setSelectedIds(new Set());
+                  }}
+                  className="text-xs"
+                >
+                  {batchMode ? "Cancel Selection" : "Select"}
+                </Button>
+                <Link href="/dashboard/upload">
+                  <Button size="sm">
+                    <Upload className="w-4 h-4" />
+                    Upload New
+                  </Button>
+                </Link>
+              </>
+            )}
+          </div>
         </div>
 
         {isLoading ? (
@@ -96,7 +124,13 @@ export default function DashboardPage() {
         ) : hasSermons ? (
           <div className="space-y-3">
             {sermons.map((sermon) => (
-              <SermonCard key={sermon.id} sermon={sermon} />
+              <SermonCard
+                key={sermon.id}
+                sermon={sermon}
+                selectable={batchMode}
+                selected={selectedIds.has(sermon.id)}
+                onSelectChange={(selected) => toggleSelect(sermon.id, selected)}
+              />
             ))}
           </div>
         ) : (
@@ -121,6 +155,17 @@ export default function DashboardPage() {
           </Card>
         )}
       </div>
+
+      {/* Batch Toolbar */}
+      {selectedIds.size > 0 && (
+        <BatchToolbar
+          selectedIds={Array.from(selectedIds)}
+          onClear={() => {
+            setSelectedIds(new Set());
+            setBatchMode(false);
+          }}
+        />
+      )}
     </div>
   );
 }

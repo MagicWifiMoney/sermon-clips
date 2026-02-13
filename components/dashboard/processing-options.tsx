@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
+import { TierBadge } from "@/components/dashboard/plan-gate";
 import { ChevronDown, ChevronUp, Lock } from "lucide-react";
 import type { ProcessingOptions, OutputFormat, PublishMode } from "@/types";
 
@@ -35,11 +36,21 @@ const ENHANCEMENT_OPTIONS = [
   { key: "motionGraphics" as const, label: "Motion Graphics" },
 ];
 
+const AI_OPTIONS = [
+  { key: "aiAvatar" as const, label: "AI Avatar", feature: "aiAvatar" },
+  { key: "aiAugment" as const, label: "AI Augment", feature: "aiAvatar" },
+  { key: "roughCut" as const, label: "Rough Cut", feature: "aiAvatar" },
+  { key: "voiceModification" as const, label: "Voice Modification", feature: "aiVoiceover" },
+  { key: "viralShorts" as const, label: "Viral Shorts", feature: "viralShorts" },
+];
+
 const PUBLISH_MODES: { value: PublishMode; label: string; desc: string }[] = [
   { value: "auto", label: "Auto-publish", desc: "Clips publish immediately when ready" },
   { value: "review", label: "Review first", desc: "Review clips before publishing" },
   { value: "draft", label: "Download only", desc: "Just generate clips for download" },
 ];
+
+const MUSIC_GENRES = ["Ambient", "Worship", "Cinematic", "Acoustic", "Piano", "Orchestral"];
 
 interface ProcessingOptionsProps {
   value: ProcessingOptions;
@@ -74,6 +85,10 @@ export function ProcessingOptionsPanel({
       ? value.outputFormats.filter((f) => f !== fmt)
       : [...value.outputFormats, fmt];
     if (formats.length > 0) update({ outputFormats: formats });
+  };
+
+  const toggleBoolFeature = (key: string, checked: boolean) => {
+    update({ features: { ...value.features, [key]: checked } });
   };
 
   return (
@@ -188,9 +203,7 @@ export function ProcessingOptionsPanel({
                   <input
                     type="checkbox"
                     checked={value.features[opt.key] ?? false}
-                    onChange={(e) =>
-                      update({ features: { ...value.features, [opt.key]: e.target.checked } })
-                    }
+                    onChange={(e) => toggleBoolFeature(opt.key, e.target.checked)}
                     className="rounded border-[#E8E4DC] text-[#E8725A] focus:ring-[#E8725A]/50"
                   />
                   <span className="text-sm text-[#2D2D2D]">{opt.label}</span>
@@ -198,6 +211,132 @@ export function ProcessingOptionsPanel({
                 </label>
               ))}
             </div>
+          </div>
+
+          {/* AI Music Config */}
+          <div>
+            <label className="flex items-center gap-2.5 mb-2">
+              <span className="text-sm font-medium text-[#2D2D2D]">AI Background Music</span>
+              <TierBadge feature="audioEnhancement" />
+            </label>
+            <div className="space-y-2 pl-1">
+              <label className="flex items-center gap-2.5 text-sm">
+                <input
+                  type="checkbox"
+                  checked={value.features.aiMusic?.enabled ?? false}
+                  onChange={(e) =>
+                    update({
+                      features: {
+                        ...value.features,
+                        aiMusic: { ...(value.features.aiMusic ?? { enabled: false }), enabled: e.target.checked },
+                      },
+                    })
+                  }
+                  className="rounded border-[#E8E4DC] text-[#E8725A] focus:ring-[#E8725A]/50"
+                />
+                <span className="text-[#2D2D2D]">Enable AI music</span>
+              </label>
+              {value.features.aiMusic?.enabled && (
+                <div className="flex gap-2 flex-wrap">
+                  {MUSIC_GENRES.map((genre) => (
+                    <button
+                      key={genre}
+                      type="button"
+                      onClick={() =>
+                        update({
+                          features: {
+                            ...value.features,
+                            aiMusic: { ...(value.features.aiMusic ?? { enabled: true }), genre },
+                          },
+                        })
+                      }
+                      className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                        value.features.aiMusic?.genre === genre
+                          ? "bg-[#E8725A] text-white"
+                          : "bg-[#F5F1EB] text-[#2D2D2D] hover:bg-[#E8E4DC]"
+                      }`}
+                    >
+                      {genre}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* AI Features */}
+          <div>
+            <label className="block text-sm font-medium text-[#2D2D2D] mb-2">AI Features</label>
+            <div className="grid grid-cols-2 gap-2">
+              {AI_OPTIONS.map((opt) => (
+                <label
+                  key={opt.key}
+                  className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg border border-[#E8E4DC] cursor-pointer hover:bg-[#F5F1EB]/50 transition-colors"
+                >
+                  <input
+                    type="checkbox"
+                    checked={(value.features[opt.key as keyof typeof value.features] as boolean) ?? false}
+                    onChange={(e) => toggleBoolFeature(opt.key, e.target.checked)}
+                    className="rounded border-[#E8E4DC] text-[#E8725A] focus:ring-[#E8725A]/50"
+                  />
+                  <span className="text-sm text-[#2D2D2D]">{opt.label}</span>
+                  <TierBadge feature={opt.feature} />
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* AI Voiceover */}
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <label className="text-sm font-medium text-[#2D2D2D]">AI Voiceover</label>
+              <TierBadge feature="aiVoiceover" />
+            </div>
+            <label className="flex items-center gap-2.5 text-sm mb-2">
+              <input
+                type="checkbox"
+                checked={value.features.aiVoiceover?.enabled ?? false}
+                onChange={(e) =>
+                  update({
+                    features: {
+                      ...value.features,
+                      aiVoiceover: {
+                        ...(value.features.aiVoiceover ?? { enabled: false }),
+                        enabled: e.target.checked,
+                      },
+                    },
+                  })
+                }
+                className="rounded border-[#E8E4DC] text-[#E8725A] focus:ring-[#E8725A]/50"
+              />
+              <span className="text-[#2D2D2D]">Enable AI voiceover</span>
+            </label>
+            {value.features.aiVoiceover?.enabled && (
+              <div className="flex gap-2">
+                <select
+                  value={value.features.aiVoiceover?.language ?? ""}
+                  onChange={(e) =>
+                    update({
+                      features: {
+                        ...value.features,
+                        aiVoiceover: {
+                          ...(value.features.aiVoiceover ?? { enabled: true }),
+                          language: e.target.value,
+                        },
+                      },
+                    })
+                  }
+                  className="text-sm px-3 py-1.5 rounded-lg border border-[#E8E4DC] bg-white text-[#2D2D2D] outline-none focus:ring-1 focus:ring-[#E8725A]/50"
+                >
+                  <option value="">Select language</option>
+                  <option value="es">Spanish</option>
+                  <option value="pt">Portuguese</option>
+                  <option value="fr">French</option>
+                  <option value="de">German</option>
+                  <option value="ko">Korean</option>
+                </select>
+              </div>
+            )}
           </div>
 
           {/* Apply Branding */}
