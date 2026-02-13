@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { finalizeUpload, startSermonProcessing } from "@/lib/mosaic";
+import type { BrandingConfig, ProcessingOptions, PublishMode } from "@/types";
 
 // POST /api/upload/finalize — complete upload + trigger Mosaic processing
 export async function POST(request: NextRequest) {
@@ -34,12 +35,21 @@ export async function POST(request: NextRequest) {
     // Finalize the upload to get the video URL
     const { video_url } = await finalizeUpload(videoId);
 
+    // Fetch branding if applyBranding is enabled
+    const processingOptions = sermon.processingOptions as ProcessingOptions | null;
+    let branding: BrandingConfig | null = null;
+    if (processingOptions?.applyBranding) {
+      const brandingUser = await prisma.user.findUnique({ where: { id: user.id }, select: { brandingConfig: true } });
+      branding = (brandingUser?.brandingConfig as BrandingConfig) ?? null;
+    }
+
     // Trigger Mosaic processing
     const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/mosaic`;
-    const processingOptions = sermon.processingOptions as Record<string, unknown> | null;
     const run = await startSermonProcessing(video_url, callbackUrl, {
-      processingOptions: processingOptions as never,
-      publishMode: sermon.publishMode as "auto" | "review" | "draft",
+      processingOptions: processingOptions ?? undefined,
+      publishMode: sermon.publishMode as PublishMode,
+      branding,
+      clipPrompt: processingOptions?.clipPrompt,
     });
 
     // Update sermon with run ID and status

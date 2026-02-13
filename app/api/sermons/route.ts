@@ -3,6 +3,55 @@ import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { startSermonProcessing } from "@/lib/mosaic";
+import type { BrandingConfig, ProcessingOptions, PublishMode } from "@/types";
+
+const captionConfigSchema = z.object({
+  enabled: z.boolean(),
+  style: z.enum(["colored_words", "stroke_text", "full_highlight"]),
+  baseColor: z.string().optional(),
+  highlightColor: z.string().optional(),
+  strokeColor: z.string().optional(),
+  fontFamily: z.string().optional(),
+  fontWeight: z.number().optional(),
+  fontSize: z.enum(["small", "medium", "large"]).optional(),
+  verticalPosition: z.number().min(0).max(100).optional(),
+  minWords: z.number().min(1).max(10).optional(),
+  maxWords: z.number().min(1).max(10).optional(),
+}).optional();
+
+const aiMusicSchema = z.object({
+  enabled: z.boolean(),
+  genre: z.string().optional(),
+  mood: z.string().optional(),
+  intensity: z.number().min(1).max(10).optional(),
+  bpm: z.number().min(40).max(200).optional(),
+  prompt: z.string().max(500).optional(),
+  volume: z.number().min(0).max(100).optional(),
+}).optional();
+
+const aiVoiceoverSchema = z.object({
+  enabled: z.boolean(),
+  language: z.string().optional(),
+  voice: z.string().optional(),
+  script: z.string().optional(),
+}).optional();
+
+const roughCutSchema = z.object({
+  enabled: z.boolean(),
+  prompt: z.string().max(500).optional(),
+  targetDurationSeconds: z.number().optional(),
+  mood: z.string().optional(),
+}).optional();
+
+const motionGraphicsSchema = z.union([
+  z.boolean(),
+  z.object({
+    enabled: z.boolean(),
+    stylePrompt: z.string().max(500).optional(),
+    fullScreen: z.boolean().optional(),
+    preset: z.string().optional(),
+  }),
+]).optional();
 
 const createSermonSchema = z.object({
   title: z.string().min(1).max(200),
@@ -11,17 +60,30 @@ const createSermonSchema = z.object({
   processingOptions: z.object({
     clipCount: z.number().min(1).max(15),
     clipDuration: z.enum(["short", "medium", "long"]),
+    clipDurationSeconds: z.number().min(15).max(120).optional(),
+    clipPrompt: z.string().max(500).optional(),
     captionStyle: z.enum(["none", "standard", "cinematic", "with-emojis"]),
+    captionConfig: captionConfigSchema,
     outputFormats: z.array(z.enum(["vertical", "landscape", "square"])).min(1),
+    dynamicZoom: z.boolean().optional(),
     features: z.object({
       silenceRemoval: z.boolean().optional(),
+      silenceRemovalFillerWords: z.boolean().optional(),
       audioEnhancement: z.boolean().optional(),
-      colorCorrection: z.boolean().optional(),
+      colorCorrection: z.union([z.boolean(), z.enum(["golden_hour", "filmic", "vibrant", "cool_tones", "neutral_clean"])]).optional(),
       aiBackgroundMusic: z.boolean().optional(),
       aiBRoll: z.boolean().optional(),
-      motionGraphics: z.boolean().optional(),
+      motionGraphics: motionGraphicsSchema,
+      aiAvatar: z.union([z.boolean(), z.object({ enabled: z.boolean(), avatarId: z.string().optional(), script: z.string().optional(), voiceId: z.string().optional() })]).optional(),
+      aiVoiceover: aiVoiceoverSchema,
+      aiAugment: z.union([z.boolean(), z.object({ enabled: z.boolean(), style: z.string().optional(), effect: z.string().optional() })]).optional(),
+      roughCut: z.union([z.boolean(), roughCutSchema]).optional(),
+      voiceModification: z.boolean().optional(),
+      aiMusic: aiMusicSchema,
+      viralShorts: z.boolean().optional(),
     }),
     applyBranding: z.boolean(),
+    captionPrompt: z.string().max(500).optional(),
   }).optional(),
   publishMode: z.enum(["auto", "review", "draft"]).optional(),
   seriesId: z.string().optional(),
@@ -127,10 +189,19 @@ async function createSermon(request: NextRequest, userId: string) {
   // Trigger Mosaic processing for YouTube/URL sources
   if ((sourceType === "youtube" || sourceType === "url") && sourceUrl) {
     try {
+      // Fetch branding config if applyBranding is enabled
+      let branding: BrandingConfig | null = null;
+      if (processingOptions?.applyBranding) {
+        const user = await prisma.user.findUnique({ where: { id: userId }, select: { brandingConfig: true } });
+        branding = (user?.brandingConfig as BrandingConfig) ?? null;
+      }
+
       const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/mosaic`;
       const run = await startSermonProcessing(sourceUrl, callbackUrl, {
-        processingOptions,
-        publishMode,
+        processingOptions: processingOptions as ProcessingOptions | undefined,
+        publishMode: publishMode as PublishMode | undefined,
+        branding,
+        clipPrompt: processingOptions?.clipPrompt,
       });
       await prisma.sermon.update({
         where: { id: sermon.id },

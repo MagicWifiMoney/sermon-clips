@@ -1,12 +1,15 @@
-import type { ProcessingOptions, PublishMode, SocialPlatform, ContentType, TransitionStyle, GraphicStyle } from "@/types";
+import type { ProcessingOptions, PublishMode, BrandingConfig, LanguageConfig, SocialPlatform, ContentType, TransitionStyle, GraphicStyle } from "@/types";
 import {
   runAgent,
   getAgentRun,
   getVideoUploadUrl,
   finalizeVideoUpload,
+  getAudioUploadUrl,
+  finalizeAudioUpload,
   addYouTubeChannels,
   removeYouTubeChannels,
 } from "@/lib/mosaic-client";
+import { buildMosaicUpdateParams } from "@/lib/mosaic-params";
 
 const MOSAIC_AGENT_ID = process.env.MOSAIC_AGENT_ID ?? "";
 
@@ -73,11 +76,25 @@ export interface MosaicPublishResponse {
 export async function startSermonProcessing(
   videoUrl: string,
   callbackUrl: string,
-  options?: { processingOptions?: ProcessingOptions; publishMode?: PublishMode }
+  options?: {
+    processingOptions?: ProcessingOptions;
+    publishMode?: PublishMode;
+    branding?: BrandingConfig | null;
+    clipPrompt?: string;
+    languageConfig?: LanguageConfig | null;
+  }
 ): Promise<MosaicRunResponse> {
-  const updateParams = options
-    ? { processing_options: options.processingOptions, publish_mode: options.publishMode }
-    : undefined;
+  let updateParams: Record<string, unknown> | undefined;
+
+  if (options?.processingOptions) {
+    updateParams = buildMosaicUpdateParams(
+      options.processingOptions,
+      options.branding,
+      options.publishMode,
+      options.clipPrompt,
+      options.languageConfig,
+    );
+  }
 
   return runAgent(MOSAIC_AGENT_ID, [videoUrl], callbackUrl, updateParams);
 }
@@ -113,6 +130,26 @@ export async function finalizeUpload(videoId: string): Promise<{ video_url: stri
   return { video_url: res.video_url };
 }
 
+export async function getAudioUploadUrlWrapper(): Promise<{
+  upload_url: string;
+  upload_fields: Record<string, string>;
+  audio_id: string;
+  size_limit: number;
+}> {
+  const res = await getAudioUploadUrl();
+  return {
+    upload_url: res.url,
+    upload_fields: res.upload_fields,
+    audio_id: res.id,
+    size_limit: res.size_limit,
+  };
+}
+
+export async function finalizeAudioUploadWrapper(audioId: string): Promise<{ audio_url: string }> {
+  const res = await finalizeAudioUpload(audioId);
+  return { audio_url: res.audio_url };
+}
+
 // ---- LIVE: YouTube Triggers (via Mosaic API) ----
 
 export async function registerYouTubeTrigger(
@@ -131,44 +168,17 @@ export async function removeYouTubeTrigger(
   await removeYouTubeChannels(agentId, [triggerId]);
 }
 
-// ---- STUBS: Social Destinations (needs Ayrshare/Buffer/direct APIs) ----
+// ---- Social Publishing ----
+// Social account connections are managed in Mosaic's dashboard portal.
+// Publishing is handled by the Destination tile in update_params.
+// See lib/mosaic-params.ts for the destination tile mapping.
 
-export async function connectSocialAccount(
-  platform: SocialPlatform,
-  oauthCode: string
-): Promise<MosaicDestinationResponse> {
-  console.log("[Stub] connectSocialAccount:", { platform, oauthCode });
-  throw new Error("Not implemented — needs social publishing service (Ayrshare/Buffer)");
-}
-
-export async function disconnectSocialAccount(
-  platform: SocialPlatform,
-  accountId: string
-): Promise<void> {
-  console.log("[Stub] disconnectSocialAccount:", { platform, accountId });
-  throw new Error("Not implemented — needs social publishing service (Ayrshare/Buffer)");
-}
-
-export async function publishClip(
-  clipUrl: string,
-  platform: SocialPlatform,
-  caption: string,
-  scheduledAt?: Date
-): Promise<MosaicPublishResponse> {
-  console.log("[Stub] publishClip:", { clipUrl, platform, caption, scheduledAt });
-  throw new Error("Not implemented — needs social publishing service (Ayrshare/Buffer)");
+/** Get the URL to Mosaic's social account management portal */
+export function getMosaicSocialPortalUrl(): string {
+  return `https://app.mosaic.so/agents/${MOSAIC_AGENT_ID}/destinations`;
 }
 
 // ---- STUBS: AI Content Generation (needs OpenAI/Anthropic) ----
-
-export async function generateCaption(
-  clipTitle: string,
-  sermonTitle: string,
-  platform: SocialPlatform
-): Promise<string> {
-  console.log("[Stub] generateCaption:", { clipTitle, sermonTitle, platform });
-  return `${clipTitle} from "${sermonTitle}" - Watch the full sermon on our channel! #sermon #faith #church`;
-}
 
 export async function generateSermonContent(
   sermonId: string,
@@ -187,42 +197,37 @@ export async function getTranscript(
 }
 
 export async function createClipFromTimestamps(
-  runId: string,
+  videoUrl: string,
   startTime: number,
   endTime: number,
   options?: { title?: string }
 ): Promise<MosaicRunResponse> {
-  console.log("[Stub] createClipFromTimestamps:", { runId, startTime, endTime, options });
-  throw new Error("Not implemented — depends on Mosaic canvas capabilities");
+  const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/mosaic`;
+  return runAgent(MOSAIC_AGENT_ID, [videoUrl], callbackUrl, {
+    clips: {
+      number_of_clips: 1,
+      timestamps: [{ start: startTime, end: endTime }],
+    },
+  });
 }
 
-// ---- STUBS: Translation + Voiceover (needs Deepgram/ElevenLabs) ----
+// ---- Translation / Dubbing ----
+// Translation, dubbing, and lip sync are handled by the Voice tile in update_params.
+// See lib/mosaic-params.ts for the voice tile mapping.
 
-export async function translateCaptions(
-  runId: string,
-  targetLang: string
-): Promise<{ status: string }> {
-  console.log("[Stub] translateCaptions:", { runId, targetLang });
-  throw new Error("Not implemented — needs translation service (Deepgram/ElevenLabs)");
-}
-
-export async function generateVoiceover(
-  clipUrl: string,
-  language: string,
-  voice: string
-): Promise<{ status: string; audioUrl?: string }> {
-  console.log("[Stub] generateVoiceover:", { clipUrl, language, voice });
-  throw new Error("Not implemented — needs translation service (Deepgram/ElevenLabs)");
-}
-
-// ---- STUBS: Montage (depends on Mosaic canvas capabilities) ----
+// ---- Montage (via separate Mosaic agent run) ----
 
 export async function createMontage(
   clipUrls: string[],
   options: { transitionStyle?: TransitionStyle; title?: string }
 ): Promise<MosaicRunResponse> {
-  console.log("[Stub] createMontage:", { clipUrls, options });
-  throw new Error("Not implemented — depends on Mosaic canvas capabilities");
+  const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/mosaic`;
+  return runAgent(MOSAIC_AGENT_ID, clipUrls, callbackUrl, {
+    montage: {
+      enabled: true,
+      transition_style: options.transitionStyle ?? "crossfade",
+    },
+  });
 }
 
 // ---- STUBS: Graphics (needs DALL-E/Replicate) ----
@@ -236,22 +241,10 @@ export async function generateGraphic(
   throw new Error("Not implemented — needs image generation service (DALL-E/Replicate)");
 }
 
-// ---- STUBS: Smart Clips (depends on Mosaic canvas capabilities) ----
-
-export async function detectClipMoments(
-  runId: string
-): Promise<{ suggestions: { startTime: number; endTime: number; topic: string; hookScore: number; summary?: string }[] }> {
-  console.log("[Stub] detectClipMoments:", { runId });
-  throw new Error("Not implemented — depends on Mosaic canvas capabilities");
-}
-
-export async function generateViralShorts(
-  runId: string,
-  options?: { maxClips?: number; hookOptimized?: boolean }
-): Promise<MosaicRunResponse> {
-  console.log("[Stub] generateViralShorts:", { runId, options });
-  throw new Error("Not implemented — depends on Mosaic canvas capabilities");
-}
+// ---- Smart Clips ----
+// Clip detection and viral shorts are handled by the Clips tile with prompt parameter.
+// Pass clipPrompt: "hook-optimized viral shorts" for viral content.
+// Clip suggestions come via SUGGESTIONS_READY webhook.
 
 // ---- STUBS: Course (needs OpenAI/Anthropic) ----
 

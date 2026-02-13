@@ -136,10 +136,11 @@ export function UploadForm({ simplified = false }: { simplified?: boolean }) {
 
       const { data } = await res.json();
 
+      const isAudio = file.type.startsWith("audio/");
       const startRes = await fetch("/api/upload/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sermonId: data.id }),
+        body: JSON.stringify({ sermonId: data.id, contentType: isAudio ? "audio" : "video" }),
       });
 
       if (!startRes.ok) {
@@ -185,14 +186,17 @@ export function UploadForm({ simplified = false }: { simplified?: boolean }) {
     }
   };
 
+  const isMediaFile = (file: File) =>
+    file.type.startsWith("video/") || file.type.startsWith("audio/");
+
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(false);
     const dropped = e.dataTransfer.files[0];
-    if (dropped && dropped.type.startsWith("video/")) {
+    if (dropped && isMediaFile(dropped)) {
       setFile(dropped);
     } else {
-      toast.error("Please drop a video file (MP4, MOV, AVI)");
+      toast.error("Please drop a video or audio file (MP4, MOV, AVI, MP3, WAV, M4A)");
     }
   }, []);
 
@@ -383,7 +387,7 @@ export function UploadForm({ simplified = false }: { simplified?: boolean }) {
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="video/*"
+                  accept="video/*,audio/*,.mp3,.wav,.m4a,.flac,.aac"
                   className="hidden"
                   onChange={(e) => {
                     const f = e.target.files?.[0];
@@ -399,9 +403,9 @@ export function UploadForm({ simplified = false }: { simplified?: boolean }) {
                 ) : (
                   <div className="space-y-2">
                     <Upload className="w-10 h-10 text-[#5c5c5c]/50 mx-auto" />
-                    <p className="text-sm text-[#5c5c5c]">Drag & drop your video file here</p>
+                    <p className="text-sm text-[#5c5c5c]">Drag & drop your video or audio file here</p>
                     <p className="text-xs text-[#5c5c5c]/70">or click to browse</p>
-                    <p className="text-xs text-[#5c5c5c]/50 mt-2">MP4, MOV, AVI &middot; Max 5GB</p>
+                    <p className="text-xs text-[#5c5c5c]/50 mt-2">MP4, MOV, AVI, MP3, WAV, M4A &middot; Max 5GB</p>
                   </div>
                 )}
               </div>

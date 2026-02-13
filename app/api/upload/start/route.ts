@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
-import { getUploadUrl } from "@/lib/mosaic";
+import { getUploadUrl, getAudioUploadUrlWrapper } from "@/lib/mosaic";
 
 // POST /api/upload/start — get a signed upload URL from Mosaic
 export async function POST(request: NextRequest) {
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { sermonId } = body;
+  const { sermonId, contentType } = body;
 
   if (!sermonId) {
     return NextResponse.json({ error: "sermonId is required" }, { status: 400 });
@@ -31,13 +31,24 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { upload_url, upload_fields, video_id, size_limit } = await getUploadUrl();
+    if (contentType === "audio") {
+      const { upload_url, upload_fields, audio_id, size_limit } = await getAudioUploadUrlWrapper();
+      return NextResponse.json({
+        uploadUrl: upload_url,
+        uploadFields: upload_fields,
+        videoId: audio_id, // Keep as videoId for backward compat with finalize route
+        sizeLimit: size_limit,
+        contentType: "audio",
+      });
+    }
 
+    const { upload_url, upload_fields, video_id, size_limit } = await getUploadUrl();
     return NextResponse.json({
       uploadUrl: upload_url,
       uploadFields: upload_fields,
       videoId: video_id,
       sizeLimit: size_limit,
+      contentType: "video",
     });
   } catch (error) {
     console.error("[Upload Start]", error);

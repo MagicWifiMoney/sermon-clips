@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { startSermonProcessing } from "@/lib/mosaic";
+import type { BrandingConfig, ProcessingOptions, PublishMode } from "@/types";
 
 // POST /api/sermons/[id]/retry — re-trigger processing
 export async function POST(
@@ -20,18 +22,50 @@ export async function POST(
   });
   if (!sermon) return NextResponse.json({ error: "Sermon not found" }, { status: 404 });
 
-  // Reset status to PENDING and clear error
-  await prisma.sermon.update({
-    where: { id },
-    data: {
-      status: "PENDING",
-      progress: 0,
-      errorMessage: null,
-      mosaicRunId: null,
-    },
-  });
+  if (!sermon.sourceUrl) {
+    return NextResponse.json({ error: "No source URL — cannot retry" }, { status: 400 });
+  }
 
-  // TODO: Mosaic team — re-trigger startSermonProcessing()
+  const processingOptions = sermon.processingOptions as ProcessingOptions | null;
 
-  return NextResponse.json({ success: true });
+  // Fetch branding if applyBranding is enabled
+  let branding: BrandingConfig | null = null;
+  if (processingOptions?.applyBranding) {
+    branding = (user.brandingConfig as BrandingConfig) ?? null;
+  }
+
+  try {
+    // Reset status to PROCESSING
+    await prisma.sermon.update({
+      where: { id },
+      data: {
+        status: "PROCESSING",
+        progress: 0,
+        errorMessage: null,
+        mosaicRunId: null,
+      },
+    });
+
+    const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/mosaic`;
+    const run = await startSermonProcessing(sermon.sourceUrl, callbackUrl, {
+      processingOptions: processingOptions ?? undefined,
+      publishMode: (sermon.publishMode as PublishMode) ?? "review",
+      branding,
+      clipPrompt: processingOptions?.clipPrompt,
+    });
+
+    await prisma.sermon.update({
+      where: { id },
+      data: { mosaicRunId: run.run_id },
+    });
+
+    return NextResponse.json({ success: true, runId: run.run_id });
+  } catch (error) {
+    console.error("[Retry] Failed to restart processing:", error);
+    await prisma.sermon.update({
+      where: { id },
+      data: { status: "FAILED", errorMessage: "Retry failed — could not start processing" },
+    });
+    return NextResponse.json({ error: "Failed to restart processing" }, { status: 500 });
+  }
 }

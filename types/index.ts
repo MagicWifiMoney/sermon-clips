@@ -99,25 +99,31 @@ export type ApiResponse<T> = {
 export type ProcessingOptions = {
   clipCount: number;
   clipDuration: "short" | "medium" | "long";
+  clipDurationSeconds?: number;
+  clipPrompt?: string;
   captionStyle: "none" | "standard" | "cinematic" | "with-emojis";
+  captionConfig?: CaptionConfig;
   outputFormats: OutputFormat[];
+  dynamicZoom?: boolean;
   features: ProcessingFeatures;
   applyBranding: boolean;
+  captionPrompt?: string;
 };
 
 export type OutputFormat = "vertical" | "landscape" | "square";
 
 export type ProcessingFeatures = {
   silenceRemoval?: boolean;
+  silenceRemovalFillerWords?: boolean;
   audioEnhancement?: boolean;
-  colorCorrection?: boolean;
+  colorCorrection?: boolean | ColorCorrectionPreset;
   aiBackgroundMusic?: boolean;
   aiBRoll?: boolean;
-  motionGraphics?: boolean;
-  aiAvatar?: boolean;
+  motionGraphics?: boolean | MotionGraphicsConfig;
+  aiAvatar?: boolean | AiAvatarConfig;
   aiVoiceover?: AiVoiceoverConfig;
-  aiAugment?: boolean;
-  roughCut?: boolean;
+  aiAugment?: boolean | AiAugmentConfig;
+  roughCut?: boolean | RoughCutConfig;
   voiceModification?: boolean;
   aiMusic?: AiMusicConfig;
   viralShorts?: boolean;
@@ -127,11 +133,64 @@ export type AiVoiceoverConfig = {
   enabled: boolean;
   language?: string;
   voice?: string;
+  script?: string;
+};
+
+export type CaptionConfig = {
+  enabled: boolean;
+  style: "colored_words" | "stroke_text" | "full_highlight";
+  baseColor?: string;
+  highlightColor?: string;
+  strokeColor?: string;
+  fontFamily?: string;
+  fontWeight?: number;
+  fontSize?: "small" | "medium" | "large";
+  verticalPosition?: number;
+  minWords?: number;
+  maxWords?: number;
+};
+
+export type ColorCorrectionPreset =
+  | "golden_hour"
+  | "filmic"
+  | "vibrant"
+  | "cool_tones"
+  | "neutral_clean";
+
+export type RoughCutConfig = {
+  enabled: boolean;
+  prompt?: string;
+  targetDurationSeconds?: number;
+  mood?: string;
+};
+
+export type MotionGraphicsConfig = {
+  enabled: boolean;
+  stylePrompt?: string;
+  fullScreen?: boolean;
+  preset?: string;
+};
+
+export type AiAvatarConfig = {
+  enabled: boolean;
+  avatarId?: string;
+  script?: string;
+  voiceId?: string;
+};
+
+export type AiAugmentConfig = {
+  enabled: boolean;
+  style?: string;
+  effect?: string;
 };
 
 export type AiMusicConfig = {
   enabled: boolean;
   genre?: string;
+  mood?: string;
+  intensity?: number;
+  bpm?: number;
+  prompt?: string;
   volume?: number;
 };
 
@@ -140,6 +199,10 @@ export type LanguageConfig = {
   translateCaptions: boolean;
   voiceoverLanguage?: string;
   voiceoverVoice?: string;
+  lipSync?: boolean;
+  preserveBackgroundAudio?: boolean;
+  safewords?: string[];
+  translationDictionary?: Record<string, string>;
 };
 
 export type PublishMode = "auto" | "review" | "draft";
@@ -154,9 +217,12 @@ export type BrandingConfig = {
   outroVideoUrl?: string;
   watermarkUrl?: string;
   watermarkPosition?: WatermarkPosition;
+  watermarkOpacity?: number;
+  watermarkSize?: number;
+  watermarkMargin?: number;
 };
 
-export type WatermarkPosition = "top-left" | "top-right" | "bottom-left" | "bottom-right";
+export type WatermarkPosition = "top-left" | "top-right" | "bottom-left" | "bottom-right" | "center";
 
 // --- YouTube Channel ---
 

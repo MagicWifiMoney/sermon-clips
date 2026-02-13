@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,12 +19,6 @@ const SOCIAL_PLATFORMS: { platform: SocialPlatform; label: string; color: string
   { platform: "linkedin", label: "LinkedIn", color: "bg-blue-700" },
 ];
 
-interface ConnectedAccount {
-  platform: SocialPlatform;
-  accountName: string | null;
-  connected: boolean;
-}
-
 interface IntegrationsSettingsProps {
   initialYoutubeConfig: YouTubeChannelConfig | null;
 }
@@ -41,17 +35,6 @@ export function IntegrationsSettings({ initialYoutubeConfig }: IntegrationsSetti
   const [savingYt, setSavingYt] = useState(false);
 
   const posthog = usePostHog();
-  const [socialAccounts, setSocialAccounts] = useState<ConnectedAccount[]>([]);
-  const [connectingPlatform, setConnectingPlatform] = useState<SocialPlatform | null>(null);
-
-  useEffect(() => {
-    fetch("/api/social/accounts")
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.data) setSocialAccounts(data.data);
-      })
-      .catch(() => {});
-  }, []);
 
   const handleYoutubeConnect = async () => {
     if (!ytChannelUrl.trim()) return;
@@ -100,43 +83,22 @@ export function IntegrationsSettings({ initialYoutubeConfig }: IntegrationsSetti
     }
   };
 
-  const handleSocialConnect = async (platform: SocialPlatform) => {
-    setConnectingPlatform(platform);
+  const handleManageSocialAccounts = async () => {
     try {
       const res = await fetch("/api/social/connect", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ platform }),
+        body: JSON.stringify({ platform: "all" }),
       });
-      if (!res.ok) throw new Error("Connection failed");
+      if (!res.ok) throw new Error("Failed to get portal URL");
       const { data } = await res.json();
-      setSocialAccounts((prev) => {
-        const filtered = prev.filter((a) => a.platform !== platform);
-        return [...filtered, { platform, accountName: data.accountName, connected: true }];
-      });
-      posthog.capture("social_account_connected", { platform });
-      toast.success(`${platform} connected!`);
+      if (data.redirectUrl) {
+        window.open(data.redirectUrl, "_blank", "noopener,noreferrer");
+      }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Connection failed — OAuth integration pending");
-    } finally {
-      setConnectingPlatform(null);
+      toast.error(error instanceof Error ? error.message : "Could not open Mosaic portal");
     }
   };
-
-  const handleSocialDisconnect = async (platform: SocialPlatform) => {
-    try {
-      const res = await fetch(`/api/social/${platform}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Disconnect failed");
-      setSocialAccounts((prev) => prev.filter((a) => a.platform !== platform));
-      posthog.capture("social_account_disconnected", { platform });
-      toast.success(`${platform} disconnected`);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Disconnect failed");
-    }
-  };
-
-  const isConnected = (platform: SocialPlatform) =>
-    socialAccounts.find((a) => a.platform === platform && a.connected);
 
   return (
     <div className="space-y-6">
@@ -216,55 +178,37 @@ export function IntegrationsSettings({ initialYoutubeConfig }: IntegrationsSetti
         )}
       </Card>
 
-      {/* Social Accounts */}
+      {/* Social Accounts — Managed via Mosaic */}
       <Card>
         <h3 className="text-sm font-semibold text-[#2D2D2D] mb-1">Social Accounts</h3>
-        <p className="text-xs text-[#5c5c5c] mb-4">Connect your social media accounts to publish clips directly</p>
+        <p className="text-xs text-[#5c5c5c] mb-4">
+          Social publishing is powered by Mosaic. Connect and manage your social accounts in the Mosaic dashboard.
+        </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {SOCIAL_PLATFORMS.map(({ platform, label, color }) => {
-            const account = isConnected(platform);
-            return (
-              <div
-                key={platform}
-                className="flex items-center gap-3 px-4 py-3 rounded-lg border border-[#E8E4DC] hover:bg-[#F5F1EB]/30 transition-colors"
-              >
-                <div className={`w-8 h-8 rounded-lg ${color} flex items-center justify-center shrink-0`}>
-                  <span className="text-white text-xs font-bold">{label[0]}</span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-[#2D2D2D]">{label}</p>
-                  {account && (
-                    <p className="text-xs text-[#5c5c5c] truncate">{account.accountName || "Connected"}</p>
-                  )}
-                </div>
-                {account ? (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleSocialDisconnect(platform)}
-                    className="text-red-500 hover:text-red-600"
-                  >
-                    <Unplug className="w-3.5 h-3.5" />
-                  </Button>
-                ) : (
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => handleSocialConnect(platform)}
-                    disabled={connectingPlatform === platform}
-                  >
-                    {connectingPlatform === platform ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : (
-                      <><ExternalLink className="w-3.5 h-3.5" /> Connect</>
-                    )}
-                  </Button>
-                )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+          {SOCIAL_PLATFORMS.map(({ platform, label, color }) => (
+            <div
+              key={platform}
+              className="flex items-center gap-3 px-4 py-3 rounded-lg border border-[#E8E4DC] bg-[#F5F1EB]/30"
+            >
+              <div className={`w-8 h-8 rounded-lg ${color} flex items-center justify-center shrink-0`}>
+                <span className="text-white text-xs font-bold">{label[0]}</span>
               </div>
-            );
-          })}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-[#2D2D2D]">{label}</p>
+                <p className="text-xs text-[#5c5c5c]">Manage in Mosaic</p>
+              </div>
+            </div>
+          ))}
         </div>
+
+        <Button onClick={handleManageSocialAccounts} variant="secondary" className="w-full">
+          <ExternalLink className="w-4 h-4" />
+          Manage Social Accounts in Mosaic
+        </Button>
+        <p className="text-xs text-[#5c5c5c] mt-2 text-center">
+          When &quot;Auto-publish&quot; is selected during upload, clips are posted to your connected accounts automatically.
+        </p>
       </Card>
     </div>
   );

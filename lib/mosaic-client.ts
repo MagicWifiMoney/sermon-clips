@@ -153,6 +153,73 @@ export async function removeYouTubeChannels(
   });
 }
 
+// ---- Image Uploads ----
+
+export interface ImageUploadUrlResponse {
+  id: string;
+  url: string;
+  upload_fields: Record<string, string>;
+  size_limit: number;
+}
+
+export async function getImageUploadUrl(): Promise<ImageUploadUrlResponse> {
+  return mosaicFetch<ImageUploadUrlResponse>("/v1/images/upload", {
+    method: "POST",
+  });
+}
+
+export interface FinalizeImageUploadResponse {
+  id: string;
+  image_url: string;
+  status: string;
+}
+
+export async function finalizeImageUpload(assetId: string): Promise<FinalizeImageUploadResponse> {
+  return mosaicFetch<FinalizeImageUploadResponse>(`/v1/images/${assetId}/finalize`, {
+    method: "POST",
+  });
+}
+
+// ---- Audio Uploads ----
+
+export interface AudioUploadUrlResponse {
+  id: string;
+  url: string;
+  upload_fields: Record<string, string>;
+  size_limit: number;
+}
+
+export async function getAudioUploadUrl(): Promise<AudioUploadUrlResponse> {
+  return mosaicFetch<AudioUploadUrlResponse>("/v1/audio/upload", {
+    method: "POST",
+  });
+}
+
+export interface FinalizeAudioUploadResponse {
+  id: string;
+  audio_url: string;
+  status: string;
+}
+
+export async function finalizeAudioUpload(assetId: string): Promise<FinalizeAudioUploadResponse> {
+  return mosaicFetch<FinalizeAudioUploadResponse>(`/v1/audio/${assetId}/finalize`, {
+    method: "POST",
+  });
+}
+
+// ---- Agent Triggers ----
+
+export interface AgentTrigger {
+  trigger_id: string;
+  type: string;
+  channels?: string[];
+  status: string;
+}
+
+export async function getAgentTriggers(agentId: string): Promise<AgentTrigger[]> {
+  return mosaicFetch<AgentTrigger[]>(`/v1/agents/${agentId}/triggers`);
+}
+
 // ---- Utility ----
 
 export interface WhoamiResponse {
