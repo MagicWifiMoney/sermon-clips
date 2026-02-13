@@ -6,6 +6,176 @@ Turn full-length sermons into short-form video clips ready for social media. Upl
 
 ---
 
+## Mosaic Integration — Handoff
+
+> **For the Mosaic team:** Everything you need to wire up the video processing pipeline is in [MOSAIC_HANDOFF.md](./MOSAIC_HANDOFF.md). Start there.
+
+**TL;DR status:**
+
+| Layer | Status |
+|---|---|
+| **6 core Mosaic API calls** | LIVE — `startSermonProcessing`, `getRunStatus`, `getUploadUrl`, `finalizeUpload`, `registerYouTubeTrigger`, `removeYouTubeTrigger` |
+| **Webhook handler** | LIVE — `RUN_STARTED`, `RUN_PROGRESS`, `RUN_FINISHED` + 5 future event handlers |
+| **Mosaic agent canvas** | NEEDS SETUP — agent `bfdf05c7-01f2-4fb9-89ae-f113d959aa8e` exists but has no tiles configured |
+| **15 stub functions** | Ready for wiring — social publishing, AI content, transcription, graphics, translation, montage |
+| **All UI surfaces** | BUILT — upload forms, processing progress, clip grid, downloads, social publishing tab, branding settings, analytics page, upgrade/pricing |
+
+The app is fully functional end-to-end once the Mosaic agent canvas has tiles configured. Without tiles, `startSermonProcessing` creates a run but produces no outputs.
+
+**Key files:**
+```
+lib/mosaic-client.ts     ← Thin HTTP wrapper for Mosaic REST API
+lib/mosaic.ts            ← Business logic (6 live + 15 stubs)
+app/api/webhooks/mosaic/ ← Webhook receiver (signature verified)
+app/api/sermons/         ← Auto-triggers processing on create
+app/api/upload/          ← Signed upload URL + finalize flow
+MOSAIC_HANDOFF.md        ← Full integration docs, canvas setup guide, testing guide
+```
+
+---
+
+## Platform Features
+
+### Core Clip Engine
+| Feature | Description | Status |
+|---|---|---|
+| YouTube URL processing | Paste a link, AI processes the full sermon | Live (via Mosaic) |
+| Direct video upload | Drag-and-drop or browse, signed upload to Mosaic | Live (via Mosaic) |
+| Video URL import | Vimeo, Dropbox, Google Drive links | Live (via Mosaic) |
+| AI clip detection | Identifies the most clip-worthy moments automatically | Depends on Mosaic canvas |
+| Dynamic captions | Word-perfect captions — standard, cinematic, with-emojis | Depends on Mosaic canvas |
+| Multi-format export | Vertical (9:16), landscape (16:9), square (1:1) from one upload | Depends on Mosaic canvas |
+| Processing progress | Real-time progress bar via Mosaic webhooks + SWR polling | Live |
+| Clip download | Individual clip downloads with download count tracking | Live |
+| Batch processing | Select multiple sermons, process in bulk | UI built, needs Mosaic |
+
+### AI Enhancements
+| Feature | Description | Status |
+|---|---|---|
+| AI B-Roll | Auto-insert contextual visuals from 30,000+ stock assets | Depends on Mosaic canvas tile |
+| Background music | AI-composed soundtracks matched to sermon mood | Depends on Mosaic canvas tile |
+| AI eye contact | Corrects gaze so speaker looks directly at viewers | Depends on Mosaic canvas tile |
+| Audio enhancement | AI noise removal, silence removal, normalization | Depends on Mosaic canvas tile |
+| Color correction | Automatic color grading and correction | Depends on Mosaic canvas tile |
+| Motion graphics | Animated text overlays and transitions | Depends on Mosaic canvas tile |
+| AI avatar | AI-generated video avatars | Depends on Mosaic canvas tile |
+| Viral shorts | Auto-generated hook-optimized short clips | Stub (`generateViralShorts`) |
+| Smart clip suggestions | AI-detected clip-worthy moments with hook scores | Stub (`detectClipMoments`) |
+| Manual clip extraction | Create clips from specific timestamp ranges | Stub (`createClipFromTimestamps`) |
+
+### Social Publishing
+| Feature | Description | Status |
+|---|---|---|
+| Platform connections | Connect TikTok, Instagram, YouTube, Facebook, X, LinkedIn | UI built, needs OAuth service |
+| Clip publishing | Post clips to connected platforms with captions | Stub (`publishClip`) |
+| Scheduled posting | Schedule clips for future publication | UI built, stub backend |
+| Drip scheduling | Auto-space clips across days/platforms | UI built, stub backend |
+| Per-platform captions | AI-generated captions tailored to each platform | Stub (`generateCaption`) |
+
+### Content Generation
+| Feature | Description | Status |
+|---|---|---|
+| Sermon summaries | Short + long AI-generated summaries | Stub (`generateSermonContent`) |
+| YouTube descriptions | SEO-optimized video descriptions | Stub |
+| Discussion guides | Small group discussion questions | Stub |
+| Devotional plans | Multi-day devotional content from sermon | Stub |
+| Blog posts | Full blog post from sermon transcript | Stub |
+| Key quotes | Extract quotable lines | Stub |
+| Bible verses | Identify referenced scriptures | Stub |
+| Social posts | Platform-specific social media copy | Stub |
+
+### Branding & Customization
+| Feature | Description | Status |
+|---|---|---|
+| Logo upload | Custom church logo overlay on clips | UI built, awaiting Mosaic tile |
+| Brand colors | Primary/secondary color theming | UI built |
+| Intro/outro videos | Custom branded intro and outro clips | UI built, awaiting Mosaic tile |
+| Watermark | Logo watermark with position control (4 corners) | UI built, awaiting Mosaic tile |
+| Processing templates | Save and reuse clip settings presets | Live (CRUD + UI) |
+| Sermon series | Organize sermons into named series with images | Live (CRUD + UI) |
+| Multi-campus | Separate branding per campus location | UI built |
+
+### Translation & Voiceover
+| Feature | Description | Status |
+|---|---|---|
+| Caption translation | Translate captions to 30+ languages | Stub (`translateCaptions`) |
+| AI voice cloning | Clone pastor's voice for dubbing | Stub (`generateVoiceover`) |
+| Multi-language voiceover | AI voiceover in target language | Stub |
+
+### Graphics
+| Feature | Description | Status |
+|---|---|---|
+| Quote cards | Auto-generated social graphics from sermon quotes | Stub (`generateGraphic`) |
+| Thumbnails | AI-generated video thumbnails | Stub |
+| Carousel images | Multi-slide social carousel graphics | Stub |
+
+### Montage
+| Feature | Description | Status |
+|---|---|---|
+| Clip montage builder | Combine multiple clips with transitions | UI built, stub (`createMontage`) |
+| Transition styles | Crossfade, fade-to-black, cut, slide, zoom | UI built |
+
+### Study Courses
+| Feature | Description | Status |
+|---|---|---|
+| Course generation | Multi-week study course from sermon series | Stub (`generateCourse`) |
+| Module structure | Weekly modules with summaries, scriptures, discussion questions | Schema + UI built |
+
+### Analytics
+| Feature | Description | Status |
+|---|---|---|
+| Dashboard overview | Total views, engagement rate, top platform | UI built, awaiting data |
+| Clip performance | Per-clip views, likes, shares, comments by platform | Schema + UI built |
+| Platform breakdown | Performance metrics per social platform | UI built |
+| ROI metrics | Time saved, content pieces generated, cost per clip | UI built |
+| Date range filters | 7d, 30d, 90d, custom date ranges | UI built |
+
+### YouTube Auto-Trigger
+| Feature | Description | Status |
+|---|---|---|
+| Channel connection | Link YouTube channel to auto-detect new uploads | Live (via Mosaic triggers) |
+| Auto-processing | New YouTube uploads trigger automatic clip generation | Live (via Mosaic triggers) |
+| Default settings | Pre-configured processing options for auto-triggered runs | UI built |
+
+---
+
+## Onboarding & Free Trial Funnel
+
+New users flow through a conversion-optimized funnel:
+
+```
+Sign Up (no credit card) → 3-Step Wizard → Free Sermon Upload → Value Recap → Upgrade Gate
+```
+
+| Stage | What Happens |
+|---|---|
+| **Wizard** (`/dashboard/welcome`) | 3 quick steps: church name, role, primary goal. Celebration screen with confetti. |
+| **Checklist** (dashboard) | 2/4 steps pre-completed (Zeigarnik effect). CTA: "Clip your first sermon FREE" |
+| **Simplified upload** (`?first=true`) | YouTube-only, auto-fetch title, "Create My Clips — It's Free" button |
+| **Value recap** (dashboard) | After clips ready: "You saved ~4 hours!" + clip count + upgrade nudge |
+| **Upgrade gate** (upload page) | Free users who've used their sermon see testimonial + pricing CTA |
+| **Pricing page** (`/dashboard/upgrade`) | 3 tiers, monthly/yearly toggle (20% savings), trust signals |
+
+### Plan Tiers
+
+| | Free | Starter | Growth | Auto-Pilot |
+|--|------|---------|--------|------------|
+| **Price** | $0 | $29/mo ($278/yr) | $59/mo ($566/yr) | $149/mo ($1,430/yr) |
+| **Sermons** | 1 total | 4/month | 8/month | Unlimited |
+| **Clips** | 5/sermon | 3/sermon | 5/sermon | 10+/sermon |
+| **Formats** | 1 | 1 | 3 | 3 |
+
+Additional tiers (Professional at $299/mo, Suite at $599/mo) exist in the schema for future expansion.
+
+### Usage Enforcement
+
+- `sermonsProcessed` counter on User model, incremented on `RUN_FINISHED` webhook
+- `checkSermonQuota()` in `lib/usage.ts` validates before upload
+- Upload page shows upgrade gate when quota exceeded
+- "Upload New" button on dashboard links to `/dashboard/upgrade` for free users past their limit
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
@@ -19,6 +189,7 @@ Turn full-length sermons into short-form video clips ready for social media. Upl
 | Data Fetching | SWR |
 | Validation | Zod |
 | Notifications | Sonner |
+| Analytics | PostHog |
 | Deployment | Vercel |
 
 ---
@@ -73,45 +244,60 @@ Open [http://localhost:3000](http://localhost:3000).
 ```
 sermon-clips/
 ├── app/
-│   ├── (auth)/              # Sign-in / sign-up pages (Clerk)
-│   ├── (dashboard)/         # Authenticated dashboard layout
+│   ├── (auth)/                    # Sign-in / sign-up pages (Clerk)
+│   ├── (onboarding)/              # Onboarding wizard (minimal layout, no sidebar)
+│   │   └── dashboard/welcome/     # 3-step wizard page
+│   ├── (dashboard)/               # Authenticated dashboard layout (sidebar + header)
 │   │   └── dashboard/
-│   │       ├── page.tsx         # Main dashboard (stats + sermon list)
-│   │       ├── upload/          # Upload / YouTube URL form
-│   │       ├── sermons/[id]/    # Sermon detail (progress, clips, downloads)
-│   │       ├── analytics/       # Analytics page
-│   │       ├── publishing/      # Social publishing
-│   │       ├── montage/         # Clip montage builder
-│   │       ├── series/[id]/     # Sermon series detail
-│   │       └── settings/        # Account + branding settings
+│   │       ├── page.tsx           # Main dashboard (state machine: wizard redirect / checklist / value recap / normal)
+│   │       ├── upload/            # Upload form (simplified for free trial, full for paid)
+│   │       ├── upgrade/           # In-app pricing page with monthly/yearly toggle
+│   │       ├── sermons/[id]/      # Sermon detail (progress bar, clip grid, downloads)
+│   │       ├── analytics/         # Analytics dashboard
+│   │       ├── publishing/        # Social publishing management
+│   │       ├── montage/           # Clip montage builder
+│   │       ├── series/[id]/       # Sermon series detail
+│   │       └── settings/          # Account, branding, integrations, templates, series, campuses
 │   ├── api/
-│   │   ├── sermons/             # CRUD + auto-trigger Mosaic processing
-│   │   ├── upload/              # Signed upload URL + finalize
-│   │   ├── clips/               # Download, publish, caption generation
+│   │   ├── me/                    # Current user info + plan + onboarding + backfill
+│   │   ├── onboarding/            # POST wizard data (church name, role, goal)
+│   │   ├── usage/check/           # GET sermon quota check
+│   │   ├── sermons/               # CRUD + auto-trigger Mosaic processing
+│   │   ├── upload/                # Signed upload URL + finalize
+│   │   ├── clips/                 # Download, publish, caption generation
 │   │   ├── webhooks/
-│   │   │   ├── clerk/           # Clerk user sync webhook
-│   │   │   └── mosaic/          # Mosaic processing event webhook
-│   │   ├── integrations/youtube/ # YouTube channel connect + triggers
-│   │   ├── social/              # Social account management
-│   │   ├── analytics/           # Analytics + ROI endpoints
-│   │   ├── series/              # Sermon series management
-│   │   ├── templates/           # Processing template CRUD
-│   │   ├── settings/            # Branding config
-│   │   └── ...                  # Montage, schedule, batch, etc.
-│   ├── blog/                # SEO blog pages
-│   └── page.tsx             # Landing page
+│   │   │   ├── clerk/             # Clerk user sync webhook
+│   │   │   └── mosaic/            # Mosaic processing events + sermonsProcessed increment
+│   │   ├── integrations/youtube/  # YouTube channel connect + auto-triggers
+│   │   ├── social/                # Social account management
+│   │   ├── analytics/             # Analytics + ROI endpoints
+│   │   ├── series/                # Sermon series CRUD + course generation
+│   │   ├── templates/             # Processing template CRUD
+│   │   ├── settings/              # Branding config
+│   │   ├── batch/                 # Batch processing
+│   │   ├── montage/               # Montage CRUD
+│   │   ├── schedule/              # Scheduled post management
+│   │   ├── campuses/              # Multi-campus management
+│   │   └── courses/               # Study course management
+│   ├── blog/                      # SEO blog (8 articles)
+│   └── page.tsx                   # Landing page (hero, features, pricing, FAQ, testimonials)
 ├── components/
-│   ├── dashboard/           # Dashboard-specific components
-│   └── ui/                  # Shared UI primitives
+│   ├── dashboard/                 # Dashboard components (sermon card, upload form, sidebar, etc.)
+│   ├── onboarding/                # Wizard, checklist, value recap, celebration, confetti
+│   └── ui/                        # Shared UI primitives (button, card, tabs, skeleton, etc.)
 ├── lib/
-│   ├── mosaic-client.ts     # Thin HTTP client for Mosaic REST API
-│   ├── mosaic.ts            # Business logic (6 live + 15 stubs)
-│   └── prisma.ts            # Prisma client singleton (Neon adapter)
+│   ├── mosaic-client.ts           # Thin HTTP client for Mosaic REST API
+│   ├── mosaic.ts                  # Business logic (6 live + 15 stubs)
+│   ├── prisma.ts                  # Prisma client singleton (Neon adapter)
+│   ├── plan-gate.ts               # Plan tier logic, feature checks, sermon quota validation
+│   ├── usage.ts                   # checkSermonQuota() utility
+│   └── utils.ts                   # Formatting helpers, fetchYouTubeTitle
 ├── prisma/
-│   └── schema.prisma        # Database schema
+│   └── schema.prisma              # Database schema (15 models)
 ├── types/
-│   └── index.ts             # Shared TypeScript types
-└── MOSAIC_HANDOFF.md        # Integration handoff doc
+│   └── index.ts                   # Shared TypeScript types + plan definitions
+├── MOSAIC_HANDOFF.md              # Full Mosaic integration handoff document
+└── README.md
 ```
 
 ---
@@ -119,38 +305,50 @@ sermon-clips/
 ## Architecture
 
 ```
-┌──────────────────────────────────────────────────┐
-│                  Browser                         │
-│                                                  │
-│  Landing ──▶ Sign In ──▶ Dashboard               │
-│                          │                       │
-│                    Upload / YouTube URL           │
-│                          │                       │
-└──────────────────────────┼───────────────────────┘
-                           │
-                           ▼
-┌──────────────────────────────────────────────────┐
-│              Next.js API Routes                  │
-│                                                  │
-│  POST /api/sermons ──▶ startSermonProcessing()   │
-│  POST /api/upload/start ──▶ getUploadUrl()       │
-│  POST /api/upload/finalize ──▶ finalizeUpload()  │
-│  POST /api/webhooks/mosaic ◀── Mosaic webhooks   │
-│                                                  │
-└───────────┬──────────────────────┬───────────────┘
-            │                      │
-            ▼                      ▼
-┌───────────────────┐  ┌───────────────────────────┐
-│   Neon Postgres   │  │      Mosaic API            │
-│   (via Prisma)    │  │   api.mosaic.so            │
-│                   │  │                             │
-│  Users            │  │  Agent Runs                 │
-│  Sermons          │  │  Video Uploads              │
-│  Clips            │  │  YouTube Triggers           │
-│  Content Pieces   │  │  Webhooks ──▶ our endpoint  │
-│  Social Accounts  │  │                             │
-│  ...              │  └─────────────────────────────┘
-└───────────────────┘
+┌──────────────────────────────────────────────────────────────────────┐
+│                          Browser                                     │
+│                                                                      │
+│  Landing ──▶ Sign Up ──▶ Onboarding Wizard ──▶ Dashboard             │
+│                                                   │                  │
+│                              ┌────────────────────┤                  │
+│                              │                    │                  │
+│                         Upload Form         Sermon Detail            │
+│                         (simplified /        (progress +             │
+│                          full mode)           clip grid)             │
+│                              │                    ▲                  │
+│                              ▼                    │                  │
+│                      ┌───────────────┐    ┌───────┴──────────┐       │
+│                      │  API Routes   │    │ Webhook Handler   │       │
+│                      │  /api/sermons │    │ /api/webhooks/    │       │
+│                      │  /api/upload  │    │ mosaic            │       │
+│                      │  /api/me      │    │                   │       │
+│                      │  /api/usage   │    │ Increments        │       │
+│                      │  /api/onboard │    │ sermonsProcessed  │       │
+│                      └──────┬────────┘    └──────▲────────────┘       │
+│                             │                    │                    │
+└─────────────────────────────┼────────────────────┼────────────────────┘
+                              │                    │
+                              ▼                    │
+┌─────────────────────────────────────────────────────────────────────┐
+│                       External Services                              │
+│                                                                      │
+│  ┌─────────────────┐  ┌──────────────────┐  ┌────────────────────┐  │
+│  │  Neon Postgres   │  │   Mosaic API     │  │   Clerk Auth       │  │
+│  │  (via Prisma)    │  │   api.mosaic.so  │  │   clerk.com        │  │
+│  │                  │  │                  │  │                    │  │
+│  │  15 models:      │  │  Agent runs      │  │  User management   │  │
+│  │  User, Sermon,   │  │  Video uploads   │  │  Webhook sync      │  │
+│  │  Clip, Content,  │  │  YouTube triggers│  │  Sign-in/up pages  │  │
+│  │  Social, Series, │  │  Webhooks ──▶    │  │                    │  │
+│  │  Templates, etc. │  │  our endpoint    │  │                    │  │
+│  └─────────────────┘  └──────────────────┘  └────────────────────┘  │
+│                                                                      │
+│  ┌─────────────────┐  ┌──────────────────┐                          │
+│  │  PostHog         │  │   Vercel         │                          │
+│  │  Analytics +     │  │   Deployment +   │                          │
+│  │  funnel tracking │  │   hosting        │                          │
+│  └─────────────────┘  └──────────────────┘                          │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 **Processing flow:**
@@ -158,8 +356,49 @@ sermon-clips/
 2. API creates a Sermon record and calls Mosaic's `runAgent`
 3. Mosaic processes the video (clip detection, captions, reframing)
 4. Mosaic sends webhooks: `RUN_STARTED` → `RUN_PROGRESS` → `RUN_FINISHED`
-5. On `RUN_FINISHED`, Clip records are created from `outputs[]`
+5. On `RUN_FINISHED`, Clip records are created from `outputs[]` and `sermonsProcessed` is incremented
 6. Dashboard polls via SWR and shows clips when ready
+
+**Onboarding flow:**
+1. New user signs up via Clerk (no credit card)
+2. Dashboard detects `onboardingStep === null` → redirects to `/dashboard/welcome`
+3. 3-step wizard saves church name, role, goal → celebration screen
+4. Dashboard shows getting-started checklist (2/4 pre-completed)
+5. Simplified upload form: YouTube URL only, auto-fetch title, "Create My Clips — It's Free"
+6. After clips ready: value recap banner ("You saved ~4 hours!")
+7. Second upload attempt → upgrade gate → `/dashboard/upgrade`
+
+---
+
+## Database
+
+The schema is managed with Prisma (15 models). Key models:
+
+| Model | Purpose |
+|---|---|
+| **User** | Synced from Clerk via webhook. Stores plan, `sermonsProcessed`, onboarding data, branding config, YouTube channel. |
+| **Sermon** | Source URL, processing status/progress, Mosaic run ID, processing options, series membership. |
+| **Clip** | Generated clips with video URL, thumbnail, format, download count. |
+| **ContentPiece** | AI-generated content (summaries, blog posts, quotes, devotionals). |
+| **SocialAccount** | Connected social platforms per user. |
+| **ClipPublication** | Tracks where/when clips are published, with status + external URL. |
+| **ClipAnalytics** | Per-clip performance metrics by platform and date. |
+| **ScheduledPost** | Future-dated posts with platform, caption, status. |
+| **ProcessingTemplate** | Saved presets for clip count, duration, captions, features. |
+| **SermonSeries** | Named groups of sermons with images and date ranges. |
+| **Montage** | Combined multi-clip videos with transition styles. |
+| **Graphic** | AI-generated images (quote cards, thumbnails, carousels). |
+| **Campus** | Multi-campus locations with per-campus branding. |
+| **SuggestedClip** | AI-detected clip-worthy moments with topic, hook score, timestamps. |
+| **Course** | Multi-week study courses generated from sermon series. |
+
+```bash
+# Push schema changes to database
+npx prisma db push
+
+# Open Prisma Studio
+npx prisma studio
+```
 
 ---
 
@@ -176,45 +415,25 @@ sermon-clips/
 | `MOSAIC_API_KEY` | Mosaic API key (`mk_` prefix) |
 | `MOSAIC_WEBHOOK_SECRET` | Mosaic webhook secret (`whsk_` prefix) |
 | `MOSAIC_AGENT_ID` | Mosaic agent UUID |
+| `NEXT_PUBLIC_POSTHOG_KEY` | PostHog project API key |
+| `NEXT_PUBLIC_POSTHOG_HOST` | PostHog API host (default: `https://us.i.posthog.com`) |
 
 ---
 
-## Database
+## PostHog Funnel Events
 
-The schema is managed with Prisma. Key models:
-
-- **User** — synced from Clerk via webhook, stores branding config + YouTube channel
-- **Sermon** — tracks source, processing status, progress, Mosaic run ID
-- **Clip** — generated clips with video URL, thumbnail, download count
-- **ContentPiece** — AI-generated content (summaries, blog posts, quotes)
-- **SocialAccount** — connected social platforms
-- **ClipPublication** — tracks where clips are published
-- **SuggestedClip** — AI-detected clip-worthy moments
-
-```bash
-# Push schema changes to database
-npx prisma db push
-
-# Open Prisma Studio
-npx prisma studio
-```
-
----
-
-## Mosaic Integration
-
-6 core functions are live (see `lib/mosaic.ts`):
-
-| Function | What It Does |
+| Event | Funnel Position |
 |---|---|
-| `startSermonProcessing` | Triggers a Mosaic agent run on a video |
-| `getRunStatus` | Polls run status + calculates progress |
-| `getUploadUrl` | Gets a signed URL for direct file upload |
-| `finalizeUpload` | Marks upload complete, returns video URL |
-| `registerYouTubeTrigger` | Auto-process new uploads from a channel |
-| `removeYouTubeTrigger` | Remove a YouTube auto-trigger |
-
-15 additional stubs exist for features that need separate services (social publishing, AI content, graphics, translation). See [MOSAIC_HANDOFF.md](./MOSAIC_HANDOFF.md) for details.
+| `onboarding_started` | Top of funnel |
+| `onboarding_step_completed` | |
+| `onboarding_completed` | |
+| `onboarding_skipped` | |
+| `free_upload_started` | |
+| `sermon_created` | |
+| `free_clips_viewed` | Aha moment |
+| `upgrade_gate_shown` | Conversion point |
+| `upgrade_page_viewed` | |
+| `upgrade_plan_selected` | |
 
 ---
 
