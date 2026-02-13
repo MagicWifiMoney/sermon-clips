@@ -8,28 +8,33 @@ Turn full-length sermons into short-form video clips ready for social media. Upl
 
 ## Mosaic Integration — Handoff
 
-> **For the Mosaic team:** Everything you need to wire up the video processing pipeline is in [MOSAIC_HANDOFF.md](./MOSAIC_HANDOFF.md). Start there.
+> **For the Mosaic team:** Full integration docs in [MOSAIC_HANDOFF.md](./MOSAIC_HANDOFF.md). Start there.
 
-**TL;DR status:**
+**TL;DR status — All 6 phases complete:**
 
 | Layer | Status |
 |---|---|
-| **6 core Mosaic API calls** | LIVE — `startSermonProcessing`, `getRunStatus`, `getUploadUrl`, `finalizeUpload`, `registerYouTubeTrigger`, `removeYouTubeTrigger` |
-| **Webhook handler** | LIVE — `RUN_STARTED`, `RUN_PROGRESS`, `RUN_FINISHED` + 5 future event handlers |
-| **Mosaic agent canvas** | NEEDS SETUP — agent `bfdf05c7-01f2-4fb9-89ae-f113d959aa8e` exists but has no tiles configured |
-| **15 stub functions** | Ready for wiring — social publishing, AI content, transcription, graphics, translation, montage |
-| **All UI surfaces** | BUILT — upload forms, processing progress, clip grid, downloads, social publishing tab, branding settings, analytics page, upgrade/pricing |
+| **Tile param mapper** | LIVE — `buildMosaicUpdateParams()` maps all 17+ tiles via `update_params` |
+| **8 live API functions** | `startSermonProcessing`, uploads (video/audio/image), YouTube triggers, social portal, clip extraction, montage |
+| **Webhook handler** | LIVE — `RUN_STARTED`, `RUN_PROGRESS`, `RUN_FINISHED` + 5 future events |
+| **Social publishing** | LIVE — Mosaic Destination tile (no Ayrshare/Buffer needed) |
+| **Translation/dubbing** | LIVE — Mosaic Voice tile (no ElevenLabs/Deepgram needed) |
+| **Branding pipeline** | LIVE — Watermark/Intro/Outro tiles, asset upload via Mosaic API |
+| **Enriched UI** | LIVE — Rich captions (colors/fonts/position), clip prompt + chips, AI music (mood/BPM/prompt), dynamic zoom, color presets, filler word toggle |
+| **Mosaic agent canvas** | NEEDS SETUP — tiles must be added to agent `bfdf05c7-01f2-4fb9-89ae-f113d959aa8e` |
+| **4 remaining stubs** | Need external services: AI content (OpenAI), graphics (DALL-E), transcription (Deepgram), courses (OpenAI) |
 
-The app is fully functional end-to-end once the Mosaic agent canvas has tiles configured. Without tiles, `startSermonProcessing` creates a run but produces no outputs.
+The app is fully functional end-to-end once the Mosaic agent canvas has tiles configured.
 
 **Key files:**
 ```
-lib/mosaic-client.ts     ← Thin HTTP wrapper for Mosaic REST API
-lib/mosaic.ts            ← Business logic (6 live + 15 stubs)
+lib/mosaic-params.ts     ← NEW — update_params mapper (ProcessingOptions → tile params)
+lib/mosaic-client.ts     ← Thin HTTP client (15 endpoints)
+lib/mosaic.ts            ← Business logic (8 live + 4 external-service stubs)
 app/api/webhooks/mosaic/ ← Webhook receiver (signature verified)
 app/api/sermons/         ← Auto-triggers processing on create
-app/api/upload/          ← Signed upload URL + finalize flow
-MOSAIC_HANDOFF.md        ← Full integration docs, canvas setup guide, testing guide
+app/api/upload/          ← Signed upload URL + finalize (video + audio)
+MOSAIC_HANDOFF.md        ← Full integration docs, canvas setup guide, tile mapping reference
 ```
 
 ---
@@ -41,84 +46,87 @@ MOSAIC_HANDOFF.md        ← Full integration docs, canvas setup guide, testing 
 |---|---|---|
 | YouTube URL processing | Paste a link, AI processes the full sermon | Live (via Mosaic) |
 | Direct video upload | Drag-and-drop or browse, signed upload to Mosaic | Live (via Mosaic) |
+| Audio file upload | MP3, WAV, M4A, FLAC — routes to audio upload endpoint | Live (via Mosaic) |
 | Video URL import | Vimeo, Dropbox, Google Drive links | Live (via Mosaic) |
-| AI clip detection | Identifies the most clip-worthy moments automatically | Depends on Mosaic canvas |
-| Dynamic captions | Word-perfect captions — standard, cinematic, with-emojis | Depends on Mosaic canvas |
-| Multi-format export | Vertical (9:16), landscape (16:9), square (1:1) from one upload | Depends on Mosaic canvas |
+| Clip prompt | Guide AI clip detection with text prompts + quick-pick chips | Live (via Clips tile `prompt`) |
+| Duration fine-tuning | Slider from 15-90 seconds + short/medium/long presets | Live (via Clips tile `duration_seconds`) |
+| Rich captions | Colors, fonts, position, word count — 3 styles (colored words, stroke, full highlight) | Live (via Captions tile) |
+| Multi-format export | Vertical (9:16), landscape (16:9), square (1:1) with dynamic zoom | Live (via Reframe tile) |
 | Processing progress | Real-time progress bar via Mosaic webhooks + SWR polling | Live |
 | Clip download | Individual clip downloads with download count tracking | Live |
-| Batch processing | Select multiple sermons, process in bulk | UI built, needs Mosaic |
+| Retry failed sermons | "Try Again" re-triggers Mosaic with same options + branding | Live |
+| Batch processing | Select multiple sermons, process in bulk | UI built, needs Mosaic canvas |
 
 ### AI Enhancements
 | Feature | Description | Status |
 |---|---|---|
-| AI B-Roll | Auto-insert contextual visuals from 30,000+ stock assets | Depends on Mosaic canvas tile |
-| Background music | AI-composed soundtracks matched to sermon mood | Depends on Mosaic canvas tile |
-| AI eye contact | Corrects gaze so speaker looks directly at viewers | Depends on Mosaic canvas tile |
-| Audio enhancement | AI noise removal, silence removal, normalization | Depends on Mosaic canvas tile |
-| Color correction | Automatic color grading and correction | Depends on Mosaic canvas tile |
-| Motion graphics | Animated text overlays and transitions | Depends on Mosaic canvas tile |
-| AI avatar | AI-generated video avatars | Depends on Mosaic canvas tile |
-| Viral shorts | Auto-generated hook-optimized short clips | Stub (`generateViralShorts`) |
-| Smart clip suggestions | AI-detected clip-worthy moments with hook scores | Stub (`detectClipMoments`) |
-| Manual clip extraction | Create clips from specific timestamp ranges | Stub (`createClipFromTimestamps`) |
+| AI B-Roll | Auto-insert contextual visuals | Live (via AI B-Roll tile) |
+| AI background music | Genre, mood, intensity, BPM, and free-text prompt | Live (via AI Music tile) |
+| Audio enhancement | AI noise removal, normalization | Live (via Audio Enhance tile) |
+| Silence removal | Remove silences + optional filler word removal ("um", "uh") | Live (via Silence Removal tile) |
+| Color correction | 5 presets: Golden Hour, Filmic, Vibrant, Cool Tones, Neutral Clean | Live (via Color Correction tile) |
+| Dynamic zoom | Speaker-tracking zoom for static camera shots | Live (via Reframe tile `dynamic_zoom`) |
+| Motion graphics | Animated overlays with style prompt + presets | Live (via Motion Graphics tile) |
+| Rough cut | Prompt-guided editing with target duration + mood | Live (via Rough Cut tile) |
+| AI avatar | AI-generated video avatars | Live (via AI Avatar tile) |
+| AI voiceover | Voiceover in multiple languages with voice selection | Live (via AI Voiceover tile) |
+| AI augment | Style and effect modifications | Live (via AI Augment tile) |
+| Viral shorts | Hook-optimized shorts via Clips tile with prompt | Live (Clips tile) |
+| Smart clip suggestions | AI-detected moments with hook scores | Live (via SUGGESTIONS_READY webhook) |
+| Manual clip extraction | Create clips from specific timestamp ranges | Live (thin `runAgent` wrapper) |
 
-### Social Publishing
+### Social Publishing (Mosaic-Native)
 | Feature | Description | Status |
 |---|---|---|
-| Platform connections | Connect TikTok, Instagram, YouTube, Facebook, X, LinkedIn | UI built, needs OAuth service |
-| Clip publishing | Post clips to connected platforms with captions | Stub (`publishClip`) |
-| Scheduled posting | Schedule clips for future publication | UI built, stub backend |
-| Drip scheduling | Auto-space clips across days/platforms | UI built, stub backend |
-| Per-platform captions | AI-generated captions tailored to each platform | Stub (`generateCaption`) |
+| Platform connections | TikTok, Instagram, YouTube, Facebook, X, LinkedIn | Live — managed in Mosaic portal |
+| Auto-publish | Clips auto-post to connected accounts when ready | Live (via Destination tile `mode: "publish"`) |
+| Review mode | Clips queued for review before publishing | Live (via Destination tile `mode: "review"`) |
+| AI social captions | AI-generated captions with custom prompt | Live (via Destination tile `caption_prompt`) |
+| Scheduled posting | Schedule clips for future publication | UI built, depends on Mosaic Destination |
+| Drip scheduling | Auto-space clips across days/platforms | UI built, depends on Mosaic Destination |
 
 ### Content Generation
 | Feature | Description | Status |
 |---|---|---|
-| Sermon summaries | Short + long AI-generated summaries | Stub (`generateSermonContent`) |
-| YouTube descriptions | SEO-optimized video descriptions | Stub |
-| Discussion guides | Small group discussion questions | Stub |
-| Devotional plans | Multi-day devotional content from sermon | Stub |
-| Blog posts | Full blog post from sermon transcript | Stub |
-| Key quotes | Extract quotable lines | Stub |
-| Bible verses | Identify referenced scriptures | Stub |
-| Social posts | Platform-specific social media copy | Stub |
+| Sermon summaries | Short + long AI-generated summaries | Stub (needs OpenAI/Anthropic) |
+| Blog posts, quotes, devotionals, etc. | 8 content types from sermon transcript | Stub (needs OpenAI/Anthropic) |
 
 ### Branding & Customization
 | Feature | Description | Status |
 |---|---|---|
-| Logo upload | Custom church logo overlay on clips | UI built, awaiting Mosaic tile |
-| Brand colors | Primary/secondary color theming | UI built |
-| Intro/outro videos | Custom branded intro and outro clips | UI built, awaiting Mosaic tile |
-| Watermark | Logo watermark with position control (4 corners) | UI built, awaiting Mosaic tile |
+| Logo upload | Upload via Mosaic image API, stored in branding config | Live |
+| Brand colors | Primary/secondary color theming | Live |
+| Intro/outro videos | Upload via Mosaic video API, passed to Intro/Outro tiles | Live |
+| Watermark | Position (5 options), opacity slider, size slider, margin | Live (via Watermark tile) |
 | Processing templates | Save and reuse clip settings presets | Live (CRUD + UI) |
 | Sermon series | Organize sermons into named series with images | Live (CRUD + UI) |
 | Multi-campus | Separate branding per campus location | UI built |
 
-### Translation & Voiceover
+### Translation & Dubbing (Mosaic-Native)
 | Feature | Description | Status |
 |---|---|---|
-| Caption translation | Translate captions to 30+ languages | Stub (`translateCaptions`) |
-| AI voice cloning | Clone pastor's voice for dubbing | Stub (`generateVoiceover`) |
-| Multi-language voiceover | AI voiceover in target language | Stub |
+| Translation + dubbing | Translate to 30+ languages with lip sync | Live (via Voice tile) |
+| Safewords | Protect brand names from translation ("Jesus", church name) | Live (via Voice tile `safewords`) |
+| Preserve background audio | Keep original background audio during dubbing | Live (via Voice tile) |
+| Custom translation dictionary | Custom term mappings for domain-specific vocabulary | Type defined, UI pending |
 
 ### Graphics
 | Feature | Description | Status |
 |---|---|---|
-| Quote cards | Auto-generated social graphics from sermon quotes | Stub (`generateGraphic`) |
+| Quote cards | Auto-generated social graphics from sermon quotes | Stub (needs DALL-E/Replicate) |
 | Thumbnails | AI-generated video thumbnails | Stub |
 | Carousel images | Multi-slide social carousel graphics | Stub |
 
 ### Montage
 | Feature | Description | Status |
 |---|---|---|
-| Clip montage builder | Combine multiple clips with transitions | UI built, stub (`createMontage`) |
-| Transition styles | Crossfade, fade-to-black, cut, slide, zoom | UI built |
+| Clip montage builder | Combine multiple clips with transitions | Live (thin `runAgent` wrapper) |
+| Transition styles | Crossfade, fade-to-black, cut, slide, zoom | Live |
 
 ### Study Courses
 | Feature | Description | Status |
 |---|---|---|
-| Course generation | Multi-week study course from sermon series | Stub (`generateCourse`) |
+| Course generation | Multi-week study course from sermon series | Stub (needs OpenAI/Anthropic) |
 | Module structure | Weekly modules with summaries, scriptures, discussion questions | Schema + UI built |
 
 ### Analytics
@@ -286,8 +294,9 @@ sermon-clips/
 │   ├── onboarding/                # Wizard, checklist, value recap, celebration, confetti
 │   └── ui/                        # Shared UI primitives (button, card, tabs, skeleton, etc.)
 ├── lib/
-│   ├── mosaic-client.ts           # Thin HTTP client for Mosaic REST API
-│   ├── mosaic.ts                  # Business logic (6 live + 15 stubs)
+│   ├── mosaic-client.ts           # Thin HTTP client for Mosaic REST API (15 endpoints)
+│   ├── mosaic.ts                  # Business logic (8 live functions + 4 external-service stubs)
+│   ├── mosaic-params.ts           # update_params mapper (ProcessingOptions → Mosaic tile params)
 │   ├── prisma.ts                  # Prisma client singleton (Neon adapter)
 │   ├── plan-gate.ts               # Plan tier logic, feature checks, sermon quota validation
 │   ├── usage.ts                   # checkSermonQuota() utility
@@ -352,12 +361,13 @@ sermon-clips/
 ```
 
 **Processing flow:**
-1. User submits YouTube URL or uploads a video file
-2. API creates a Sermon record and calls Mosaic's `runAgent`
-3. Mosaic processes the video (clip detection, captions, reframing)
-4. Mosaic sends webhooks: `RUN_STARTED` → `RUN_PROGRESS` → `RUN_FINISHED`
+1. User submits YouTube URL, video URL, or uploads a video/audio file
+2. API creates a Sermon record, `buildMosaicUpdateParams()` maps all options to tile params
+3. `runAgent` sends video URL + `update_params` (clips, captions, reframe, music, branding, destination, etc.)
+4. Mosaic processes through configured tiles, sends webhooks: `RUN_STARTED` → `RUN_PROGRESS` → `RUN_FINISHED`
 5. On `RUN_FINISHED`, Clip records are created from `outputs[]` and `sermonsProcessed` is incremented
-6. Dashboard polls via SWR and shows clips when ready
+6. If `destination.mode === "publish"`, Mosaic auto-posts to connected social accounts
+7. Dashboard polls via SWR and shows clips when ready
 
 **Onboarding flow:**
 1. New user signs up via Clerk (no credit card)

@@ -1,175 +1,248 @@
 # Mosaic Integration — Handoff Document
 
-> Last updated: 2026-02-12
+> Last updated: 2026-02-13
 
 ---
 
-## 1. What's Done
+## 1. What's Done (All 6 Phases Complete)
 
-The **6 core Mosaic API functions** are fully wired and live:
+The full Mosaic integration is built. Everything flows through `update_params` on `POST /v1/agents/{id}/runs` — one mapper function builds the correct tile configuration from our `ProcessingOptions`.
 
+### Core API Functions (LIVE)
 | Function | File | Status |
 |---|---|---|
-| `startSermonProcessing` | `lib/mosaic.ts` | LIVE — calls `POST /v1/agents/:id/runs` |
-| `getRunStatus` | `lib/mosaic.ts` | LIVE — calls `GET /v1/runs/:id`, calculates progress from `node_status_counts` |
-| `getUploadUrl` | `lib/mosaic.ts` | LIVE — calls `POST /v1/videos/upload` for signed URL |
-| `finalizeUpload` | `lib/mosaic.ts` | LIVE — calls `POST /v1/videos/:id/finalize` |
-| `registerYouTubeTrigger` | `lib/mosaic.ts` | LIVE — calls `POST /v1/agents/:id/triggers/youtube` |
-| `removeYouTubeTrigger` | `lib/mosaic.ts` | LIVE — calls `DELETE /v1/agents/:id/triggers/youtube` |
+| `startSermonProcessing` | `lib/mosaic.ts` | LIVE — calls `runAgent` with `buildMosaicUpdateParams()` |
+| `getRunStatus` | `lib/mosaic.ts` | LIVE — progress from `node_status_counts` |
+| `getUploadUrl` / `finalizeUpload` | `lib/mosaic.ts` | LIVE — video upload |
+| `getAudioUploadUrlWrapper` / `finalizeAudioUploadWrapper` | `lib/mosaic.ts` | LIVE — audio upload |
+| `registerYouTubeTrigger` / `removeYouTubeTrigger` | `lib/mosaic.ts` | LIVE — YouTube auto-triggers |
+| `getMosaicSocialPortalUrl` | `lib/mosaic.ts` | LIVE — Mosaic destination portal |
+| `createClipFromTimestamps` | `lib/mosaic.ts` | LIVE — thin `runAgent` wrapper |
+| `createMontage` | `lib/mosaic.ts` | LIVE — thin `runAgent` wrapper |
 
-**Webhook handler** (`app/api/webhooks/mosaic/route.ts`):
+### Tile Param Mapper (NEW)
+**`lib/mosaic-params.ts`** — `buildMosaicUpdateParams()` maps our `ProcessingOptions` + `BrandingConfig` + `PublishMode` + `LanguageConfig` to Mosaic's tile parameter structure.
+
+### Mosaic Client (LIVE)
+**`lib/mosaic-client.ts`** — 15 endpoints:
+- Agent runs: `runAgent`, `getAgentRun`, `cancelAgentRun`
+- Video: `getVideoUploadUrl`, `finalizeVideoUpload`
+- Audio: `getAudioUploadUrl`, `finalizeAudioUpload`
+- Image: `getImageUploadUrl`, `finalizeImageUpload`
+- YouTube: `addYouTubeChannels`, `removeYouTubeChannels`
+- Triggers: `getAgentTriggers`
+- Utility: `whoami`
+
+### Webhook Handler (LIVE)
+`app/api/webhooks/mosaic/route.ts`:
 - Verifies `X-Mosaic-Signature` header
-- Handles `flag` field (Mosaic's actual field name, with `event` fallback)
-- Processes 3 Mosaic events: `RUN_STARTED`, `RUN_PROGRESS`, `RUN_FINISHED`
-- 5 additional event handlers ready for future services
+- Handles `flag` field (with `event` fallback)
+- 3 live events: `RUN_STARTED`, `RUN_PROGRESS`, `RUN_FINISHED`
+- 5 future events: `TRANSCRIPT_READY`, `CONTENT_GENERATED`, `GRAPHIC_GENERATED`, `MONTAGE_FINISHED`, `SUGGESTIONS_READY`
 
-**API routes wired:**
-- `POST /api/sermons` — auto-triggers Mosaic processing for YouTube/URL sources
-- `POST /api/upload/start` — returns signed upload URL from Mosaic
-- `POST /api/upload/finalize` — finalizes upload + triggers processing
-- `POST /api/integrations/youtube/connect` — registers Mosaic YouTube trigger
-
-**Upload UI** (`components/dashboard/upload-form.tsx`):
-- Full 3-step flow: get signed URL → upload to Mosaic → finalize + process
+### API Routes Wired
+| Route | Function |
+|---|---|
+| `POST /api/sermons` | Creates sermon + auto-triggers Mosaic with full tile params |
+| `POST /api/sermons/[id]/retry` | Re-triggers `startSermonProcessing` (was TODO, now wired) |
+| `POST /api/upload/start` | Returns signed upload URL (video or audio) |
+| `POST /api/upload/finalize` | Finalizes upload + triggers processing with branding |
+| `POST /api/social/connect` | Returns Mosaic social portal redirect URL |
+| `POST /api/settings/branding/upload` | Get presigned URL for branding assets via Mosaic |
+| `PUT /api/settings/branding/upload` | Finalize branding asset upload + store URL |
+| `POST /api/integrations/youtube/connect` | Registers Mosaic YouTube trigger |
 
 ---
 
 ## 2. Architecture Overview
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                     sermon-clips.com                        │
-│                                                             │
-│  ┌──────────┐    ┌──────────┐    ┌───────────────────────┐  │
-│  │  Upload   │    │ YouTube  │    │   Sermon Detail       │  │
-│  │  Form     │    │ URL Form │    │   (progress + clips)  │  │
-│  └────┬─────┘    └────┬─────┘    └───────────────────────┘  │
-│       │               │                     ▲               │
-│       ▼               ▼                     │               │
-│  ┌─────────────────────────────┐    ┌───────┴────────────┐  │
-│  │     API Routes              │    │  Webhook Handler    │  │
-│  │  /api/upload/start          │    │  /api/webhooks/     │  │
-│  │  /api/upload/finalize       │    │  mosaic             │  │
-│  │  /api/sermons (POST)        │    │                     │  │
-│  └────────────┬────────────────┘    └───────▲────────────┘  │
-│               │                             │               │
-└───────────────┼─────────────────────────────┼───────────────┘
-                │                             │
-                ▼                             │
-┌───────────────────────────────┐             │
-│        Mosaic API             │             │
-│   api.mosaic.so               │             │
-│                               │             │
-│  ┌─────────────────────────┐  │             │
-│  │ POST /v1/agents/:id/runs│──┼─────────────┘
-│  │ GET  /v1/runs/:id       │  │  (webhooks: RUN_STARTED,
-│  │ POST /v1/videos/upload  │  │   RUN_PROGRESS, RUN_FINISHED)
-│  │ POST /v1/videos/:id/    │  │
-│  │      finalize            │  │
-│  │ YouTube triggers         │  │
-│  └─────────────────────────┘  │
-│                               │
-│  Agent: bfdf05c7-01f2-4fb9-  │
-│  89ae-f113d959aa8e            │
-│  (NEEDS CANVAS SETUP ⚠️)      │
-└───────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                     sermon-clips.com                             │
+│                                                                  │
+│  ┌──────────┐    ┌──────────┐    ┌────────────────────────────┐  │
+│  │  Upload   │    │ YouTube  │    │   Sermon Detail            │  │
+│  │  Form     │    │ URL Form │    │   (progress + clips)       │  │
+│  │  (video   │    │          │    │                            │  │
+│  │  + audio) │    │          │    │                            │  │
+│  └────┬─────┘    └────┬─────┘    └────────────────────────────┘  │
+│       │               │                     ▲                    │
+│       ▼               ▼                     │                    │
+│  ┌──────────────────────────────────┐  ┌────┴──────────────────┐ │
+│  │     API Routes                   │  │  Webhook Handler       │ │
+│  │  /api/sermons (POST)             │  │  /api/webhooks/mosaic  │ │
+│  │  /api/sermons/[id]/retry (POST)  │  │                        │ │
+│  │  /api/upload/start + finalize    │  │  RUN_STARTED           │ │
+│  │  /api/social/connect             │  │  RUN_PROGRESS          │ │
+│  │  /api/settings/branding/upload   │  │  RUN_FINISHED          │ │
+│  └────────────┬─────────────────────┘  └────▲──────────────────┘ │
+│               │                              │                    │
+│               │  buildMosaicUpdateParams()   │                    │
+│               │  (lib/mosaic-params.ts)      │                    │
+│               │                              │                    │
+└───────────────┼──────────────────────────────┼────────────────────┘
+                │                              │
+                ▼                              │
+┌──────────────────────────────────────────────┘────────────────────┐
+│        Mosaic API  (api.mosaic.so)                                │
+│                                                                   │
+│  POST /v1/agents/:id/runs                                        │
+│  ├── video_urls: [source video/audio]                            │
+│  ├── callback_url: sermon-clips.com/api/webhooks/mosaic          │
+│  └── update_params: {                                            │
+│        clips: { number_of_clips, duration_seconds, prompt }      │
+│        captions: { style, colors, fonts, position }              │
+│        reframe: { aspect_ratios, dynamic_zoom }                  │
+│        silence_removal: { enabled, remove_filler_words }         │
+│        audio_enhance: { enabled }                                │
+│        color_correction: { preset }                              │
+│        ai_music: { genre, mood, intensity, bpm, prompt }         │
+│        ai_broll: { enabled }                                     │
+│        motion_graphics: { style_prompt, preset }                 │
+│        rough_cut: { prompt, target_duration_seconds, mood }      │
+│        ai_voiceover: { voice_id, script, language }              │
+│        ai_avatar: { avatar_id, script, voice_id }               │
+│        ai_augment: { style, effect }                             │
+│        watermark: { image_url, position, size_percent, opacity } │
+│        intro: { intro_video_url }                                │
+│        outro: { outro_video_url }                                │
+│        destination: { mode, caption_prompt }                     │
+│        voice: { target_language, lip_sync, safewords }           │
+│      }                                                           │
+│                                                                   │
+│  Agent: bfdf05c7-01f2-4fb9-89ae-f113d959aa8e                    │
+│  (NEEDS CANVAS TILE SETUP — see Section 3)                       │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 3. Mosaic Canvas Setup Guide (CRITICAL)
+## 3. Mosaic Canvas Setup (CRITICAL — Required for Any Output)
 
-The Mosaic agent (`bfdf05c7-01f2-4fb9-89ae-f113d959aa8e`) is a **blank canvas**. It needs tiles/nodes configured before it can actually process sermons.
+The agent (`bfdf05c7-01f2-4fb9-89ae-f113d959aa8e`) needs tiles configured in the Mosaic dashboard. The code passes all tile params via `update_params` — tiles just need to exist on the canvas.
 
-**Required tiles for sermon clip generation:**
+### Required Tiles (Core Pipeline)
+| Tile | What It Does | update_params Key |
+|---|---|---|
+| Video Input | Accepts video/audio URL | (automatic from `video_urls`) |
+| Clips | Detects clip-worthy moments | `clips` |
+| Captions | Adds word-level captions | `captions` / `cinematic_captions` / `captions_with_emojis` |
+| Reframe | Multi-format output (9:16, 16:9, 1:1) | `reframe` |
+| Output | Produces final clips | (automatic) |
 
-1. **Video Input** — accepts the video URL passed via `video_urls`
-2. **Clip Detection** — identifies clip-worthy moments (Mosaic's AI)
-3. **Caption Generation** — adds captions (standard, cinematic, with-emojis)
-4. **Aspect Ratio Reframing** — produces vertical (9:16), landscape (16:9), square (1:1) outputs
-5. **Audio Enhancement** — silence removal, audio normalization
-6. **Output** — produces final clips as `outputs[]` in the webhook payload
+### Enhancement Tiles (Plan-Gated)
+| Tile | update_params Key | Notes |
+|---|---|---|
+| Silence Removal | `silence_removal` | Includes filler word removal toggle |
+| Audio Enhance | `audio_enhance` | No params, just enabled |
+| Color Correction | `color_correction` | 5 presets (golden_hour, filmic, vibrant, cool_tones, neutral_clean) |
+| AI Music | `ai_music` | Genre, mood, intensity, BPM, prompt |
+| AI B-Roll | `ai_broll` | Boolean toggle |
+| Motion Graphics | `motion_graphics` | Style prompt, full screen, preset |
+| Rough Cut | `rough_cut` | Prompt-guided editing with target duration |
 
-**Optional tiles (based on user plan features):**
-- B-roll insertion
-- Background music
-- Eye-contact correction
-- Color correction
-- Motion graphics
-- Branding overlay (intro/outro, watermark, logo)
+### Branding Tiles
+| Tile | update_params Key | Notes |
+|---|---|---|
+| Watermark | `watermark` | image_url, position, size_percent, opacity, margin_px |
+| Intro | `intro` | intro_video_url (from branding settings) |
+| Outro | `outro` | outro_video_url (from branding settings) |
 
-**How to set this up:**
-1. Go to the Mosaic dashboard
-2. Open agent `bfdf05c7-01f2-4fb9-89ae-f113d959aa8e`
-3. Add the tiles above in a pipeline
-4. Configure the callback URL: `https://sermon-clips.com/api/webhooks/mosaic`
-5. Test with a sample YouTube URL using the API or dashboard
+### Social Publishing Tile
+| Tile | update_params Key | Notes |
+|---|---|---|
+| Destination | `destination` | `mode: "publish"` or `"review"`, caption_prompt for AI captions |
 
-**Without canvas setup, `startSermonProcessing` will succeed (creates a run) but produce no outputs.**
+Social accounts are connected in the **Mosaic dashboard** — we redirect users there via `getMosaicSocialPortalUrl()`.
+
+### Translation/Dubbing Tile
+| Tile | update_params Key | Notes |
+|---|---|---|
+| Voice | `voice` | target_language, lip_sync, safewords, preserve_background_audio |
+
+### AI Feature Tiles (Higher Tiers)
+| Tile | update_params Key | Notes |
+|---|---|---|
+| AI Voiceover | `ai_voiceover` | voice_id, script, language |
+| AI Avatar | `ai_avatar` | avatar_id, script, voice_id |
+| AI Augment | `ai_augment` | style, effect |
+
+### Setup Instructions
+1. Open Mosaic dashboard → agent `bfdf05c7-01f2-4fb9-89ae-f113d959aa8e`
+2. Add tiles in this pipeline order: Video Input → Clips → Captions → Reframe → (enhancement tiles) → Watermark → Intro → Outro → Destination → Output
+3. Each tile reads its config from `update_params` — the code handles building the correct structure
+4. Set callback URL: `https://sermon-clips.com/api/webhooks/mosaic`
+5. Test with: `curl -X POST https://api.mosaic.so/v1/agents/bfdf05c7.../runs -H "Authorization: Bearer $MOSAIC_API_KEY" -d '{"video_urls":["https://youtube.com/watch?v=..."]}'`
+
+**Without tiles, `startSermonProcessing` creates a run but produces no outputs.**
 
 ---
 
-## 4. What Still Needs Integration
+## 4. Remaining Stubs (Need External Services — NOT Mosaic)
 
-The remaining **15 stub functions** are grouped by the external service they need:
+These functions genuinely need services Mosaic doesn't provide:
 
-### Social Publishing (Ayrshare / Buffer / Direct Platform APIs)
-| Function | Description |
+| Function | File | Service Needed |
+|---|---|---|
+| `generateSermonContent` | `lib/mosaic.ts` | OpenAI / Anthropic (summaries, blog posts, devotionals) |
+| `generateCourse` | `lib/mosaic.ts` | OpenAI / Anthropic (multi-week study courses) |
+| `generateGraphic` | `lib/mosaic.ts` | DALL-E / Replicate (quote cards, thumbnails) |
+| `getTranscript` | `lib/mosaic.ts` | Deepgram (or via TRANSCRIPT_READY webhook) |
+
+### Previously Stubbed → Now Mosaic-Native
+These were stubs that are **now handled via Mosaic tiles**:
+
+| Old Stub | Replaced By |
 |---|---|
-| `connectSocialAccount` | OAuth flow to connect TikTok, Instagram, YouTube, etc. |
-| `disconnectSocialAccount` | Revoke platform connection |
-| `publishClip` | Post a clip to a platform (optionally scheduled) |
-
-### AI Content Generation (OpenAI / Anthropic)
-| Function | Description |
-|---|---|
-| `generateCaption` | Currently returns a placeholder template |
-| `generateSermonContent` | Summaries, blog posts, discussion guides, etc. |
-| `generateCourse` | Multi-week study course from sermon series |
-
-### Transcription (Deepgram / AssemblyAI)
-| Function | Description |
-|---|---|
-| `getTranscript` | Speaker-diarized transcript with timestamps |
-
-### Graphics (DALL-E / Replicate)
-| Function | Description |
-|---|---|
-| `generateGraphic` | Quote cards, thumbnails, carousels |
-
-### Advanced Mosaic (depends on canvas tile capabilities)
-| Function | Description |
-|---|---|
-| `createClipFromTimestamps` | Manual clip extraction from specific time range |
-| `createMontage` | Combine multiple clips with transitions |
-| `detectClipMoments` | AI-powered clip suggestion |
-| `generateViralShorts` | Auto-generate hook-optimized short clips |
-
-### Translation (Deepgram / ElevenLabs)
-| Function | Description |
-|---|---|
-| `translateCaptions` | Translate captions to target language |
-| `generateVoiceover` | AI voiceover in different languages |
+| `connectSocialAccount` / `disconnectSocialAccount` | Mosaic Destination tile + portal redirect |
+| `publishClip` | Destination tile's `mode: "publish"` in update_params |
+| `generateCaption` | Destination tile's `caption_prompt` |
+| `translateCaptions` | Voice tile's `target_language` |
+| `generateVoiceover` | Voice tile / AI Voiceover tile |
+| `detectClipMoments` | Clips tile with `prompt` param |
+| `generateViralShorts` | Clips tile with `prompt: "hook-optimized viral shorts"` |
 
 ---
 
-## 5. Webhook Events
+## 5. Tile Parameter Mapping Reference
 
-### Live (Mosaic API)
-| Event | Trigger | What We Do |
-|---|---|---|
-| `RUN_STARTED` | Agent run begins | Set sermon status → `PROCESSING`, progress → 5% |
-| `RUN_PROGRESS` | Node completes in pipeline | Calculate progress from `node_status_counts` |
-| `RUN_FINISHED` | All nodes complete | Create Clip records from `outputs[]`, set status → `COMPLETED` |
+The complete mapping lives in `lib/mosaic-params.ts`. Here's the reference:
 
-### Ready for Future Services
-| Event | Service Needed | What It Will Do |
+| Our Field | Mosaic Tile | Tile Param |
 |---|---|---|
-| `TRANSCRIPT_READY` | Deepgram | Store transcript JSON on sermon |
-| `CONTENT_GENERATED` | OpenAI/Anthropic | Update ContentPiece record |
-| `GRAPHIC_GENERATED` | DALL-E/Replicate | Update Graphic record with image URL |
-| `MONTAGE_FINISHED` | Mosaic advanced | Update Montage record with video URL |
-| `SUGGESTIONS_READY` | Mosaic advanced | Create SuggestedClip records |
+| `clipCount` | Clips | `number_of_clips` |
+| `clipDuration` (short→25s, medium→45s, long→75s) | Clips | `duration_seconds` |
+| `clipDurationSeconds` (fine-tune slider) | Clips | `duration_seconds` |
+| `clipPrompt` | Clips | `prompt` |
+| `captionStyle` (standard/cinematic/with-emojis) | Captions variants | tile name selection |
+| `captionConfig.style` | Captions | `style` |
+| `captionConfig.baseColor/highlightColor/strokeColor` | Captions | `base_color`, `highlight_color`, `stroke_color` |
+| `captionConfig.fontFamily/fontWeight/fontSize` | Captions | `font_family`, `font_weight`, `font_size` |
+| `captionConfig.verticalPosition` | Captions | `vertical_position` |
+| `captionConfig.minWords/maxWords` | Captions | `min_words`, `max_words` |
+| `outputFormats` (vertical/landscape/square) | Reframe | `aspect_ratios` (9:16/16:9/1:1) |
+| `dynamicZoom` | Reframe | `dynamic_zoom` |
+| `features.silenceRemoval` | Silence Removal | `enabled` |
+| `features.silenceRemovalFillerWords` | Silence Removal | `remove_filler_words` |
+| `features.audioEnhancement` | Audio Enhance | `enabled` |
+| `features.colorCorrection` (boolean or preset string) | Color Correction | `enabled`, `preset` |
+| `features.aiMusic.genre/mood/intensity/bpm/prompt` | AI Music | same names |
+| `features.aiBRoll` | AI B-Roll | `enabled` |
+| `features.motionGraphics.stylePrompt/fullScreen/preset` | Motion Graphics | `style_prompt`, `full_screen`, `preset` |
+| `features.roughCut.prompt/targetDurationSeconds/mood` | Rough Cut | `prompt`, `target_duration_seconds`, `mood` |
+| `features.aiVoiceover.voice/script/language` | AI Voiceover | `voice_id`, `script`, `language` |
+| `features.aiAvatar.avatarId/script/voiceId` | AI Avatar | `avatar_id`, `script`, `voice_id` |
+| `features.aiAugment.style/effect` | AI Augment | `style`, `effect` |
+| `branding.watermarkUrl` | Watermark | `image_url` |
+| `branding.watermarkPosition/Size/Opacity/Margin` | Watermark | `position`, `size_percent`, `opacity`, `margin_px` |
+| `branding.introVideoUrl` | Intro | `intro_video_url` |
+| `branding.outroVideoUrl` | Outro | `outro_video_url` |
+| `publishMode` (auto/review) | Destination | `mode` (publish/review) |
+| `captionPrompt` | Destination | `caption_prompt` |
+| `languageConfig.targetLanguages[0]` | Voice | `target_language` |
+| `languageConfig.lipSync` | Voice | `lip_sync` |
+| `languageConfig.safewords` | Voice | `safewords` |
+| `languageConfig.preserveBackgroundAudio` | Voice | `preserve_background_audio` |
 
 ---
 
@@ -191,50 +264,55 @@ The remaining **15 stub functions** are grouped by the external service they nee
 curl -H "Authorization: Bearer $MOSAIC_API_KEY" https://api.mosaic.so/v1/whoami
 ```
 
-### Test Upload Flow
-1. Create a sermon with `sourceType: "upload"` via the UI
-2. The upload form will:
-   - `POST /api/upload/start` → get signed URL
-   - Upload file to signed URL
-   - `POST /api/upload/finalize` → triggers processing
-3. Check sermon detail page for progress updates
+### Test Full Processing Flow
+1. Create a sermon via UI with YouTube URL + all processing options
+2. API calls `startSermonProcessing` → `buildMosaicUpdateParams()` → `runAgent`
+3. Check that `update_params` includes: `clips`, `captions`, `reframe`, `silence_removal`, etc.
+4. Mosaic sends webhooks → clips appear on sermon detail page
 
-### Test YouTube Processing
-1. Create a sermon with `sourceType: "youtube"` and a YouTube URL
-2. The API route auto-calls `startSermonProcessing`
-3. Mosaic sends webhooks as the run progresses
-4. Clips appear on the sermon detail page when finished
+### Test Retry
+1. Find a FAILED sermon
+2. Click "Try Again" → hits `POST /api/sermons/[id]/retry`
+3. Verify it re-triggers with the same options + branding
 
-### Test Webhook Handler
+### Test Branding Pipeline
+1. Upload a watermark in Settings → Branding
+2. Set opacity, size, position, margin
+3. Create a sermon with "Apply my branding" checked
+4. Verify `update_params` includes `watermark`, `intro`, `outro` sections
+
+### Test Social Publishing
+1. Go to Settings → Integrations
+2. Click "Manage Social Accounts in Mosaic" → opens Mosaic portal
+3. Create a sermon with `publishMode: "auto"` and a caption prompt
+4. Verify `update_params` includes `destination: { mode: "publish", caption_prompt: "..." }`
+
+### Test Audio Upload
+1. Drop an MP3/WAV/M4A file in the upload form
+2. Verify it routes to the audio upload endpoint (`/v1/audio/upload`)
+
+### Webhook Test
 ```bash
 curl -X POST https://sermon-clips.com/api/webhooks/mosaic \
   -H "Content-Type: application/json" \
   -H "X-Mosaic-Signature: $MOSAIC_WEBHOOK_SECRET" \
-  -d '{
-    "flag": "RUN_STARTED",
-    "run_id": "test-run-id",
-    "agent_id": "bfdf05c7-01f2-4fb9-89ae-f113d959aa8e",
-    "status": "running"
-  }'
+  -d '{"flag":"RUN_STARTED","run_id":"test","agent_id":"bfdf05c7-01f2-4fb9-89ae-f113d959aa8e","status":"running"}'
 ```
-Expected: 404 (no sermon with that run_id) — but verifies signature check works.
-
-### Verify YouTube Trigger
-1. Connect a YouTube channel in Settings
-2. Check Mosaic dashboard for the registered trigger
-3. Upload a video to the connected channel
-4. Mosaic should auto-trigger a run + send webhooks
 
 ---
 
-## Key Files
+## 8. Key Files
 
 ```
-lib/mosaic-client.ts     ← Thin HTTP wrapper for Mosaic REST API
-lib/mosaic.ts            ← Business logic (6 live + 15 stubs)
-app/api/webhooks/mosaic/ ← Webhook receiver (signature verified)
-app/api/sermons/         ← Auto-triggers processing on create
-app/api/upload/start/    ← Gets signed upload URL
-app/api/upload/finalize/ ← Finalizes upload + starts processing
-app/api/integrations/youtube/connect/ ← Registers YouTube trigger
+lib/mosaic-params.ts          ← NEW — update_params mapper (ProcessingOptions → tile params)
+lib/mosaic-client.ts          ← Thin HTTP client (15 endpoints)
+lib/mosaic.ts                 ← Business logic (8 live functions + 4 external-service stubs)
+app/api/webhooks/mosaic/      ← Webhook receiver (signature verified)
+app/api/sermons/              ← Auto-triggers processing on create
+app/api/sermons/[id]/retry/   ← Re-triggers processing (was TODO, now wired)
+app/api/upload/start/         ← Gets signed upload URL (video + audio)
+app/api/upload/finalize/      ← Finalizes upload + starts processing
+app/api/social/connect/       ← Returns Mosaic portal redirect URL
+app/api/settings/branding/upload/ ← Upload branding assets via Mosaic API
+types/index.ts                ← All types (ProcessingOptions, CaptionConfig, AiMusicConfig, etc.)
 ```
