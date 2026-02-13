@@ -20,6 +20,7 @@ import { GraphicsSection } from "@/components/dashboard/graphics-section";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { formatDate, formatDurationLong } from "@/lib/utils";
 import { ArrowLeft, Download, Youtube, Upload, Trash2 } from "lucide-react";
+import { usePostHog } from "posthog-js/react";
 import type { SermonWithClips } from "@/types";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
@@ -35,6 +36,7 @@ const statusConfig = {
 export default function SermonDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
+  const posthog = usePostHog();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -57,6 +59,7 @@ export default function SermonDetailPage({ params }: { params: Promise<{ id: str
         window.open(`/api/clips/${clip.id}/download`, "_blank");
       }
     }
+    posthog.capture("clips_downloaded", { clip_count: sermon.clips.length, sermon_id: id });
     toast.success(`Downloading ${sermon.clips.length} clips`);
   };
 
@@ -65,6 +68,7 @@ export default function SermonDetailPage({ params }: { params: Promise<{ id: str
     try {
       const res = await fetch(`/api/sermons/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Delete failed");
+      posthog.capture("sermon_deleted", { sermon_id: id });
       toast.success("Sermon deleted");
       router.push("/dashboard");
     } catch (error) {
@@ -79,6 +83,7 @@ export default function SermonDetailPage({ params }: { params: Promise<{ id: str
     try {
       const res = await fetch(`/api/sermons/${id}/retry`, { method: "POST" });
       if (!res.ok) throw new Error("Retry failed");
+      posthog.capture("sermon_retried", { sermon_id: id });
       toast.success("Re-processing queued!");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Retry failed");

@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Upload, Loader2 } from "lucide-react";
+import { usePostHog } from "posthog-js/react";
 import type { BrandingConfig, WatermarkPosition } from "@/types";
 
 const WATERMARK_POSITIONS: { value: WatermarkPosition; label: string }[] = [
@@ -19,6 +20,7 @@ interface BrandingSettingsProps {
 }
 
 export function BrandingSettings({ initialConfig }: BrandingSettingsProps) {
+  const posthog = usePostHog();
   const [config, setConfig] = useState<BrandingConfig>(initialConfig ?? {});
   const [saving, setSaving] = useState(false);
 
@@ -35,6 +37,7 @@ export function BrandingSettings({ initialConfig }: BrandingSettingsProps) {
         body: JSON.stringify(config),
       });
       if (!res.ok) throw new Error("Failed to save branding settings");
+      posthog.capture("branding_saved", { has_logo: !!config.logoUrl, has_watermark: !!config.watermarkUrl });
       toast.success("Branding settings saved!");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Something went wrong");

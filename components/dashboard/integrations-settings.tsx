@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Youtube, Loader2, Unplug, ExternalLink } from "lucide-react";
 import { ProcessingOptionsPanel, DEFAULT_PROCESSING_OPTIONS } from "@/components/dashboard/processing-options";
+import { usePostHog } from "posthog-js/react";
 import type { YouTubeChannelConfig, SocialPlatform, ProcessingOptions, PublishMode } from "@/types";
 
 const SOCIAL_PLATFORMS: { platform: SocialPlatform; label: string; color: string }[] = [
@@ -39,6 +40,7 @@ export function IntegrationsSettings({ initialYoutubeConfig }: IntegrationsSetti
   const [connecting, setConnecting] = useState(false);
   const [savingYt, setSavingYt] = useState(false);
 
+  const posthog = usePostHog();
   const [socialAccounts, setSocialAccounts] = useState<ConnectedAccount[]>([]);
   const [connectingPlatform, setConnectingPlatform] = useState<SocialPlatform | null>(null);
 
@@ -63,6 +65,7 @@ export function IntegrationsSettings({ initialYoutubeConfig }: IntegrationsSetti
       if (!res.ok) throw new Error("Failed to connect channel");
       const { data } = await res.json();
       setYtConfig(data);
+      posthog.capture("youtube_channel_connected", { channel_name: data.channelName });
       toast.success("YouTube channel connected!");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Connection failed");
@@ -111,6 +114,7 @@ export function IntegrationsSettings({ initialYoutubeConfig }: IntegrationsSetti
         const filtered = prev.filter((a) => a.platform !== platform);
         return [...filtered, { platform, accountName: data.accountName, connected: true }];
       });
+      posthog.capture("social_account_connected", { platform });
       toast.success(`${platform} connected!`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Connection failed — OAuth integration pending");
@@ -124,6 +128,7 @@ export function IntegrationsSettings({ initialYoutubeConfig }: IntegrationsSetti
       const res = await fetch(`/api/social/${platform}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Disconnect failed");
       setSocialAccounts((prev) => prev.filter((a) => a.platform !== platform));
+      posthog.capture("social_account_disconnected", { platform });
       toast.success(`${platform} disconnected`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Disconnect failed");

@@ -8,12 +8,14 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ProcessingOptionsPanel, DEFAULT_PROCESSING_OPTIONS } from "@/components/dashboard/processing-options";
 import { Youtube, Upload, FileVideo, ArrowRight, Loader2, Link as LinkIcon } from "lucide-react";
+import { usePostHog } from "posthog-js/react";
 import { TemplateSelector } from "@/components/dashboard/template-selector";
 import { SeriesSelector } from "@/components/dashboard/series-selector";
 import type { ProcessingOptions, PublishMode } from "@/types";
 
 export function UploadForm() {
   const router = useRouter();
+  const posthog = usePostHog();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // YouTube tab state
@@ -57,6 +59,7 @@ export function UploadForm() {
       }
 
       const { data } = await res.json();
+      posthog.capture("sermon_created", { source_type: sourceType, has_processing_options: !!processingOptions, publish_mode: publishMode });
       toast.success("Sermon submitted! Processing will begin shortly.");
       router.push(`/dashboard/sermons/${data.id}`);
     } catch (error) {
@@ -146,6 +149,7 @@ export function UploadForm() {
         throw new Error("Failed to finalize upload");
       }
 
+      posthog.capture("sermon_created", { source_type: "upload", file_size_mb: +(file.size / (1024 * 1024)).toFixed(1), publish_mode: publishMode });
       toast.success("Video uploaded! Processing has started.");
       router.push(`/dashboard/sermons/${data.id}`);
     } catch (error) {

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatDuration } from "@/lib/utils";
 import { Send, Sparkles, Loader2, Play, Clock } from "lucide-react";
+import { usePostHog } from "posthog-js/react";
 import type { Clip, SocialPlatform, PublicationStatus } from "@/types";
 
 const PLATFORMS: { platform: SocialPlatform; label: string }[] = [
@@ -35,6 +36,7 @@ interface ClipPublishCardProps {
 }
 
 export function ClipPublishCard({ clip, index, sermonTitle, connectedPlatforms, status }: ClipPublishCardProps) {
+  const posthog = usePostHog();
   const [selectedPlatforms, setSelectedPlatforms] = useState<SocialPlatform[]>([]);
   const [caption, setCaption] = useState("");
   const [scheduleType, setScheduleType] = useState<"now" | "scheduled">("now");
@@ -84,6 +86,7 @@ export function ClipPublishCard({ clip, index, sermonTitle, connectedPlatforms, 
         }),
       });
       if (!res.ok) throw new Error("Publishing failed");
+      posthog.capture("clip_published", { platforms: selectedPlatforms, scheduled: scheduleType === "scheduled", clip_id: clip.id });
       toast.success(scheduleType === "scheduled" ? "Clip scheduled!" : "Publishing clip...");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Publish failed — integration pending");

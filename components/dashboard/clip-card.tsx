@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatDuration } from "@/lib/utils";
 import { Download, Play, Smartphone, Monitor, Square } from "lucide-react";
+import { usePostHog } from "posthog-js/react";
 import type { Clip } from "@/types";
 
 const formatIcons: Record<string, React.ElementType> = {
@@ -18,10 +19,12 @@ interface ClipCardProps {
 }
 
 export function ClipCard({ clip, index }: ClipCardProps) {
+  const posthog = usePostHog();
   const FormatIcon = clip.format ? formatIcons[clip.format] ?? Square : Square;
 
   const handleDownload = async () => {
     if (clip.videoUrl) {
+      posthog.capture("clip_downloaded", { clip_id: clip.id, format: clip.format });
       window.open(`/api/clips/${clip.id}/download`, "_blank");
     }
   };
