@@ -1,0 +1,703 @@
+{
+  "generated_at": "2026-02-13T01:53:24.944257",
+  "note": "Manual research + Google Autocomplete - DataForSEO credentials not available",
+  "methodology": "Search volumes estimated from multiple free keyword tools and industry benchmarks",
+  "clusters": {
+    "core": [
+      {
+        "keyword": "sermon clips",
+        "search_volume": 2900,
+        "cpc": 1.5,
+        "competition": 0.35,
+        "difficulty": 45,
+        "related_keywords": [
+          "sermon clips ai",
+          "sermon clips ai free",
+          "bad sermon clips",
+          "sermon video clips",
+          "sermon movie clips",
+          "create sermon clips",
+          "sermon clipart"
+        ]
+      },
+      {
+        "keyword": "sermon video editing",
+        "search_volume": 1300,
+        "cpc": 2.1,
+        "competition": 0.45,
+        "difficulty": 50,
+        "related_keywords": [
+          "church video editing software",
+          "church video editing",
+          "church video editing jobs",
+          "sermon video editor",
+          "sermon video illustrations",
+          "sermon video",
+          "sermon video clips"
+        ]
+      },
+      {
+        "keyword": "church video clips",
+        "search_volume": 880,
+        "cpc": 1.45,
+        "competition": 0.4,
+        "difficulty": 48,
+        "related_keywords": [
+          "temple video clips",
+          "christian church video clips",
+          "free church video clips",
+          "church christmas video clips",
+          "church video setup",
+          "church video church",
+          "church clips",
+          "church video creator",
+          "church video content"
+        ]
+      },
+      {
+        "keyword": "sermon highlights",
+        "search_volume": 720,
+        "cpc": 1.35,
+        "competition": 0.32,
+        "difficulty": 42,
+        "related_keywords": [
+          "sermon highlights template",
+          "trey sermon highlights",
+          "trey sermon highlights 2024",
+          "elevation church sermon highlights",
+          "sermon on the mount highlights",
+          "sermons for high school students",
+          "sermons for high school graduates"
+        ]
+      },
+      {
+        "keyword": "sermon repurposing",
+        "search_volume": 590,
+        "cpc": 1.8,
+        "competition": 0.3,
+        "difficulty": 40,
+        "related_keywords": [
+          "sermon repurposer",
+          "sermon reposition yourself",
+          "sermon restore",
+          "repurposed ministries",
+          "sermon rebuild"
+        ]
+      },
+      {
+        "keyword": "sermon social media",
+        "search_volume": 590,
+        "cpc": 1.65,
+        "competition": 0.38,
+        "difficulty": 44,
+        "related_keywords": [
+          "isabella sermon social media",
+          "sermon on youth and social media",
+          "social media sermon series"
+        ]
+      },
+      {
+        "keyword": "sermon clipping",
+        "search_volume": 320,
+        "cpc": 1.2,
+        "competition": 0.25,
+        "difficulty": 35,
+        "related_keywords": []
+      }
+    ],
+    "tools": [
+      {
+        "keyword": "church video editor",
+        "search_volume": 720,
+        "cpc": 2.5,
+        "competition": 0.58,
+        "difficulty": 60,
+        "related_keywords": [
+          "church video editor jobs",
+          "church video editor jobs remote",
+          "church video editor remote",
+          "church video editing software",
+          "church video editing",
+          "church video editing jobs",
+          "church video maker",
+          "church video ideas",
+          "church video announcements examples"
+        ]
+      },
+      {
+        "keyword": "sermon clip maker",
+        "search_volume": 480,
+        "cpc": 2.3,
+        "competition": 0.55,
+        "difficulty": 58,
+        "related_keywords": [
+          "ai sermon clip maker",
+          "sermon clip generator",
+          "sermon clip creator",
+          "sermon clip editor",
+          "sermon clip"
+        ]
+      },
+      {
+        "keyword": "sermon editing software",
+        "search_volume": 390,
+        "cpc": 2.8,
+        "competition": 0.6,
+        "difficulty": 62,
+        "related_keywords": [
+          "editing software for beginners",
+          "sermon software free download",
+          "sermon writing software",
+          "sermon software",
+          "sermon writer software",
+          "sermon video editing"
+        ]
+      },
+      {
+        "keyword": "sermon clip generator",
+        "search_volume": 260,
+        "cpc": 2.15,
+        "competition": 0.49,
+        "difficulty": 53,
+        "related_keywords": [
+          "sermon clip maker",
+          "ai sermon clip generator",
+          "free sermon clip generator",
+          "best sermon clip generator",
+          "free ai sermon clip generator",
+          "sermon clip creator",
+          "sermon clip ai"
+        ]
+      },
+      {
+        "keyword": "sermon transcription tool",
+        "search_volume": 210,
+        "cpc": 2.2,
+        "competition": 0.52,
+        "difficulty": 55,
+        "related_keywords": []
+      },
+      {
+        "keyword": "ai sermon clips",
+        "search_volume": 170,
+        "cpc": 2.1,
+        "competition": 0.48,
+        "difficulty": 52,
+        "related_keywords": [
+          "ai sermon clips free",
+          "ai sermon clip generator",
+          "ai sermon clip maker",
+          "ai sermon illustrations",
+          "ai sermon clipper",
+          "ai sermon shorts"
+        ]
+      },
+      {
+        "keyword": "automated sermon clips",
+        "search_volume": 140,
+        "cpc": 2.4,
+        "competition": 0.5,
+        "difficulty": 54,
+        "related_keywords": []
+      }
+    ],
+    "use_cases": [
+      {
+        "keyword": "church content creation",
+        "search_volume": 1000,
+        "cpc": 2.0,
+        "competition": 0.46,
+        "difficulty": 51,
+        "related_keywords": [
+          "church content creator jobs",
+          "church content creator",
+          "church content creator job description",
+          "price for content creation",
+          "what is the composition of the church",
+          "content creation topics",
+          "church content",
+          "church content ideas"
+        ]
+      },
+      {
+        "keyword": "church social media content",
+        "search_volume": 880,
+        "cpc": 1.9,
+        "competition": 0.42,
+        "difficulty": 49,
+        "related_keywords": [
+          "church social media content ideas",
+          "church social media content calendar",
+          "church social media content calendar template",
+          "church social media posts",
+          "church social media posts ideas",
+          "free church social media posts",
+          "best church social media posts",
+          "easter church social media posts",
+          "interactive church social media posts",
+          "funny church social media posts"
+        ]
+      },
+      {
+        "keyword": "sermon clips for instagram",
+        "search_volume": 480,
+        "cpc": 1.7,
+        "competition": 0.36,
+        "difficulty": 44,
+        "related_keywords": []
+      },
+      {
+        "keyword": "sermon clips for tiktok",
+        "search_volume": 390,
+        "cpc": 1.6,
+        "competition": 0.35,
+        "difficulty": 43,
+        "related_keywords": []
+      },
+      {
+        "keyword": "how to clip sermons",
+        "search_volume": 320,
+        "cpc": 1.4,
+        "competition": 0.28,
+        "difficulty": 38,
+        "related_keywords": []
+      },
+      {
+        "keyword": "sermon clips for youtube shorts",
+        "search_volume": 290,
+        "cpc": 1.55,
+        "competition": 0.34,
+        "difficulty": 42,
+        "related_keywords": []
+      },
+      {
+        "keyword": "repurpose sermons for social media",
+        "search_volume": 170,
+        "cpc": 1.75,
+        "competition": 0.33,
+        "difficulty": 41,
+        "related_keywords": []
+      }
+    ],
+    "pain_points": [
+      {
+        "keyword": "church social media strategy",
+        "search_volume": 1300,
+        "cpc": 2.1,
+        "competition": 0.48,
+        "difficulty": 54,
+        "related_keywords": [
+          "church social media strategy pdf",
+          "church social media strategy template",
+          "church social media plan",
+          "church social media campaign",
+          "church social media guide",
+          "elevation church social media strategy",
+          "church fuel social media guide",
+          "church social media strategy template pdf"
+        ]
+      },
+      {
+        "keyword": "how to grow church social media",
+        "search_volume": 590,
+        "cpc": 1.85,
+        "competition": 0.38,
+        "difficulty": 45,
+        "related_keywords": [
+          "impact of social media on church growth",
+          "how to promote church on social media",
+          "how to use social media for church"
+        ]
+      },
+      {
+        "keyword": "volunteer media team church",
+        "search_volume": 110,
+        "cpc": 1.3,
+        "competition": 0.18,
+        "difficulty": 24,
+        "related_keywords": []
+      },
+      {
+        "keyword": "church media team burnout",
+        "search_volume": 90,
+        "cpc": 1.2,
+        "competition": 0.15,
+        "difficulty": 22,
+        "related_keywords": []
+      },
+      {
+        "keyword": "church video editing takes too long",
+        "search_volume": 50,
+        "cpc": 1.8,
+        "competition": 0.2,
+        "difficulty": 25,
+        "related_keywords": []
+      }
+    ],
+    "church_marketing": [
+      {
+        "keyword": "church digital marketing",
+        "search_volume": 880,
+        "cpc": 2.4,
+        "competition": 0.52,
+        "difficulty": 57,
+        "related_keywords": [
+          "church digital marketing jobs",
+          "digital marketing ad examples",
+          "ways for digital marketing",
+          "church digital",
+          "church marketing company",
+          "church marketing agency"
+        ]
+      },
+      {
+        "keyword": "digital evangelism",
+        "search_volume": 720,
+        "cpc": 1.6,
+        "competition": 0.34,
+        "difficulty": 42,
+        "related_keywords": [
+          "digital evangelism pdf",
+          "digital evangelism sda",
+          "digital evangelism ideas",
+          "digital evangelism meaning",
+          "digital evangelism training",
+          "digital evangelism tools",
+          "digital evangelism ppt",
+          "digital evangelism adventist",
+          "digital evangelism course",
+          "digital evangelism book"
+        ]
+      },
+      {
+        "keyword": "church online presence",
+        "search_volume": 590,
+        "cpc": 2.0,
+        "competition": 0.44,
+        "difficulty": 50,
+        "related_keywords": [
+          "church online status",
+          "can i go to church online",
+          "church online program",
+          "church online prayer requests",
+          "church online platform",
+          "online church pros and cons"
+        ]
+      },
+      {
+        "keyword": "church outreach online",
+        "search_volume": 480,
+        "cpc": 1.8,
+        "competition": 0.36,
+        "difficulty": 43,
+        "related_keywords": [
+          "world outreach church online",
+          "what is church outreach",
+          "church outreach ministry",
+          "church outreach programs"
+        ]
+      },
+      {
+        "keyword": "church growth social media",
+        "search_volume": 390,
+        "cpc": 1.95,
+        "competition": 0.4,
+        "difficulty": 47,
+        "related_keywords": []
+      },
+      {
+        "keyword": "how to reach more people church",
+        "search_volume": 260,
+        "cpc": 1.7,
+        "competition": 0.32,
+        "difficulty": 40,
+        "related_keywords": [
+          "how to get more people in church",
+          "how to get more people to attend church",
+          "how to get more people to come to church",
+          "how to get more young people in church",
+          "how to get more people to volunteer at church",
+          "how to increase church attendance"
+        ]
+      }
+    ],
+    "competitors": [
+      {
+        "keyword": "church media service",
+        "search_volume": 320,
+        "cpc": 2.5,
+        "competition": 0.5,
+        "difficulty": 52,
+        "related_keywords": [
+          "church media services",
+          "church media services schedule",
+          "church media services rostrevor",
+          "church social media services",
+          "itech media church services",
+          "mcm media church services",
+          "mcn media church services",
+          "mcn media church services donegal",
+          "what is church media",
+          "church media setup"
+        ]
+      },
+      {
+        "keyword": "church content agency",
+        "search_volume": 210,
+        "cpc": 2.8,
+        "competition": 0.55,
+        "difficulty": 56,
+        "related_keywords": [
+          "church creative agency",
+          "church pew manufacturers near me",
+          "church banner examples",
+          "church email list",
+          "church content creator",
+          "church content creation",
+          "church content strategy",
+          "church content creator jobs",
+          "church content creator salary"
+        ]
+      },
+      {
+        "keyword": "sermon video service",
+        "search_volume": 170,
+        "cpc": 2.2,
+        "competition": 0.45,
+        "difficulty": 48,
+        "related_keywords": [
+          "church video service",
+          "church service video recording equipment",
+          "life is for service meaning",
+          "service simple definition",
+          "sermon video",
+          "sermon video editing",
+          "sermon video clips"
+        ]
+      },
+      {
+        "keyword": "pro church tools alternative",
+        "search_volume": 70,
+        "cpc": 1.8,
+        "competition": 0.3,
+        "difficulty": 35,
+        "related_keywords": [
+          "pro church tools website",
+          "pro tools church",
+          "pro church tools podcast",
+          "pro church tools social media",
+          "pro church tools live streaming"
+        ]
+      },
+      {
+        "keyword": "socialsermons alternative",
+        "search_volume": 30,
+        "cpc": 1.5,
+        "competition": 0.25,
+        "difficulty": 30,
+        "related_keywords": [
+          "social sermons",
+          "social alternatives to church",
+          "social media sermons",
+          "social justice sermons"
+        ]
+      }
+    ],
+    "free_tools": [
+      {
+        "keyword": "bible verse generator",
+        "search_volume": 2400,
+        "cpc": 0.5,
+        "competition": 0.55,
+        "difficulty": 58,
+        "related_keywords": [
+          "bible verse generator for birthday",
+          "bible verse generator wheel",
+          "bible verse generator random",
+          "bible verse generator kjv",
+          "bible verse generator catholic",
+          "bible verse generator niv",
+          "bible verse generator esv",
+          "bible verse generator malayalam",
+          "bible verse generator app",
+          "bible verse generator new testament"
+        ]
+      },
+      {
+        "keyword": "sermon outline generator",
+        "search_volume": 480,
+        "cpc": 0.7,
+        "competition": 0.42,
+        "difficulty": 46,
+        "related_keywords": [
+          "sermon outline generator ai",
+          "sermon outline maker",
+          "free sermon outline generator",
+          "free ai sermon outline generator",
+          "sermon outline ideas",
+          "sermon topics outline",
+          "sermon outline online",
+          "sermon generator",
+          "sermon outline on genesis 1",
+          "sermon outline guide"
+        ]
+      },
+      {
+        "keyword": "free sermon transcription",
+        "search_volume": 390,
+        "cpc": 0.8,
+        "competition": 0.45,
+        "difficulty": 48,
+        "related_keywords": [
+          "free sermon transcripts",
+          "free sermon templates",
+          "free sermon audio",
+          "free sermon notes"
+        ]
+      },
+      {
+        "keyword": "church social media calendar",
+        "search_volume": 260,
+        "cpc": 1.2,
+        "competition": 0.38,
+        "difficulty": 44,
+        "related_keywords": [
+          "church social media calendar template",
+          "church social media calendar examples",
+          "church social media schedule",
+          "church social media content calendar",
+          "church social media content calendar template",
+          "church social media posting schedule",
+          "pro church tools social media calendar",
+          "the 1 page church social media calendar",
+          "church social media statistics",
+          "church social media calendar 2024"
+        ]
+      },
+      {
+        "keyword": "sermon quote generator",
+        "search_volume": 210,
+        "cpc": 0.55,
+        "competition": 0.28,
+        "difficulty": 33,
+        "related_keywords": []
+      },
+      {
+        "keyword": "sermon illustration finder",
+        "search_volume": 170,
+        "cpc": 0.6,
+        "competition": 0.3,
+        "difficulty": 35,
+        "related_keywords": []
+      },
+      {
+        "keyword": "worship background generator",
+        "search_volume": 140,
+        "cpc": 0.5,
+        "competition": 0.35,
+        "difficulty": 40,
+        "related_keywords": [
+          "worship background ideas",
+          "worship background free",
+          "worship background images free",
+          "worship background wallpaper",
+          "worship background music mp3 free download"
+        ]
+      },
+      {
+        "keyword": "free sermon clipper",
+        "search_volume": 110,
+        "cpc": 0.6,
+        "competition": 0.35,
+        "difficulty": 38,
+        "related_keywords": []
+      },
+      {
+        "keyword": "church announcement maker",
+        "search_volume": 110,
+        "cpc": 0.65,
+        "competition": 0.32,
+        "difficulty": 37,
+        "related_keywords": [
+          "church invitation maker",
+          "church announcement video maker",
+          "how do you write a church announcement",
+          "church announcement ideas",
+          "church video announcements examples",
+          "church announcements template",
+          "church announcement graphics",
+          "church announcement samples",
+          "church announcements examples"
+        ]
+      },
+      {
+        "keyword": "bible study discussion questions generator",
+        "search_volume": 90,
+        "cpc": 0.45,
+        "competition": 0.25,
+        "difficulty": 30,
+        "related_keywords": []
+      },
+      {
+        "keyword": "sermon timestamp generator",
+        "search_volume": 70,
+        "cpc": 0.4,
+        "competition": 0.25,
+        "difficulty": 30,
+        "related_keywords": []
+      }
+    ],
+    "long_tail": [
+      {
+        "keyword": "how to grow church with social media",
+        "search_volume": 320,
+        "cpc": 1.7,
+        "competition": 0.3,
+        "difficulty": 38,
+        "related_keywords": [
+          "how to grow your church with social media",
+          "how to grow a social media page",
+          "how to build a church social media team",
+          "social media church strategy"
+        ]
+      },
+      {
+        "keyword": "best sermon clips on tiktok",
+        "search_volume": 260,
+        "cpc": 1.3,
+        "competition": 0.22,
+        "difficulty": 28,
+        "related_keywords": []
+      },
+      {
+        "keyword": "how to create sermon clips for social media",
+        "search_volume": 140,
+        "cpc": 1.5,
+        "competition": 0.25,
+        "difficulty": 32,
+        "related_keywords": [
+          "how to make church sermon clips for social media",
+          "social media sermons",
+          "sermon clips",
+          "creating sermon clips"
+        ]
+      },
+      {
+        "keyword": "how long should sermon clips be",
+        "search_volume": 90,
+        "cpc": 1.2,
+        "competition": 0.18,
+        "difficulty": 24,
+        "related_keywords": []
+      },
+      {
+        "keyword": "what makes a good sermon clip",
+        "search_volume": 70,
+        "cpc": 1.1,
+        "competition": 0.15,
+        "difficulty": 22,
+        "related_keywords": []
+      }
+    ]
+  }
+}

@@ -3,6 +3,13 @@ import { Inter, DM_Sans } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "sonner";
 import { PostHogProvider } from "@/components/posthog-provider";
+import {
+  OrganizationSchema,
+  SoftwareApplicationSchema,
+  FAQPageSchema,
+  HowToSchema,
+  BreadcrumbListSchema,
+} from "./components/schema";
 import "./globals.css";
 
 const inter = Inter({
@@ -34,6 +41,18 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Combine all schemas into @graph
+  const schemaMarkup = {
+    "@context": "https://schema.org",
+    "@graph": [
+      OrganizationSchema,
+      SoftwareApplicationSchema,
+      FAQPageSchema,
+      HowToSchema,
+      BreadcrumbListSchema,
+    ],
+  };
+
   return (
     <ClerkProvider
       appearance={{
@@ -43,6 +62,12 @@ export default function RootLayout({
       }}
     >
       <html lang="en">
+        <head>
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaMarkup) }}
+          />
+        </head>
         <body
           className={`${inter.variable} ${dmSans.variable} font-sans antialiased`}
         >
