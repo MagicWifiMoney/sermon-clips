@@ -1,0 +1,278 @@
+---
+title: "Uploads"
+description: "Upload media assets for use in update_params"
+---
+
+## Why You Need This
+
+Some agent nodes accept images, audio, or videos as parameters. Use these endpoints to upload files and get UUIDs that you can pass to `update_params` when running agents.
+
+---
+
+## Upload Flow
+
+```
+POST /uploads/{type}/get_upload_url   →   POST file to upload_url   →   POST /uploads/{type}/finalize_upload
+```
+
+1. Call `get_upload_url` to get a signed URL and the asset UUID
+2. POST your file to that URL (include `upload_fields` as form data)
+3. Call `finalize_upload` to confirm the upload
+
+Use the returned UUID in `update_params`:
+
+```json
+{
+  "update_params": {
+    "NODE_ID": {
+      "audio_id": "your-uploaded-uuid"
+    }
+  }
+}
+```
+
+---
+
+## Video
+
+**Limits:** 5 GB, 1 hour duration
+
+### Get Upload URL
+
+```bash
+curl -X POST "https://api.mosaic.so/uploads/video/get_upload_url" \
+  -H "Authorization: Bearer mk_your_api_key"
+```
+
+```json
+{
+  "video_id": "7f8d9c2b-4a6e-8b3f-1d5c-9e2f3a4b5c6d",
+  "upload_url": "https://storage.googleapis.com/...",
+  "upload_fields": { "key": "...", "policy": "...", "x-goog-signature": "..." },
+  "max_file_size_bytes": 5368709120
+}
+```
+
+### Upload File
+
+POST as form-data. **Fields first, then file:**
+
+<CodeGroup>
+```python Python
+import requests
+
+resp = requests.post(
+    "https://api.mosaic.so/uploads/video/get_upload_url",
+    headers={"Authorization": "Bearer mk_your_api_key"}
+)
+data = resp.json()
+
+with open("video.mp4", "rb") as f:
+    requests.post(data["upload_url"], data=data["upload_fields"], files={"file": f})
+```
+
+```javascript JavaScript
+const { video_id, upload_url, upload_fields } = await fetch(
+  "https://api.mosaic.so/uploads/video/get_upload_url",
+  { method: "POST", headers: { "Authorization": "Bearer mk_your_api_key" } }
+).then(r => r.json());
+
+const formData = new FormData();
+Object.entries(upload_fields).forEach(([k, v]) => formData.append(k, v));
+formData.append("file", file);
+await fetch(upload_url, { method: "POST", body: formData });
+```
+</CodeGroup>
+
+### Finalize
+
+```bash
+curl -X POST "https://api.mosaic.so/uploads/video/finalize_upload" \
+  -H "Authorization: Bearer mk_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{"video_id": "7f8d9c2b-4a6e-8b3f-1d5c-9e2f3a4b5c6d"}'
+```
+
+```json
+{
+  "video_id": "7f8d9c2b-4a6e-8b3f-1d5c-9e2f3a4b5c6d"
+}
+```
+
+Use `video_id` in `update_params`.
+
+---
+
+## Audio
+
+**Limits:** 100 MB, 1 hour duration
+
+### Get Upload URL
+
+```bash
+curl -X POST "https://api.mosaic.so/uploads/audio/get_upload_url" \
+  -H "Authorization: Bearer mk_your_api_key"
+```
+
+```json
+{
+  "audio_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "upload_url": "https://storage.googleapis.com/...",
+  "upload_fields": { ... },
+  "max_file_size_bytes": 104857600
+}
+```
+
+### Finalize
+
+```bash
+curl -X POST "https://api.mosaic.so/uploads/audio/finalize_upload" \
+  -H "Authorization: Bearer mk_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{"audio_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"}'
+```
+
+```json
+{
+  "audio_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+}
+```
+
+Use `audio_id` in `update_params`.
+
+---
+
+## Image
+
+**Limits:** 50 MB
+
+### Get Upload URL
+
+```bash
+curl -X POST "https://api.mosaic.so/uploads/image/get_upload_url" \
+  -H "Authorization: Bearer mk_your_api_key"
+```
+
+```json
+{
+  "image_id": "img-1234-5678-90ab-cdef",
+  "upload_url": "https://storage.googleapis.com/...",
+  "upload_fields": { ... },
+  "max_file_size_bytes": 52428800
+}
+```
+
+### Finalize
+
+```bash
+curl -X POST "https://api.mosaic.so/uploads/image/finalize_upload" \
+  -H "Authorization: Bearer mk_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{"image_id": "img-1234-5678-90ab-cdef"}'
+```
+
+```json
+{
+  "image_id": "img-1234-5678-90ab-cdef"
+}
+```
+
+Use `image_id` in `update_params`.
+
+---
+
+## Full Example
+
+Upload audio and use it in `update_params`:
+
+<CodeGroup>
+```python Python
+import requests
+
+API_KEY = "mk_your_api_key"
+BASE = "https://api.mosaic.so"
+
+# 1. Get upload URL
+data = requests.post(f"{BASE}/uploads/audio/get_upload_url",
+    headers={"Authorization": f"Bearer {API_KEY}"}).json()
+
+# 2. Upload file
+with open("music.mp3", "rb") as f:
+    requests.post(data["upload_url"], data=data["upload_fields"], files={"file": f})
+
+# 3. Finalize
+result = requests.post(f"{BASE}/uploads/audio/finalize_upload",
+    headers={"Authorization": f"Bearer {API_KEY}"},
+    json={"audio_id": data["audio_id"]}).json()
+
+# 4. Use in update_params
+run = requests.post(f"{BASE}/agent/YOUR_AGENT_ID/run",
+    headers={"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"},
+    json={
+        "video_urls": ["https://youtube.com/watch?v=dQw4w9WgXcQ"],
+        "update_params": {
+            "AUDIO_NODE_ID": {"audio_id": result["audio_id"]}
+        }
+    }).json()
+
+print(f"Run ID: {run['run_id']}")
+```
+
+```javascript JavaScript
+const API_KEY = "mk_your_api_key";
+const BASE = "https://api.mosaic.so";
+
+// 1. Get upload URL
+const data = await fetch(`${BASE}/uploads/audio/get_upload_url`, {
+  method: "POST",
+  headers: { "Authorization": `Bearer ${API_KEY}` }
+}).then(r => r.json());
+
+// 2. Upload file
+const formData = new FormData();
+Object.entries(data.upload_fields).forEach(([k, v]) => formData.append(k, v));
+formData.append("file", audioFile);
+await fetch(data.upload_url, { method: "POST", body: formData });
+
+// 3. Finalize
+const result = await fetch(`${BASE}/uploads/audio/finalize_upload`, {
+  method: "POST",
+  headers: { "Authorization": `Bearer ${API_KEY}`, "Content-Type": "application/json" },
+  body: JSON.stringify({ audio_id: data.audio_id })
+}).then(r => r.json());
+
+// 4. Use in update_params
+const run = await fetch(`${BASE}/agent/YOUR_AGENT_ID/run`, {
+  method: "POST",
+  headers: { "Authorization": `Bearer ${API_KEY}`, "Content-Type": "application/json" },
+  body: JSON.stringify({
+    video_urls: ["https://youtube.com/watch?v=dQw4w9WgXcQ"],
+    update_params: {
+      "AUDIO_NODE_ID": { audio_id: result.audio_id }
+    }
+  })
+}).then(r => r.json());
+
+console.log(`Run ID: ${run.run_id}`);
+```
+</CodeGroup>
+
+---
+
+## Supported Formats
+
+| Type | Formats | Max Size | Max Duration |
+| --- | --- | --- | --- |
+| Video | MP4, MOV, AVI, WebM, MKV, M4V | 5 GB | 1 hour |
+| Audio | MP3, WAV, M4A, FLAC, OGG, AAC, Opus | 100 MB | 1 hour |
+| Image | PNG, JPEG, GIF, WebP, SVG | 50 MB | - |
+
+---
+
+## Errors
+
+| Error | Cause |
+| --- | --- |
+| 404 | Upload ID not found or expired |
+| 400 | File not uploaded before finalize |
+| 413 | File exceeds size limit |

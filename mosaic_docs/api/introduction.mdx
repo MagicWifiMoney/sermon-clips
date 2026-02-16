@@ -1,0 +1,91 @@
+---
+title: "API Overview"
+description: "Authentication and conventions for Mosaic's REST API."
+---
+
+## Overview
+
+Mosaic's REST API allows you to kick off video editing workflows ("Agents") entirely from code. An agent is a pre-built graph that can do anything from audio enhancement to animated captions – you supply a video and optional parameters, Mosaic returns the result.
+
+### Typical flow
+
+1.  **Run an agent** – Call `/agent/[agent_id]/run` with `video_urls` (supports YouTube URLs and signed URLs).
+2.  **Track progress** – Poll `/agent_run/[run_id]` or subscribe to a webhook.
+3.  **Download outputs** – The outputs are included in the agent run status response.
+
+Explore each endpoint category in the sections below.
+
+## Authentication
+
+Use an API key **prefixed `mk_`** for all API endpoints with the Authorization Bearer header.
+
+```bash
+curl -H "Authorization: Bearer mk_your_key" \
+     -H "Content-Type: application/json" \
+     https://api.mosaic.so/agent/[agent_id]/run
+```
+
+API keys can be created and managed in your [Mosaic dashboard](https://edit.mosaic.so).
+
+### Validating Your API Key
+
+Use the `/whoami` endpoint to verify your API key is working correctly and get information about the associated user:
+
+```bash
+curl -X GET "https://api.mosaic.so/whoami" \
+  -H "Authorization: Bearer mk_your_api_key"
+```
+
+Response:
+
+```json
+{
+  "user_id": "123e4567-e89b-12d3-a456-789012345678",
+  "email": "user@example.com",
+  "is_admin": false,
+  "api_key_id": "98765432-dcba-4321-abcd-987654321098",
+  "created_at": "2024-01-15T08:00:00Z",
+  "last_used_at": "2024-01-15T14:30:00Z"
+}
+```
+
+This endpoint is useful for:
+- Verifying your API key is valid and active
+- Checking which user account the key belongs to
+- Confirming the key's creation and last usage timestamps
+- Testing your authentication setup before making other API calls
+
+<Tip>
+Always test your API key with `/whoami` first when setting up a new integration. This helps catch authentication issues early.
+</Tip>
+
+### Webhook Authentication
+
+When a webhook secret is configured for your account, Mosaic includes an `X-Mosaic-Signature` header for verification. If configured, always validate this signature before processing webhook payloads. See the [Webhooks](/api/webhooks) documentation for details.
+
+## Error Handling
+
+Responses use conventional HTTP status codes. On errors the body contains a machine-readable `error` field plus a human friendly `detail`.
+
+```json
+{
+  "detail": "Request failed",
+  "error": "request_error"
+}
+```
+
+| Status | Error Code | Typical Cause |
+| --- | --- | --- |
+| 400 | validation_error | Malformed JSON or missing field |
+| 401 | invalid_api_key | Key revoked / wrong value |
+| 403 | forbidden | Access denied / insufficient permissions |
+| 404 | not_found | Unknown ID |
+| 422 | parameter_out_of_range | Field outside validation bounds |
+| 429 | rate_limit | Too many requests |
+| 500 | internal_server_error | Unexpected exception |
+
+## Base URL
+
+```text
+https://api.mosaic.so
+```

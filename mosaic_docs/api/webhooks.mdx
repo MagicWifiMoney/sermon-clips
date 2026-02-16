@@ -1,0 +1,333 @@
+---
+title: "Webhooks"
+description: "Receive real-time notifications for agent runs and triggers"
+---
+
+## Authentication
+
+All webhooks are sent with a signature in the `X-Mosaic-Signature` header when you have a webhook secret configured. The signature is your webhook secret sent as a **plaintext string** for simple validation.
+
+**Important**: This is NOT encryption or hashing - it's a direct plaintext string comparison for authentication.
+
+### Signature Validation Example
+
+```python
+# Simple plaintext validation
+webhook_signature = request.headers.get('X-Mosaic-Signature')
+expected_secret = os.environ.get('MOSAIC_WEBHOOK_SECRET')
+
+if expected_secret and webhook_signature != expected_secret:
+    return {"error": "Invalid webhook signature"}, 401
+```
+
+## Webhook Types
+
+Mosaic sends three types of webhooks:
+
+1. **RUN_STARTED** - Sent when an agent run begins processing
+2. **RUN_PROGRESS** - Sent when one or more agent nodes change status
+3. **RUN_FINISHED** - Sent when an agent run completes (successfully or with failures)
+
+---
+
+## RUN_STARTED
+
+Sent immediately when an agent run begins processing. This webhook includes information about all input videos being processed.
+
+### Payload Structure
+
+```json
+{
+  "flag": "RUN_STARTED",
+  "agent_id": "123e4567-e89b-12d3-a456-789012345678",
+  "run_id": "7f8d9c2b-4a6e-8b3f-1d5c-9e2f3a4b5c6d",
+  "status": "running",
+  "inputs": [
+    {
+      "video_url": "https://storage.googleapis.com/.../input.mp4",
+      "thumbnail_url": "https://storage.googleapis.com/.../input-thumb.jpg"
+    }
+  ],
+  "node_status_counts": {
+    "completed": 1,
+    "in_progress": 5,
+    "failed": 0
+  },
+  "triggered_by": {
+    "type": "youtube",
+    "channel_id": "UCxxxxxxxxxxxxxx",
+    "video_id": "dQw4w9WgXcQ",
+    "video_title": "Never Gonna Give You Up",
+    "video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "triggered_at": "2024-01-15T10:30:00Z",
+    "trigger_id": "8f7d6c5b-4a3e-2b1f-9d8c-1a2b3c4d5e6f"
+  }
+}
+```
+
+### Field Descriptions
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `flag` | `"RUN_STARTED"` | Webhook type identifier |
+| `agent_id` | `string` | UUID of the agent being executed |
+| `run_id` | `string` | UUID of the agent run (same as agent_state_id) |
+| `status` | `"running"` | Current status of the run |
+| `inputs` | `VideoInput[]` | Array of input videos being processed |
+| `node_status_counts` | `NodeStatusCounts` | Counts of nodes in different statuses |
+| `triggered_by` | `TriggerInfo` | Optional information about what triggered this run |
+
+---
+
+## RUN_PROGRESS
+
+Sent when one or more agent nodes change status. This webhook is useful for updating UI progress bars or timelines without polling.
+
+### Payload Structure
+
+```json
+{
+  "flag": "RUN_PROGRESS",
+  "agent_id": "123e4567-e89b-12d3-a456-789012345678",
+  "run_id": "7f8d9c2b-4a6e-8b3f-1d5c-9e2f3a4b5c6d",
+  "status": "running",
+  "node_status_counts": {
+    "completed": 4,
+    "in_progress": 3,
+    "failed": 0
+  },
+  "updated_nodes": [
+    {
+      "original_node_id": "2ba7b810-9dad-11d1-80b4-00c04fd430c8",
+      "status": "completed",
+      "status_message": null,
+      "outputs": [
+        {
+          "id": "7ba7b810-9dad-11d1-80b4-00c04fd430c8",
+          "video_url": "https://storage.googleapis.com/output-signed-url",
+          "thumbnail_url": "https://storage.googleapis.com/output-thumbnail-url",
+          "completed_at": "2024-01-15T10:35:00Z",
+          "original_node_id": "2ba7b810-9dad-11d1-80b4-00c04fd430c8"
+        }
+      ]
+    }
+  ],
+  "triggered_by": {
+    "type": "youtube",
+    "channel_id": "UCxxxxxxxxxxxxxx",
+    "video_id": "dQw4w9WgXcQ",
+    "video_title": "Never Gonna Give You Up",
+    "video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "triggered_at": "2024-01-15T10:30:00Z",
+    "trigger_id": "8f7d6c5b-4a3e-2b1f-9d8c-1a2b3c4d5e6f"
+  }
+}
+```
+
+### Field Descriptions
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `flag` | `"RUN_PROGRESS"` | Webhook type identifier |
+| `agent_id` | `string` | UUID of the agent being executed |
+| `run_id` | `string` | UUID of the agent run (same as agent_state_id) |
+| `status` | `"running"` | Current status of the run |
+| `node_status_counts` | `NodeStatusCounts` | Counts of nodes in different statuses |
+| `updated_nodes` | `UpdatedNode[]` | Optional list of nodes that changed status in this batch |
+| `triggered_by` | `TriggerInfo` | Optional information about what triggered this run |
+
+#### UpdatedNode Structure
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `original_node_id` | `string \| null` | Template agent_node_id this runtime node was cloned from. Use this to map progress updates back to specific nodes in your agent. |
+| `status` | `string` | Current status of the node (`completed`, `partial_complete`, `failed`, `blocked`, `running`, `queued`) |
+| `status_message` | `string \| null` | Optional human-readable status message |
+| `outputs` | `VideoOutput[]` | Optional list of outputs produced by this node in this update |
+
+---
+
+## RUN_FINISHED
+
+Sent when an agent run completes processing (successfully or with failures). This webhook includes all final outputs produced by the run.
+
+### Payload Structure
+
+```json
+{
+  "flag": "RUN_FINISHED",
+  "agent_id": "123e4567-e89b-12d3-a456-789012345678",
+  "run_id": "7f8d9c2b-4a6e-8b3f-1d5c-9e2f3a4b5c6d",
+  "status": "completed",
+  "status_message": null,
+  "inputs": [
+    {
+      "video_url": "https://storage.googleapis.com/.../input.mp4",
+      "thumbnail_url": "https://storage.googleapis.com/.../input-thumb.jpg"
+    }
+  ],
+  "outputs": [
+    {
+      "id": "7ba7b810-9dad-11d1-80b4-00c04fd430c8",
+      "video_url": "https://storage.googleapis.com/.../output.mp4",
+      "thumbnail_url": "https://storage.googleapis.com/.../thumb.jpg",
+      "completed_at": "2024-01-15T10:35:00Z",
+      "original_node_id": "2ba7b810-9dad-11d1-80b4-00c04fd430c8"
+    }
+  ],
+  "node_status_counts": {
+    "completed": 10,
+    "in_progress": 0,
+    "failed": 0
+  },
+  "triggered_by": {
+    "type": "youtube",
+    "channel_id": "UCxxxxxxxxxxxxxx",
+    "video_id": "dQw4w9WgXcQ",
+    "video_title": "Never Gonna Give You Up",
+    "video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "triggered_at": "2024-01-15T10:30:00Z",
+    "trigger_id": "8f7d6c5b-4a3e-2b1f-9d8c-1a2b3c4d5e6f"
+  }
+}
+```
+
+### Field Descriptions
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `flag` | `"RUN_FINISHED"` | Webhook type identifier |
+| `agent_id` | `string` | UUID of the agent that was executed |
+| `run_id` | `string` | UUID of the agent run (same as agent_state_id) |
+| `status` | `"completed"` \| `"partial_complete"` \| `"failed"` | Final status of the run |
+| `status_message` | `string \| null` | Optional human-readable message about the run status |
+| `inputs` | `VideoInput[]` | Array of input videos that were processed |
+| `outputs` | `VideoOutput[]` | Array of final output videos produced by the run |
+| `node_status_counts` | `NodeStatusCounts` | Counts of nodes in different statuses |
+| `triggered_by` | `TriggerInfo` | Optional information about what triggered this run |
+
+#### VideoOutput Structure
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `string` | Unique identifier for this output render. Use this to reference specific outputs in subsequent API calls. |
+| `video_url` | `string` | Signed URL to download the rendered video (valid for 7 days) |
+| `thumbnail_url` | `string \| null` | Signed URL to download the video thumbnail (valid for 7 days) |
+| `completed_at` | `string` | ISO 8601 timestamp when this output finished rendering |
+| `original_node_id` | `string \| null` | Template agent_node_id this output originated from. Use this to map outputs back to specific nodes in your agent. |
+
+<Tip>
+**Tracking outputs across runs**: Use `original_node_id` to reliably identify which node in your agent template produced each output. This allows you to consistently map outputs to your application logic even as the internal runtime node IDs change between runs.
+</Tip>
+
+---
+
+## Common Types
+
+### VideoInput Structure
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `video_url` | `string \| null` | Signed URL to access the input video file |
+| `thumbnail_url` | `string \| null` | Signed URL to access the input video thumbnail |
+
+### NodeStatusCounts Structure
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `completed` | `integer` | Number of nodes that finished successfully (status: `"completed"`, `"partial_complete"`) |
+| `in_progress` | `integer` | Number of nodes currently processing or waiting (status: `"running"`, `"queued"`) |
+| `failed` | `integer` | Number of nodes that failed or are blocked (status: `"failed"`, `"blocked"`) |
+
+### TriggerInfo Types
+
+Depending on what initiated the run, `triggered_by` will have one of the following structures:
+
+#### YouTube Trigger
+
+```json
+{
+  "type": "youtube",
+  "channel_id": "UCxxxxxxxxxxxxxx",
+  "video_id": "dQw4w9WgXcQ",
+  "video_title": "Video Title",
+  "video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+  "triggered_at": "2024-01-15T10:30:00Z",
+  "trigger_id": "8f7d6c5b-4a3e-2b1f-9d8c-1a2b3c4d5e6f"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `type` | `"youtube"` | Trigger type identifier |
+| `channel_id` | `string \| null` | YouTube channel ID that triggered the run (may be null for manual API runs) |
+| `video_id` | `string` | YouTube video ID that triggered the run |
+| `video_title` | `string` | Title of the YouTube video |
+| `video_url` | `string` | Full YouTube URL of the video |
+| `triggered_at` | `string` | ISO 8601 timestamp when the trigger fired |
+| `trigger_id` | `string \| null` | Internal trigger configuration ID (null for manual/API YouTube runs) |
+
+#### Schedule Trigger
+
+```json
+{
+  "type": "schedule",
+  "scheduled_at": "2024-01-15T10:30:00Z",
+  "schedule_id": "8f7d6c5b-4a3e-2b1f-9d8c-1a2b3c4d5e6f",
+  "cron_expression": "0 9 * * 1"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `type` | `"schedule"` | Trigger type identifier |
+| `scheduled_at` | `string` | ISO 8601 timestamp when run was scheduled |
+| `schedule_id` | `string` | Internal schedule configuration ID |
+| `cron_expression` | `string \| null` | Cron expression if applicable |
+
+#### Manual Trigger
+
+```json
+{
+  "type": "manual",
+  "source": "api",
+  "user_id": "user-uuid",
+  "triggered_at": "2024-01-15T10:30:00Z"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `type` | `"manual"` | Trigger type identifier |
+| `source` | `"api"` \| `"ui"` | Whether triggered via API or UI |
+| `user_id` | `string` | ID of user who triggered the run |
+| `triggered_at` | `string` | ISO 8601 timestamp when the trigger fired |
+
+---
+
+## Notes
+
+<Note>
+If a run is initiated manually via `POST /agent/[agent_id]/run` using a YouTube URL, `triggered_by.type` will still be `"youtube"`, but `trigger_id` will be `null` because there is no saved channel-trigger configuration associated with the run.
+</Note>
+
+<Note>
+In rare cases, `triggered_by.channel_id` may be `null` for manual YouTube runs if channel metadata is unavailable at run creation time. The webhook will still include `video_id`, `video_title`, and `video_url`.
+</Note>
+
+## Status Values
+
+The `status` field in RUN_FINISHED can have the following values:
+
+- **`"completed"`** - All videos processed successfully with outputs generated
+- **`"partial_complete"`** - Some videos processed successfully, but others failed  
+- **`"failed"`** - The entire run failed, no outputs generated
+
+The node `status` field in UpdatedNode can have these values:
+
+- **`"completed"`** - Node finished successfully
+- **`"partial_complete"`** - Node partially completed (some outputs succeeded)
+- **`"running"`** - Node is currently processing
+- **`"queued"`** - Node is waiting to be processed
+- **`"failed"`** - Node failed with an error
+- **`"blocked"`** - Node is blocked by an upstream failure

@@ -1,0 +1,62 @@
+---
+title: "Mosaic API Documentation"
+description: "API reference for Mosaic's video editing workflows"
+---
+
+# Mosaic API
+
+Mosaic provides a powerful API for automating professional-grade video editing with AI-powered agents. Upload videos, run pre-built workflows, and receive polished outputs programmatically.
+
+## Base URL
+
+```text
+https://api.mosaic.so
+```
+
+## Core Concepts
+
+### Agent
+A pre-built video editing workflow that can be executed via the API. Create and configure agents at [edit.mosaic.so](https://edit.mosaic.so).
+
+### Agent Run
+An execution instance of an agent that processes your videos. Track progress and retrieve outputs through the run ID.
+
+### Triggers
+Automated agent execution based on external events (e.g., new YouTube videos).
+
+## API Overview
+
+<CardGroup cols={2}>
+  <Card title="Agents" icon="robot" href="/api/agent-operations">
+    Run agents and track their progress
+  </Card>
+  <Card title="Uploads" icon="cloud-arrow-up" href="/api/uploads">
+    Upload videos, audio, and images
+  </Card>
+  <Card title="Triggers" icon="bolt" href="/api/triggers">
+    Automate agents with YouTube monitoring
+  </Card>
+  <Card title="Webhooks" icon="webhook" href="/api/webhooks">
+    Receive real-time status updates
+  </Card>
+</CardGroup>
+
+## Authentication
+
+All API requests require authentication using an API key prefixed with `mk_`.
+
+```bash
+curl -H "Authorization: Bearer mk_your_api_key" \
+     https://api.mosaic.so/agent/[agent_id]/run
+```
+
+Test your API key with the `/whoami` endpoint:
+
+```bash
+curl -H "Authorization: Bearer mk_your_api_key" \
+     https://api.mosaic.so/whoami
+```
+
+## Next Steps
+
+Start with the [API Introduction](/api/introduction) for authentication details and conventions, then explore each endpoint category.
