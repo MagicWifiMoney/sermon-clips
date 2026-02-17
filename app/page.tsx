@@ -1,10 +1,11 @@
 'use client';
 
 import {
-  CheckCircle2, Upload, Wand2, Share2, Play, ArrowRight, Quote, ChevronDown,
-  Sparkles, Clock, Users, TrendingUp, Brain, Film, Music, Eye, Palette,
-  GitBranch, Languages, Youtube, BarChart3, Volume2, Type, Maximize2,
-  Zap, Shield, Church, Megaphone, X
+  CheckCircle2, Upload, Wand2, Share2, Play, ArrowRight, ChevronDown,
+  Sparkles, Clock, Brain, Film, Music, Palette,
+  Languages, Youtube, Volume2, Type, Maximize2,
+  Zap, Church, Users, Megaphone, Settings, Layers, Scissors,
+  Timer, Mic, Video, LayoutGrid, CalendarClock, Sliders
 } from "lucide-react";
 import EmailCapturePopup from "@/components/EmailCapturePopup";
 
@@ -14,7 +15,6 @@ export default function Home() {
       {/* Header */}
       <header className="fixed top-0 w-full bg-[#F5F1EB]/95 backdrop-blur-md z-50">
         <nav className="max-w-7xl mx-auto px-6 lg:px-8 py-4 flex items-center justify-between">
-          {/* Logo */}
           <a href="/" className="flex items-center gap-3">
             <div className="relative w-10 h-10">
               <svg viewBox="0 0 40 40" className="w-full h-full">
@@ -54,29 +54,27 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <div className="max-w-xl">
-              {/* Tagline Badge */}
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#2D2D2D]/5 mb-6">
                 <Sparkles className="w-4 h-4 text-[#E8725A]" />
-                <span className="text-sm text-[#2D2D2D]/70">AI-powered sermon clipping in minutes</span>
+                <span className="text-sm text-[#2D2D2D]/70">Your AI media team — ready in minutes</span>
               </div>
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[#2D2D2D] leading-[1.1] tracking-tight mb-6">
                 Turn sermons into
                 <span className="relative">
-                  <span className="relative z-10 text-[#E8725A]"> viral clips</span>
+                  <span className="relative z-10 text-[#E8725A]"> scroll-stopping clips</span>
                   <svg className="absolute -bottom-2 left-0 w-full h-3 text-[#E8725A]/20" viewBox="0 0 200 12" preserveAspectRatio="none">
                     <path d="M0 6 Q 50 0, 100 6 T 200 6" fill="none" stroke="currentColor" strokeWidth="8" strokeLinecap="round" />
                   </svg>
                 </span>
                 <br />
-                <span className="text-[#5c5c5c] text-3xl sm:text-4xl lg:text-5xl font-medium">—in minutes, not hours</span>
+                <span className="text-[#5c5c5c] text-3xl sm:text-4xl lg:text-5xl font-medium">—no editor required</span>
               </h1>
 
               <p className="text-lg text-[#5c5c5c] leading-relaxed mb-8">
-                Upload your sermon once. Our AI finds the most shareable moments, adds captions, formats for every platform, and delivers 5–10 polished clips in 24 hours. Human-reviewed. Ready to post.
+                Upload your sermon. AI finds the best moments, adds captions, B-roll, music, and formats for every platform. Download or auto-post — all in under 10 minutes.
               </p>
 
-              {/* CTA + Social Proof */}
               <div className="space-y-6">
                 <div className="flex flex-col sm:flex-row gap-4">
                   <a href="/sign-up" className="bg-[#E8725A] hover:bg-[#d4654f] text-white px-8 py-4 rounded-full font-medium transition-all hover:shadow-xl hover:shadow-[#E8725A]/30 inline-flex items-center justify-center gap-2 text-base">
@@ -89,25 +87,7 @@ export default function Home() {
                   </a>
                 </div>
 
-                <div className="flex items-center gap-4">
-                  <div className="flex -space-x-3">
-                    {[1,2,3,4,5].map((i) => (
-                      <div key={i} className="w-10 h-10 rounded-full bg-gradient-to-br from-[#E8725A]/20 to-[#2D2D2D]/20 border-2 border-[#F5F1EB] flex items-center justify-center">
-                        <span className="text-xs font-medium text-[#2D2D2D]/60">{String.fromCharCode(64+i)}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1">
-                      {[1,2,3,4,5].map((i) => (
-                        <svg key={i} className="w-4 h-4 text-[#E8725A]" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                      ))}
-                    </div>
-                    <p className="text-sm text-[#5c5c5c]">Trusted by <span className="font-semibold text-[#2D2D2D]">500+</span> churches</p>
-                  </div>
-                </div>
+                <p className="text-sm text-[#5c5c5c]">First sermon free &bull; 5 clips included &bull; No credit card</p>
               </div>
             </div>
 
@@ -139,11 +119,11 @@ export default function Home() {
               <div className="absolute -left-4 lg:-left-16 top-1/4 bg-white rounded-2xl p-4 shadow-xl shadow-[#2D2D2D]/5 animate-float">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-[#E8725A]/10 flex items-center justify-center">
-                    <TrendingUp className="w-5 h-5 text-[#E8725A]" />
+                    <Languages className="w-5 h-5 text-[#E8725A]" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-[#2D2D2D]">312%</p>
-                    <p className="text-xs text-[#5c5c5c]">Avg. engagement boost</p>
+                    <p className="text-2xl font-bold text-[#2D2D2D]">30+</p>
+                    <p className="text-xs text-[#5c5c5c]">Languages supported</p>
                   </div>
                 </div>
               </div>
@@ -154,8 +134,8 @@ export default function Home() {
                     <Clock className="w-5 h-5 text-[#2D2D2D]" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-[#2D2D2D]">24hr</p>
-                    <p className="text-xs text-[#5c5c5c]">Turnaround time</p>
+                    <p className="text-2xl font-bold text-[#2D2D2D]">&lt;10 min</p>
+                    <p className="text-xs text-[#5c5c5c]">Processing time</p>
                   </div>
                 </div>
               </div>
@@ -163,7 +143,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Scroll indicator */}
         <div className="flex justify-center mt-16">
           <a href="#problem" className="flex flex-col items-center gap-2 text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">
             <span className="text-xs uppercase tracking-wider">Learn More</span>
@@ -188,7 +167,7 @@ export default function Home() {
             {[
               { icon: Clock, title: "No Time", desc: "Who has 4 hours every Monday to edit clips? Your team is already stretched thin." },
               { icon: Wand2, title: "No Expertise", desc: "Captions, hooks, pacing—it's a craft your volunteers don't have time to learn." },
-              { icon: TrendingUp, title: "Algorithm Demands Clips", desc: "The algorithm doesn't care how good your sermon was. It wants short clips." },
+              { icon: Sparkles, title: "Algorithm Demands Clips", desc: "The algorithm doesn't care how good your sermon was. It wants short clips." },
               { icon: Share2, title: "Platform Chaos", desc: "TikTok wants vertical. YouTube wants landscape. Instagram wants square. It's exhausting." },
             ].map((item, i) => (
               <div key={i} className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-[#E8725A]/30 transition-colors">
@@ -201,36 +180,33 @@ export default function Home() {
         </div>
       </section>
 
-      {/* AI + Human Solution Overview — NEW */}
+      {/* AI Platform Overview */}
       <section className="py-24 px-6 lg:px-8 bg-[#F5F1EB]">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <span className="inline-block px-4 py-2 rounded-full bg-[#E8725A]/10 text-[#E8725A] text-sm font-medium mb-4">
-              Our Approach
+              The Platform
             </span>
             <h2 className="text-3xl md:text-4xl font-bold text-[#2D2D2D] mb-4">
-              AI speed. Human quality. The best of both worlds.
+              An entire media team — powered by AI
             </h2>
             <p className="text-lg text-[#5c5c5c] max-w-2xl mx-auto">
-              We built on top of Mosaic&apos;s agentic video editing platform so your church gets Hollywood-grade AI with a human eye for what actually resonates.
+              Everything a full-time video editor, social media manager, and translator would do — automated, consistent, and ready in minutes.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {/* What AI Does */}
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <div className="p-8 rounded-3xl bg-white border border-[#E8E4DC] hover:shadow-xl transition-shadow">
               <div className="w-14 h-14 rounded-2xl bg-[#E8725A]/10 flex items-center justify-center mb-6">
                 <Brain className="w-7 h-7 text-[#E8725A]" />
               </div>
-              <h3 className="text-xl font-bold text-[#2D2D2D] mb-4">What AI Does</h3>
+              <h3 className="text-xl font-bold text-[#2D2D2D] mb-4">Finds the Gold</h3>
               <ul className="space-y-3">
                 {[
-                  "Transcribes your full sermon in seconds",
                   "Detects the most clip-worthy moments",
-                  "Generates word-perfect captions",
-                  "Formats for every platform automatically",
-                  "Adds B-roll from 30,000+ assets",
-                  "Composes background music to match mood",
+                  "Prompt-guided rough cut editing",
+                  "Quick-pick chips to guide AI focus",
+                  "Silence & filler word removal",
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-3 text-[#5c5c5c]">
                     <Zap className="w-4 h-4 text-[#E8725A] mt-1 flex-shrink-0" />
@@ -240,23 +216,40 @@ export default function Home() {
               </ul>
             </div>
 
-            {/* What Humans Do */}
             <div className="p-8 rounded-3xl bg-white border border-[#E8E4DC] hover:shadow-xl transition-shadow">
-              <div className="w-14 h-14 rounded-2xl bg-[#2D2D2D]/10 flex items-center justify-center mb-6">
-                <Shield className="w-7 h-7 text-[#2D2D2D]" />
+              <div className="w-14 h-14 rounded-2xl bg-[#E8725A]/10 flex items-center justify-center mb-6">
+                <Film className="w-7 h-7 text-[#E8725A]" />
               </div>
-              <h3 className="text-xl font-bold text-[#2D2D2D] mb-4">What Humans Do</h3>
+              <h3 className="text-xl font-bold text-[#2D2D2D] mb-4">Produces the Clip</h3>
               <ul className="space-y-3">
                 {[
-                  "Curate the moments that actually resonate",
-                  "Ensure your brand voice stays consistent",
-                  "Add theological context AI can't grasp",
-                  "Quality-check every clip before delivery",
-                  "Fine-tune hooks and pacing for engagement",
-                  "Handle revisions and special requests",
+                  "Dynamic captions with custom styles",
+                  "AI B-roll from 30,000+ assets",
+                  "Dynamic zoom & speaker tracking",
+                  "Color correction & motion graphics",
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-3 text-[#5c5c5c]">
-                    <CheckCircle2 className="w-4 h-4 text-[#2D2D2D] mt-1 flex-shrink-0" />
+                    <Zap className="w-4 h-4 text-[#E8725A] mt-1 flex-shrink-0" />
+                    <span className="text-sm">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="p-8 rounded-3xl bg-white border border-[#E8E4DC] hover:shadow-xl transition-shadow">
+              <div className="w-14 h-14 rounded-2xl bg-[#E8725A]/10 flex items-center justify-center mb-6">
+                <Share2 className="w-7 h-7 text-[#E8725A]" />
+              </div>
+              <h3 className="text-xl font-bold text-[#2D2D2D] mb-4">Distributes Everywhere</h3>
+              <ul className="space-y-3">
+                {[
+                  "Auto-post to 6 platforms",
+                  "Drip scheduling across days",
+                  "Review or auto-publish modes",
+                  "YouTube auto-trigger on upload",
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-3 text-[#5c5c5c]">
+                    <Zap className="w-4 h-4 text-[#E8725A] mt-1 flex-shrink-0" />
                     <span className="text-sm">{item}</span>
                   </li>
                 ))}
@@ -266,7 +259,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Platform Features Grid — NEW */}
+      {/* Platform Features Grid */}
       <section id="features" className="py-24 bg-[#2D2D2D]">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -277,7 +270,7 @@ export default function Home() {
               Everything your media team wishes they had
             </h2>
             <p className="text-lg text-white/60 max-w-2xl mx-auto">
-              Powered by Mosaic&apos;s agentic video AI — the same technology used by professional studios.
+              30+ AI-powered tools built specifically for sermon content.
             </p>
           </div>
 
@@ -291,12 +284,12 @@ export default function Home() {
               {
                 icon: Type,
                 title: "Dynamic Captions",
-                desc: "Word-perfect captions with emoji support, styled to match the energy of each moment. Powered by Deepgram transcription."
+                desc: "Word-perfect captions with custom colors, fonts, and positioning. Styled to match the energy of each moment."
               },
               {
                 icon: Maximize2,
                 title: "Multi-Format Export",
-                desc: "One upload — vertical, landscape, and square clips. Smart reframing keeps the speaker centered on every platform."
+                desc: "One upload — vertical (9:16), landscape (16:9), and square (1:1) clips. Smart reframing keeps the speaker centered."
               },
               {
                 icon: Film,
@@ -305,43 +298,73 @@ export default function Home() {
               },
               {
                 icon: Music,
-                title: "Custom Soundtracks",
-                desc: "AI-composed background music that fits your video's mood — from reverent to uplifting. No licensing headaches."
+                title: "AI Background Music",
+                desc: "AI-composed soundtracks matched to mood, genre, and BPM. From reverent to uplifting — no licensing headaches."
               },
               {
                 icon: Volume2,
-                title: "Crystal Clear Audio",
+                title: "Audio Enhancement",
                 desc: "AI noise removal makes even phone recordings and gym-turned-sanctuary audio sound studio-quality."
               },
               {
-                icon: Eye,
-                title: "AI Eye Contact",
-                desc: "Corrects gaze so your pastor looks directly at viewers — even if they were reading notes during the sermon."
+                icon: Video,
+                title: "Dynamic Zoom",
+                desc: "Speaker-tracking zoom for static camera shots. Adds professional movement and energy to any footage."
               },
               {
                 icon: Palette,
-                title: "Branded Intro/Outro",
-                desc: "Auto-generated intros and outros with your church logo, colors, and social handles. Consistent branding on every clip."
+                title: "Color Correction",
+                desc: "One-click presets: Golden Hour, Filmic, Vibrant, Cool Tones, Neutral Clean. Instant cinematic look."
               },
               {
-                icon: GitBranch,
-                title: "Hook Testing",
-                desc: "Generate multiple versions of the same clip with different hooks and openings. See what performs best."
+                icon: Layers,
+                title: "Motion Graphics",
+                desc: "Animated overlays and lower thirds that make your clips pop. Professional polish without After Effects."
+              },
+              {
+                icon: Scissors,
+                title: "Silence & Filler Removal",
+                desc: "Automatically cuts 'um', 'uh', and dead air. Tighter pacing, better watch time."
+              },
+              {
+                icon: Sliders,
+                title: "Rough Cut Editing",
+                desc: "Prompt-guided editing with target duration and mood. Tell the AI what you want and it builds the cut."
+              },
+              {
+                icon: Mic,
+                title: "AI Voiceover & Avatar",
+                desc: "Generate voiceovers in multiple languages with voice selection, or create AI avatar presentations."
+              },
+              {
+                icon: LayoutGrid,
+                title: "Montage Builder",
+                desc: "Combine multiple clips with transitions into sermon highlight reels. Perfect for series recaps."
               },
               {
                 icon: Languages,
-                title: "30+ Languages",
-                desc: "AI voice cloning and dubbing to reach your global congregation in their native language."
+                title: "30+ Language Translation",
+                desc: "AI dubbing and translation to reach your global congregation in their native language."
               },
               {
                 icon: Youtube,
                 title: "YouTube Auto-Trigger",
-                desc: "Connect your YouTube channel and we auto-detect new sermon uploads. Zero manual work."
+                desc: "Connect your YouTube channel and clips are generated automatically when new sermons upload. Zero manual work."
               },
               {
-                icon: BarChart3,
-                title: "Analytics Dashboard",
-                desc: "Track views, engagement, and growth across every platform. Know exactly what&apos;s resonating."
+                icon: Share2,
+                title: "Social Publishing",
+                desc: "Post directly to TikTok, Instagram, YouTube, Facebook, X, and LinkedIn. Review first or auto-publish."
+              },
+              {
+                icon: CalendarClock,
+                title: "Drip Scheduling",
+                desc: "Auto-space clips across days and platforms. Keep your feeds active all week from one Sunday sermon."
+              },
+              {
+                icon: Settings,
+                title: "Processing Templates",
+                desc: "Save your preferred settings and reuse them. Consistent branding across every clip, every week."
               },
             ].map((feature, i) => (
               <div key={i} className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-[#E8725A]/30 transition-all hover:bg-white/[0.07] group">
@@ -365,7 +388,7 @@ export default function Home() {
               Three steps. Zero headaches.
             </h2>
             <p className="text-lg text-[#5c5c5c] max-w-xl mx-auto">
-              From sermon to social-ready clips — fully automated, human-reviewed.
+              From sermon to social-ready clips — fully automated.
             </p>
           </div>
 
@@ -375,19 +398,19 @@ export default function Home() {
                 num: "01",
                 icon: Upload,
                 title: "Upload Your Sermon",
-                desc: "Share via YouTube link, Dropbox, Google Drive, or direct upload. Or connect YouTube and we auto-detect new sermons."
+                desc: "Share via YouTube link, Dropbox, Google Drive, or direct upload. Or connect YouTube and clips generate automatically when you upload."
               },
               {
                 num: "02",
                 icon: Brain,
-                title: "AI + Humans Find the Gold",
-                desc: "Our Curator Agent analyzes your entire message, identifies shareable moments, adds captions, formats for every platform, and adds B-roll and music. Then our team reviews every clip for quality."
+                title: "AI Processes Everything",
+                desc: "The AI finds the best moments, adds captions, B-roll, music, and formats for every platform. Use prompts and quick-pick chips to guide what it looks for."
               },
               {
                 num: "03",
                 icon: Share2,
-                title: "Download & Post (or We Post for You)",
-                desc: "Get 5–10 polished clips in 24 hours. Post yourself or upgrade to Auto-Pilot for automatic scheduling across all platforms."
+                title: "Download or Auto-Post",
+                desc: "Review your clips and download, or turn on auto-publish to schedule across TikTok, Instagram, YouTube, Facebook, X, and LinkedIn."
               }
             ].map((step, i) => (
               <div key={i} className="relative group">
@@ -417,10 +440,10 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {[
-              { num: "500+", label: "Churches Served" },
-              { num: "15,000+", label: "AI-Edited Clips" },
-              { num: "312%", label: "Avg. Engagement Lift" },
               { num: "30+", label: "Languages Supported" },
+              { num: "30,000+", label: "B-Roll Assets" },
+              { num: "5", label: "Export Formats" },
+              { num: "6", label: "Social Platforms" },
             ].map((stat, i) => (
               <div key={i} className="p-6">
                 <p className="text-4xl md:text-5xl font-bold text-[#2D2D2D] mb-2">{stat.num}</p>
@@ -431,7 +454,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Use Cases / Who It's For — NEW */}
+      {/* Use Cases / Who It's For */}
       <section className="py-24 px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
@@ -442,7 +465,7 @@ export default function Home() {
               Built for churches of every size
             </h2>
             <p className="text-lg text-[#5c5c5c] max-w-xl mx-auto">
-              Whether you&apos;re a church plant or a multi-campus ministry, we&apos;ve got a plan that fits.
+              Whether you&apos;re a church plant or a multi-campus ministry, there&apos;s a plan that fits.
             </p>
           </div>
 
@@ -452,21 +475,21 @@ export default function Home() {
                 icon: Church,
                 title: "Small Churches",
                 pain: "No media team? No budget for a video editor?",
-                solution: "Upload your sermon and get polished clips back in 24 hours. No expertise needed. Starting at $29/mo.",
+                solution: "Upload your sermon and get polished clips in minutes. No expertise needed. Starting at $29/mo.",
                 cta: "See Starter Plan",
               },
               {
                 icon: Users,
                 title: "Growing Churches",
                 pain: "Multiple services, multiple pastors, one overwhelmed comms person?",
-                solution: "Custom branding, 10 clips per sermon, AI B-roll, eye contact fix, and 24-hour turnaround. Scale without hiring.",
+                solution: "Dynamic zoom, color correction, branded intros, and 5 clips per sermon across 3 formats. Scale without hiring.",
                 cta: "See Growth Plan",
               },
               {
                 icon: Megaphone,
                 title: "Comms Directors",
-                pain: "Need auto-posting, analytics, A/B testing, and a strategy partner?",
-                solution: "Auto-Pilot handles everything — YouTube auto-trigger, scheduled posting, performance analytics, and monthly strategy calls.",
+                pain: "Need auto-posting, scheduling, and full automation?",
+                solution: "Auto-Pilot handles everything — YouTube auto-trigger, drip scheduling, auto-posting to 6 platforms, and 10+ clips per sermon.",
                 cta: "See Auto-Pilot Plan",
               },
             ].map((useCase, i) => (
@@ -486,7 +509,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Testimonials */}
+      {/* TODO: Testimonials — replace with real testimonials when available */}
+      {/*
       <section className="py-24 px-6 lg:px-8 bg-[#F5F1EB]">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
@@ -497,40 +521,10 @@ export default function Home() {
               Churches love us
             </h2>
           </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                quote: "I used to spend 4 hours every Monday editing clips. Now I upload the sermon and have 10 polished clips by Tuesday morning. The AI picks moments I wouldn't have thought to clip — and they perform the best.",
-                name: "Pastor Mike",
-                church: "Grace Community Church, Ohio",
-              },
-              {
-                quote: "I was skeptical about AI touching our pastor's message. But honestly? The clips don't feel robotic at all. The human review team gets our voice. It's like having a media team without the salary.",
-                name: "Sarah T.",
-                church: "Communications Director, New Life Church",
-              },
-              {
-                quote: "The multi-format export alone is worth it. One upload and we get vertical for TikTok, landscape for YouTube, and square for Instagram — all with captions and B-roll. Game changer for a two-person comms team.",
-                name: "David R.",
-                church: "Executive Pastor, Cityview Church",
-              },
-            ].map((t, i) => (
-              <div key={i} className="p-8 rounded-3xl bg-white border border-[#E8E4DC] hover:shadow-xl transition-shadow">
-                <Quote className="w-10 h-10 text-[#E8725A]/20 mb-4" />
-                <p className="text-[#2D2D2D] leading-relaxed mb-6">&ldquo;{t.quote}&rdquo;</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#E8725A]/20 to-[#2D2D2D]/10" />
-                  <div>
-                    <p className="font-semibold text-[#2D2D2D]">{t.name}</p>
-                    <p className="text-sm text-[#5c5c5c]">{t.church}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <!-- Add real testimonials here -->
         </div>
       </section>
+      */}
 
       {/* Pricing Section */}
       <section id="pricing" className="py-24 bg-[#2D2D2D] px-6 lg:px-8">
@@ -562,11 +556,11 @@ export default function Home() {
               <ul className="space-y-4 mb-8">
                 {[
                   "4 sermons/month",
-                  "5 clips per sermon",
-                  "Captions included",
-                  "3 formats (vertical, landscape, square)",
-                  "AI B-Roll",
-                  "48hr turnaround",
+                  "3 clips per sermon",
+                  "1 format (vertical)",
+                  "Dynamic captions",
+                  "AI moment detection",
+                  "Audio enhancement",
                 ].map((item, i) => (
                   <li key={i} className="flex items-center gap-3 text-white/70 text-sm">
                     <CheckCircle2 className="w-5 h-5 text-[#E8725A] flex-shrink-0" />
@@ -593,13 +587,13 @@ export default function Home() {
               <ul className="space-y-4 mb-8">
                 {[
                   "8 sermons/month",
-                  "10 clips per sermon",
-                  "All 3 formats",
-                  "24hr turnaround",
-                  "Custom branding",
-                  "Intro/Outro",
-                  "Background music",
-                  "AI Eye contact fix",
+                  "5 clips per sermon",
+                  "3 formats (9:16, 16:9, 1:1)",
+                  "AI B-Roll & background music",
+                  "Dynamic zoom & color correction",
+                  "Branded intro/outro & watermark",
+                  "Silence & filler removal",
+                  "Processing templates",
                 ].map((item, i) => (
                   <li key={i} className="flex items-center gap-3 text-white text-sm">
                     <CheckCircle2 className="w-5 h-5 text-white flex-shrink-0" />
@@ -624,12 +618,12 @@ export default function Home() {
                 {[
                   "Unlimited sermons",
                   "10+ clips per sermon",
-                  "4hr express turnaround",
+                  "All formats + montage builder",
                   "YouTube auto-trigger",
-                  "Auto-posting to all platforms",
-                  "A/B hook testing",
-                  "Analytics dashboard",
-                  "Monthly strategy call",
+                  "Auto-posting to 6 platforms",
+                  "Drip scheduling",
+                  "AI voiceover & avatar",
+                  "30+ language translation",
                 ].map((item, i) => (
                   <li key={i} className="flex items-center gap-3 text-white/70 text-sm">
                     <CheckCircle2 className="w-5 h-5 text-[#E8725A] flex-shrink-0" />
@@ -640,16 +634,6 @@ export default function Home() {
               <a href="/sign-up" className="block w-full py-3 rounded-full border border-white/20 text-white hover:bg-white/10 transition-colors font-medium text-center">
                 Try Free — No Card Required
               </a>
-            </div>
-          </div>
-
-          {/* Add-ons */}
-          <div className="max-w-5xl mx-auto mt-12">
-            <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
-              <p className="text-white/70 text-sm text-center">
-                <span className="text-white font-semibold">Add-ons:</span>{" "}
-                Voice Cloning &amp; Dubbing (+$99/mo) &bull; Multi-Campus (+$100/mo per campus) &bull; Dedicated Account Manager (+$200/mo)
-              </p>
             </div>
           </div>
 
@@ -674,36 +658,36 @@ export default function Home() {
           <div className="space-y-6">
             {[
               {
-                q: "Is this 100% AI or do humans actually review the clips?",
-                a: "Both. AI handles the heavy lifting — transcription, moment detection, captions, formatting, B-roll, and music. But every clip is reviewed by a human editor before delivery. AI for speed, humans for soul."
+                q: "How does the AI choose which moments to clip?",
+                a: "The AI analyzes your full sermon transcript for emotional peaks, quotable lines, clear teachable points, and audience reactions. You can also guide it with clip prompts and quick-pick chips — like 'find the most encouraging moment' or 'focus on the main illustration.'"
               },
               {
-                q: "Do the clips feel robotic or AI-generated?",
-                a: "No — that's the whole point of human review. Our editors ensure every clip feels natural, has the right pacing, and captures the emotional weight of the moment. Most churches can't tell AI was involved."
+                q: "Do the clips look professional or AI-generated?",
+                a: "They look professional. Dynamic captions, B-roll, color correction, background music, and branded intros all work together. Most viewers can't tell AI was involved — they just see polished, engaging content."
               },
               {
-                q: "How do you choose which moments to clip?",
-                a: "Our Curator Agent analyzes the full transcript for emotional peaks, quotable lines, clear teachable points, and audience reactions. Then a human editor reviews and curates the final selection. You can also flag specific timestamps."
+                q: "How fast is processing?",
+                a: "Most sermons are fully processed in under 10 minutes. You'll get all your clips ready to review, download, or auto-post."
               },
               {
-                q: "Can you reach my congregation in other languages?",
-                a: "Yes! Our Voice Cloning & Dubbing add-on supports 30+ languages. The AI clones your pastor's voice and delivers natural-sounding translations — perfect for multilingual or global congregations."
+                q: "Can I reach my congregation in other languages?",
+                a: "Yes! On the Auto-Pilot plan, AI dubbing and translation supports 30+ languages. You can also use AI voiceover with different voice selections for multilingual or global congregations."
               },
               {
-                q: "Can you auto-post to our social media accounts?",
-                a: "Yes, on the Auto-Pilot plan. We'll schedule and post clips directly to Instagram, TikTok, YouTube Shorts, Facebook, and X. Lower tiers deliver clips ready to download and post yourself."
+                q: "Can it auto-post to our social media accounts?",
+                a: "Yes, on the Auto-Pilot plan. Clips post directly to TikTok, Instagram, YouTube, Facebook, X, and LinkedIn. Use drip scheduling to space them across the week. Lower tiers let you review and download clips to post yourself."
               },
               {
                 q: "What formats can I upload?",
-                a: "Anything — YouTube links, Vimeo, MP4, MOV, Dropbox, Google Drive, or direct upload. If you can share it, we can clip it. Auto-Pilot subscribers can connect YouTube for automatic detection of new uploads."
+                a: "YouTube links, Vimeo, MP4, MOV, Dropbox, Google Drive, or direct upload. Auto-Pilot subscribers can connect YouTube for automatic detection of new uploads."
               },
               {
-                q: "Can I request revisions?",
-                a: "Absolutely. Every plan includes one round of revisions per clip. Need a different moment, caption style, or hook? Just let us know and we'll adjust."
+                q: "Can I control what the AI does?",
+                a: "Absolutely. Use clip prompts to guide moment selection, choose from color correction presets, set target duration and mood for rough cuts, and save processing templates to reuse your preferred settings every week."
               },
               {
                 q: "Is there a contract?",
-                a: "No contracts, ever. All plans are month-to-month. Cancel anytime with one click. We also offer annual plans at a 20% discount."
+                a: "No contracts, ever. All plans are month-to-month. Cancel anytime with one click."
               },
             ].map((faq, i) => (
               <div key={i} className="p-6 rounded-2xl bg-white border border-[#E8E4DC]">
@@ -732,14 +716,14 @@ export default function Home() {
             Your message is too powerful to stay on the shelf.
           </h2>
           <p className="text-lg text-[#5c5c5c] mb-10 max-w-xl mx-auto">
-            AI-powered editing. Human-quality results. Zero learning curve.
+            AI-powered editing. Professional results. Under 10 minutes.
           </p>
 
           <a href="/sign-up" className="bg-[#E8725A] hover:bg-[#d4654f] text-white px-10 py-4 rounded-full font-medium text-lg transition-all hover:shadow-xl hover:shadow-[#E8725A]/30 inline-flex items-center gap-2">
             Try Free — No Card Required
             <ArrowRight className="w-5 h-5" />
           </a>
-          <p className="text-sm text-[#5c5c5c] mt-6">No credit card required. Results in 24 hours.</p>
+          <p className="text-sm text-[#5c5c5c] mt-6">First sermon free &bull; 5 clips included &bull; No credit card</p>
         </div>
       </section>
 
@@ -758,7 +742,7 @@ export default function Home() {
                 </div>
                 <span className="font-bold text-white">Sermon<span className="font-light tracking-wider uppercase ml-0.5">Clips</span></span>
               </div>
-              <p className="text-sm">AI-powered editing. Human-quality results.</p>
+              <p className="text-sm">Your AI media team.</p>
             </div>
             <div>
               <h4 className="text-white text-sm font-semibold mb-4">Product</h4>
