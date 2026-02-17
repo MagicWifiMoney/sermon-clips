@@ -79,14 +79,14 @@ function SurveyForm() {
         <div className="w-20 h-20 rounded-full bg-[#E8725A]/20 flex items-center justify-center mx-auto mb-6">
           <CheckCircle2 className="w-10 h-10 text-[#E8725A]" />
         </div>
-        <h3 className="text-2xl font-bold text-white mb-3">You&apos;re on the list!</h3>
-        <p className="text-white/60 max-w-md mx-auto">Thank you for your feedback. We&apos;ll notify you as soon as early access opens. Your input is shaping what we build.</p>
+        <h3 className="text-2xl font-bold text-[#2D2D2D] mb-3">You&apos;re on the list!</h3>
+        <p className="text-[#5c5c5c] max-w-md mx-auto">Thank you for your feedback. We&apos;ll notify you as soon as early access opens. Your input is shaping what we build.</p>
       </div>
     );
   }
 
-  const selectClass = "w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#E8725A] transition-colors [&>option]:text-[#2D2D2D]";
-  const labelClass = "block text-sm font-medium text-white mb-2";
+  const selectClass = "w-full bg-white border border-[#2D2D2D]/15 rounded-xl px-4 py-3 text-[#2D2D2D] text-sm focus:outline-none focus:border-[#E8725A] transition-colors";
+  const labelClass = "block text-sm font-medium text-[#2D2D2D] mb-2";
 
   return (
     <form onSubmit={handleSubmit} className="max-w-3xl mx-auto space-y-8">
@@ -128,36 +128,32 @@ function SurveyForm() {
 
       <div>
         <label className={labelClass}>What&apos;s your #1 frustration with sermon content?</label>
-        <textarea name="painPoint" rows={3} className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#E8725A] transition-colors placeholder-white/30 resize-none" placeholder="Tell us what's holding you back..." />
+        <textarea name="painPoint" rows={3} className="w-full bg-white border border-[#2D2D2D]/15 rounded-xl px-4 py-3 text-[#2D2D2D] text-sm focus:outline-none focus:border-[#E8725A] transition-colors placeholder-[#2D2D2D]/30 resize-none" placeholder="Tell us what's holding you back..." />
       </div>
 
       <div>
         <label className={labelClass}>Pick your top 5 most important features</label>
-        <p className="text-sm text-white/40 mb-4">{selectedFeatures.length}/5 selected</p>
-        <div className="grid md:grid-cols-2 gap-3">
+        <p className="text-sm text-[#5c5c5c]/60 mb-3">{selectedFeatures.length}/5 selected</p>
+        <div className="flex flex-wrap gap-2">
           {SURVEY_FEATURES.map((feature) => {
             const checked = selectedFeatures.includes(feature);
             const disabled = !checked && selectedFeatures.length >= 5;
             return (
-              <label
+              <button
                 key={feature}
-                className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all text-sm ${
+                type="button"
+                disabled={disabled}
+                onClick={() => toggleFeature(feature)}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
                   checked
-                    ? "bg-[#E8725A]/20 border-[#E8725A]/50 text-white"
+                    ? "bg-[#E8725A] border-[#E8725A] text-white"
                     : disabled
-                    ? "border-white/5 text-white/30 cursor-not-allowed"
-                    : "border-white/10 text-white/70 hover:border-white/20"
+                    ? "border-[#2D2D2D]/10 text-[#2D2D2D]/25 cursor-not-allowed"
+                    : "border-[#2D2D2D]/20 text-[#5c5c5c] hover:border-[#E8725A]/50 hover:text-[#E8725A]"
                 }`}
               >
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  disabled={disabled}
-                  onChange={() => toggleFeature(feature)}
-                  className="mt-0.5 accent-[#E8725A] flex-shrink-0"
-                />
-                <span>{feature}</span>
-              </label>
+                {checked && <span className="mr-1">✓</span>}{feature.split(" (")[0]}
+              </button>
             );
           })}
         </div>
@@ -178,11 +174,12 @@ function SurveyForm() {
       <div className="grid md:grid-cols-2 gap-6">
         <div>
           <label className={labelClass}>Email <span className="text-[#E8725A]">*</span></label>
-          <input type="email" name="email" required placeholder="you@church.org" className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#E8725A] transition-colors placeholder-white/30" />
+
+          <input type="email" name="email" required placeholder="you@church.org" className="w-full bg-white border border-[#2D2D2D]/15 rounded-xl px-4 py-3 text-[#2D2D2D] text-sm focus:outline-none focus:border-[#E8725A] transition-colors placeholder-[#2D2D2D]/30" />
         </div>
         <div>
           <label className={labelClass}>Name <span className="text-white/30">(optional)</span></label>
-          <input type="text" name="name" placeholder="Your name" className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#E8725A] transition-colors placeholder-white/30" />
+          <input type="text" name="name" placeholder="Your name" className="w-full bg-white border border-[#2D2D2D]/15 rounded-xl px-4 py-3 text-[#2D2D2D] text-sm focus:outline-none focus:border-[#E8725A] transition-colors placeholder-[#2D2D2D]/30" />
         </div>
       </div>
 
@@ -197,7 +194,7 @@ function SurveyForm() {
           {submitting ? "Submitting..." : "Join Early Access"}
           {!submitting && <ArrowRight className="w-5 h-5" />}
         </button>
-        <p className="text-sm text-white/30 mt-4">We&apos;ll never spam you. Unsubscribe anytime.</p>
+        <p className="text-sm text-[#5c5c5c]/50 mt-4">We&apos;ll never spam you. Unsubscribe anytime.</p>
       </div>
     </form>
   );
@@ -371,6 +368,25 @@ export default function Home() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Early Access Survey Section */}
+      <section id="pricing" className="py-24 bg-[#F5F1EB] px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <span className="inline-block px-4 py-2 rounded-full bg-[#E8725A]/10 text-[#E8725A] text-sm font-medium mb-4">
+              Early Access
+            </span>
+            <h2 className="text-3xl md:text-4xl font-bold text-[#2D2D2D] mb-4">
+              Help us build the perfect tool for your church
+            </h2>
+            <p className="text-lg text-[#5c5c5c] max-w-xl mx-auto">
+              Tell us what matters most. Early access members get priority — plus a founding member discount.
+            </p>
+          </div>
+
+          <SurveyForm />
         </div>
       </section>
 
@@ -719,25 +735,6 @@ export default function Home() {
         </div>
       </section>
       */}
-
-      {/* Early Access Survey Section */}
-      <section id="pricing" className="py-24 bg-[#2D2D2D] px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <span className="inline-block px-4 py-2 rounded-full bg-[#E8725A]/20 text-[#E8725A] text-sm font-medium mb-4">
-              Early Access
-            </span>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Help us build the perfect tool for your church
-            </h2>
-            <p className="text-lg text-white/60 max-w-xl mx-auto">
-              Tell us what matters most to you. Early access members get priority when we launch — plus a founding member discount.
-            </p>
-          </div>
-
-          <SurveyForm />
-        </div>
-      </section>
 
       {/* FAQ Section */}
       <section id="faq" className="py-24 px-6 lg:px-8">
