@@ -74,10 +74,11 @@ export async function POST(request: Request) {
       { success: true, message: 'Subscription successful!', data },
       { status: 200 }
     );
-  } catch (error) {
-    console.error('Subscription error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('Subscription error:', message);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: message || 'Internal server error' },
       { status: 500 }
     );
   }
