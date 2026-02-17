@@ -1,6 +1,6 @@
 /**
  * Maps our ProcessingOptions → Mosaic update_params for tile configuration.
- * Everything flows through `update_params` on POST /v1/agents/{id}/runs.
+ * Everything flows through `update_params` on POST /agent/{id}/run.
  */
 import type {
   ProcessingOptions,
@@ -208,24 +208,35 @@ export function buildMosaicUpdateParams(
   }
 
   // --- Watermark tile (from branding) ---
-  if (branding?.watermarkUrl) {
-    params.watermark = {
-      image_url: branding.watermarkUrl,
+  if (branding?.watermarkImageId || branding?.watermarkUrl) {
+    const watermarkParams: Record<string, unknown> = {
       position: branding.watermarkPosition ?? "bottom-right",
       ...(branding.watermarkSize != null ? { size_percent: branding.watermarkSize } : {}),
       ...(branding.watermarkOpacity != null ? { opacity: branding.watermarkOpacity } : {}),
       ...(branding.watermarkMargin != null ? { margin_px: branding.watermarkMargin } : {}),
     };
+
+    if (branding.watermarkImageId) {
+      watermarkParams.image_id = branding.watermarkImageId;
+    } else if (branding.watermarkUrl) {
+      watermarkParams.image_url = branding.watermarkUrl;
+    }
+
+    params.watermark = watermarkParams;
   }
 
   // --- Intro tile (from branding) ---
-  if (branding?.introVideoUrl) {
-    params.intro = { intro_video_url: branding.introVideoUrl };
+  if (branding?.introVideoId || branding?.introVideoUrl) {
+    params.intro = branding.introVideoId
+      ? { video_id: branding.introVideoId }
+      : { intro_video_url: branding.introVideoUrl };
   }
 
   // --- Outro tile (from branding) ---
-  if (branding?.outroVideoUrl) {
-    params.outro = { outro_video_url: branding.outroVideoUrl };
+  if (branding?.outroVideoId || branding?.outroVideoUrl) {
+    params.outro = branding.outroVideoId
+      ? { video_id: branding.outroVideoId }
+      : { outro_video_url: branding.outroVideoUrl };
   }
 
   // --- Destination tile (social publishing) ---

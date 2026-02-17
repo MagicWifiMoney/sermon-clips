@@ -59,6 +59,7 @@ export async function POST(request: NextRequest) {
 
       case "RUN_FINISHED":
         if (status === "completed" && outputs && outputs.length > 0) {
+          const validOutputs = outputs.filter((output) => Boolean(output.video_url));
           await prisma.$transaction([
             prisma.sermon.update({
               where: { id: sermon.id },
@@ -68,12 +69,12 @@ export async function POST(request: NextRequest) {
               where: { id: sermon.userId },
               data: { sermonsProcessed: { increment: 1 } },
             }),
-            ...outputs.map((output) =>
+            ...validOutputs.map((output) =>
               prisma.clip.create({
                 data: {
                   sermonId: sermon.id,
-                  videoUrl: output.video_url,
-                  thumbnailUrl: output.thumbnail_url,
+                  videoUrl: output.video_url as string,
+                  thumbnailUrl: output.thumbnail_url ?? "",
                 },
               })
             ),

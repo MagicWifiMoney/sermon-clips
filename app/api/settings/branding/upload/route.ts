@@ -65,27 +65,28 @@ export async function PUT(request: NextRequest) {
       ? await finalizeVideoUpload(assetId)
       : await finalizeImageUpload(assetId);
 
-    const url = isVideo
-      ? (result as { video_url: string }).video_url
-      : (result as { image_url: string }).image_url;
+    // Upload finalize returns IDs; store those for update_params usage.
+    const finalizedAssetId = isVideo ? result.video_id : result.image_id;
 
-    // Update the user's branding config with the new URL
+    // Update the user's branding config with the new asset ID
     const currentConfig = (user.brandingConfig as BrandingConfig) ?? {};
-    const fieldMap: Record<AssetType, keyof BrandingConfig> = {
-      logo: "logoUrl",
-      watermark: "watermarkUrl",
-      intro: "introVideoUrl",
-      outro: "outroVideoUrl",
+    const idFieldMap: Record<AssetType, keyof BrandingConfig> = {
+      logo: "logoImageId",
+      watermark: "watermarkImageId",
+      intro: "introVideoId",
+      outro: "outroVideoId",
     };
 
-    const updatedConfig = { ...currentConfig, [fieldMap[assetType]]: url };
+    const updatedConfig = { ...currentConfig, [idFieldMap[assetType]]: finalizedAssetId };
 
     await prisma.user.update({
       where: { id: user.id },
       data: { brandingConfig: updatedConfig as unknown as Prisma.InputJsonValue },
     });
 
-    return NextResponse.json({ data: { url, assetType } });
+    return NextResponse.json({
+      data: { assetId: finalizedAssetId, assetType, message: "Upload finalized and linked." },
+    });
   } catch (error) {
     console.error("[Branding Upload] Failed to finalize:", error);
     return NextResponse.json({ error: "Failed to finalize upload" }, { status: 500 });

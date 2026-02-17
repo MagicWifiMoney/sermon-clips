@@ -39,7 +39,10 @@ export function BrandingSettings({ initialConfig }: BrandingSettingsProps) {
         body: JSON.stringify(config),
       });
       if (!res.ok) throw new Error("Failed to save branding settings");
-      posthog.capture("branding_saved", { has_logo: !!config.logoUrl, has_watermark: !!config.watermarkUrl });
+      posthog.capture("branding_saved", {
+        has_logo: !!config.logoUrl || !!config.logoImageId,
+        has_watermark: !!config.watermarkUrl || !!config.watermarkImageId,
+      });
       toast.success("Branding settings saved!");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Something went wrong");
@@ -82,13 +85,13 @@ export function BrandingSettings({ initialConfig }: BrandingSettingsProps) {
       const { data: result } = await finalizeRes.json();
 
       // Update local state
-      const fieldMap: Record<string, keyof BrandingConfig> = {
-        logo: "logoUrl",
-        watermark: "watermarkUrl",
-        intro: "introVideoUrl",
-        outro: "outroVideoUrl",
+      const idFieldMap: Record<string, keyof BrandingConfig> = {
+        logo: "logoImageId",
+        watermark: "watermarkImageId",
+        intro: "introVideoId",
+        outro: "outroVideoId",
       };
-      update({ [fieldMap[assetType]]: result.url });
+      update({ [idFieldMap[assetType]]: result.assetId });
       toast.success(`${assetType} uploaded!`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Upload failed");

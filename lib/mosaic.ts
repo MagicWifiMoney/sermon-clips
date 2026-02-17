@@ -17,13 +17,13 @@ const MOSAIC_AGENT_ID = process.env.MOSAIC_AGENT_ID ?? "";
 
 export interface MosaicRunResponse {
   run_id: string;
-  status: string;
+  status?: string;
 }
 
 export interface MosaicClipOutput {
-  video_url: string;
-  thumbnail_url: string;
-  original_node_id: string;
+  video_url: string | null;
+  thumbnail_url: string | null;
+  original_node_id: string | null;
 }
 
 export interface MosaicWebhookPayload {
@@ -74,7 +74,7 @@ export interface MosaicPublishResponse {
 // ---- LIVE: Agent Runs (via Mosaic API) ----
 
 export async function startSermonProcessing(
-  videoUrl: string,
+  input: string | { videoUrl?: string; videoId?: string },
   callbackUrl: string,
   options?: {
     processingOptions?: ProcessingOptions;
@@ -96,7 +96,12 @@ export async function startSermonProcessing(
     );
   }
 
-  return runAgent(MOSAIC_AGENT_ID, [videoUrl], callbackUrl, updateParams);
+  const videoUrl = typeof input === "string" ? input : input.videoUrl;
+  const videoId = typeof input === "string" ? undefined : input.videoId;
+  const videoUrls = videoUrl ? [videoUrl] : [];
+  const videoIds = videoId ? [videoId] : undefined;
+
+  return runAgent(MOSAIC_AGENT_ID, videoUrls, callbackUrl, updateParams, videoIds);
 }
 
 export async function getRunStatus(runId: string): Promise<{ run_id: string; status: string; progress: number }> {
@@ -105,7 +110,7 @@ export async function getRunStatus(runId: string): Promise<{ run_id: string; sta
   const total = counts.completed + counts.in_progress + counts.failed;
   const progress = total > 0 ? Math.round((counts.completed / total) * 100) : 0;
 
-  return { run_id: run.run_id, status: run.status, progress };
+  return { run_id: run.run_id ?? runId, status: run.status, progress };
 }
 
 // ---- LIVE: Uploads (via Mosaic API) ----
@@ -125,9 +130,9 @@ export async function getUploadUrl(): Promise<{
   };
 }
 
-export async function finalizeUpload(videoId: string): Promise<{ video_url: string }> {
+export async function finalizeUpload(videoId: string): Promise<{ video_id: string }> {
   const res = await finalizeVideoUpload(videoId);
-  return { video_url: res.video_url };
+  return { video_id: res.video_id };
 }
 
 export async function getAudioUploadUrlWrapper(): Promise<{
@@ -145,9 +150,9 @@ export async function getAudioUploadUrlWrapper(): Promise<{
   };
 }
 
-export async function finalizeAudioUploadWrapper(audioId: string): Promise<{ audio_url: string }> {
+export async function finalizeAudioUploadWrapper(audioId: string): Promise<{ audio_id: string }> {
   const res = await finalizeAudioUpload(audioId);
-  return { audio_url: res.audio_url };
+  return { audio_id: res.audio_id };
 }
 
 // ---- LIVE: YouTube Triggers (via Mosaic API) ----
@@ -158,7 +163,10 @@ export async function registerYouTubeTrigger(
 ): Promise<MosaicTriggerResponse> {
   const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/mosaic`;
   const res = await addYouTubeChannels(agentId, [channelId], callbackUrl);
-  return { trigger_id: res.trigger_id, status: res.status };
+  return {
+    trigger_id: res.trigger_id ?? res.channel_ids?.[0] ?? channelId,
+    status: res.status ?? "configured",
+  };
 }
 
 export async function removeYouTubeTrigger(
