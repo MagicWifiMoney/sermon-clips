@@ -27,7 +27,7 @@ export async function POST(request: Request) {
 
     // Send welcome email
     const { data, error } = await getResend().emails.send({
-      from: 'Sermon Clips <hello@dogbathroomart.com>', // TODO: Update to hello@sermon-clips.com when domain is added
+      from: 'Sermon Clips <hello@sermon-clips.com>',
       to: [email],
       subject: 'Welcome to Sermon Clips — Get Your First 3 Clips Free',
       react: WelcomeEmail({ email }),
