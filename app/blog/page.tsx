@@ -9,12 +9,52 @@ export const metadata = {
 export default function BlogIndex() {
   const posts = [
     {
+      slug: 'how-to-make-sermon-clips-for-social-media',
+      title: 'How to Make Sermon Clips for Social Media (Step-by-Step Guide for 2026)',
+      excerpt: 'Your Sunday sermon reaches 200 people. But what if it could reach 2,000? Or 20,000? This guide shows you exactly how to turn your sermons into engaging social media clips that multiply your message.',
+      date: 'February 2026',
+      readTime: '12 min read',
+      featured: true,
+    },
+    {
+      slug: 'church-social-media-strategy-repurpose-sermon',
+      title: 'Church Social Media Strategy: 10 Ways to Repurpose Your Sunday Sermon',
+      excerpt: 'Your pastor spends 10-15 hours preparing each sermon. Then it\'s delivered once and forgotten. This guide shows you how to extract 10+ pieces of content from every sermon—without starting from scratch.',
+      date: 'February 2026',
+      readTime: '14 min read',
+      featured: true,
+    },
+    {
+      slug: 'sermon-notes-to-social-media-ai',
+      title: 'Sermon Notes to Social Media: How AI Turns Your Message Into Shareable Content',
+      excerpt: 'Your sermon notes contain everything you need for a week of social media content. AI can now extract and format all of it automatically. Here\'s how it works and why it\'s changing church communications.',
+      date: 'February 2026',
+      readTime: '10 min read',
+      featured: false,
+    },
+    {
+      slug: 'short-form-video-for-churches',
+      title: 'Short-Form Video for Churches: Why Reels, Shorts & TikTok Matter in 2026',
+      excerpt: '73% of churchgoers discover new churches through social media. Here\'s why short-form video is the #1 tool for church growth in 2026—and how to start without overwhelming your team.',
+      date: 'February 2026',
+      readTime: '11 min read',
+      featured: false,
+    },
+    {
+      slug: 'church-video-editing-guide',
+      title: 'The Complete Guide to Church Video Editing (Even If You\'re Not Technical)',
+      excerpt: 'No video editing experience? No problem. This guide covers everything church staff need to know about creating professional sermon clips and church videos.',
+      date: 'February 2026',
+      readTime: '13 min read',
+      featured: false,
+    },
+    {
       slug: 'how-to-create-sermon-clips',
       title: 'The Complete Guide to Creating Sermon Clips for Social Media in 2026',
       excerpt: 'Transform your Sunday messages into engaging, shareable video clips. This comprehensive guide covers everything from selecting the perfect moments to optimizing for each platform.',
       date: 'February 2026',
       readTime: '15 min read',
-      featured: true,
+      featured: false,
     },
     {
       slug: 'sermon-shots-vs-pulpit-ai-vs-gloo-comparison',
