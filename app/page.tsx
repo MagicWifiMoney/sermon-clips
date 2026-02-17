@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from "react";
 import {
   CheckCircle2, Upload, Wand2, Share2, Play, ArrowRight, ChevronDown,
   Sparkles, Clock, Brain, Film, Music, Palette,
@@ -8,6 +9,199 @@ import {
   Timer, Mic, Video, LayoutGrid, CalendarClock, Sliders
 } from "lucide-react";
 import EmailCapturePopup from "@/components/EmailCapturePopup";
+
+const SURVEY_FEATURES = [
+  "AI moment detection (auto-find clip-worthy moments)",
+  "Dynamic captions & subtitles",
+  "Multi-format output (vertical, horizontal, square)",
+  "Branded intro/outro & watermark",
+  "Auto-posting to social platforms",
+  "YouTube auto-trigger (upload → clips auto-generated)",
+  "Drip scheduling (spread clips across the week)",
+  "AI B-roll & background music",
+  "Silence & filler word removal",
+  "Audio enhancement & mixing",
+  "Dynamic zoom & color correction",
+  "Sermon-to-blog post generation",
+  "Audiogram creation (audio + waveform graphics)",
+  "Multi-campus branding (different logos per location)",
+  "30+ language translation",
+  "AI voiceover & avatar overlays",
+  "Analytics & ROI tracking",
+  "Processing templates (save your style)",
+  "Approval workflow (pastor reviews before posting)",
+  "A/B testing (multiple hooks/captions per clip)",
+];
+
+function SurveyForm() {
+  const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
+  const [error, setError] = useState("");
+
+  const toggleFeature = (feature: string) => {
+    setSelectedFeatures((prev) => {
+      if (prev.includes(feature)) return prev.filter((f) => f !== feature);
+      if (prev.length >= 5) return prev;
+      return [...prev, feature];
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError("");
+    setSubmitting(true);
+    const form = e.currentTarget;
+    const data = {
+      role: (form.elements.namedItem("role") as HTMLSelectElement).value,
+      churchSize: (form.elements.namedItem("churchSize") as HTMLSelectElement).value,
+      currentMethod: (form.elements.namedItem("currentMethod") as HTMLSelectElement).value,
+      painPoint: (form.elements.namedItem("painPoint") as HTMLTextAreaElement).value,
+      topFeatures: selectedFeatures,
+      budget: (form.elements.namedItem("budget") as HTMLSelectElement).value,
+      email: (form.elements.namedItem("email") as HTMLInputElement).value,
+      name: (form.elements.namedItem("name") as HTMLInputElement).value,
+    };
+    try {
+      const res = await fetch("/api/survey", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+      if (!res.ok) throw new Error("Failed");
+      setSubmitted(true);
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (submitted) {
+    return (
+      <div className="text-center py-16">
+        <div className="w-20 h-20 rounded-full bg-[#E8725A]/20 flex items-center justify-center mx-auto mb-6">
+          <CheckCircle2 className="w-10 h-10 text-[#E8725A]" />
+        </div>
+        <h3 className="text-2xl font-bold text-white mb-3">You&apos;re on the list!</h3>
+        <p className="text-white/60 max-w-md mx-auto">Thank you for your feedback. We&apos;ll notify you as soon as early access opens. Your input is shaping what we build.</p>
+      </div>
+    );
+  }
+
+  const selectClass = "w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#E8725A] transition-colors [&>option]:text-[#2D2D2D]";
+  const labelClass = "block text-sm font-medium text-white mb-2";
+
+  return (
+    <form onSubmit={handleSubmit} className="max-w-3xl mx-auto space-y-8">
+      <div className="grid md:grid-cols-2 gap-6">
+        <div>
+          <label className={labelClass}>Your Role</label>
+          <select name="role" required className={selectClass}>
+            <option value="">Select your role...</option>
+            <option>Pastor</option>
+            <option>Media/Communications Director</option>
+            <option>Social Media Manager</option>
+            <option>Volunteer</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div>
+          <label className={labelClass}>Church Size</label>
+          <select name="churchSize" required className={selectClass}>
+            <option value="">Select size...</option>
+            <option>Under 100</option>
+            <option>100-500</option>
+            <option>500-1000</option>
+            <option>1000-5000</option>
+            <option>5000+</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label className={labelClass}>How do you currently create sermon clips?</label>
+        <select name="currentMethod" required className={selectClass}>
+          <option value="">Select method...</option>
+          <option>Manual editing</option>
+          <option>Outsource to freelancer</option>
+          <option>Use a tool (which one?)</option>
+          <option>Don&apos;t create clips yet</option>
+        </select>
+      </div>
+
+      <div>
+        <label className={labelClass}>What&apos;s your #1 frustration with sermon content?</label>
+        <textarea name="painPoint" rows={3} className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#E8725A] transition-colors placeholder-white/30 resize-none" placeholder="Tell us what's holding you back..." />
+      </div>
+
+      <div>
+        <label className={labelClass}>Pick your top 5 most important features</label>
+        <p className="text-sm text-white/40 mb-4">{selectedFeatures.length}/5 selected</p>
+        <div className="grid md:grid-cols-2 gap-3">
+          {SURVEY_FEATURES.map((feature) => {
+            const checked = selectedFeatures.includes(feature);
+            const disabled = !checked && selectedFeatures.length >= 5;
+            return (
+              <label
+                key={feature}
+                className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all text-sm ${
+                  checked
+                    ? "bg-[#E8725A]/20 border-[#E8725A]/50 text-white"
+                    : disabled
+                    ? "border-white/5 text-white/30 cursor-not-allowed"
+                    : "border-white/10 text-white/70 hover:border-white/20"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  disabled={disabled}
+                  onChange={() => toggleFeature(feature)}
+                  className="mt-0.5 accent-[#E8725A] flex-shrink-0"
+                />
+                <span>{feature}</span>
+              </label>
+            );
+          })}
+        </div>
+      </div>
+
+      <div>
+        <label className={labelClass}>Monthly budget for a tool like this?</label>
+        <select name="budget" required className={selectClass}>
+          <option value="">Select budget...</option>
+          <option>Free only</option>
+          <option>Under $50/mo</option>
+          <option>$50-100/mo</option>
+          <option>$100-200/mo</option>
+          <option>$200+/mo</option>
+        </select>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        <div>
+          <label className={labelClass}>Email <span className="text-[#E8725A]">*</span></label>
+          <input type="email" name="email" required placeholder="you@church.org" className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#E8725A] transition-colors placeholder-white/30" />
+        </div>
+        <div>
+          <label className={labelClass}>Name <span className="text-white/30">(optional)</span></label>
+          <input type="text" name="name" placeholder="Your name" className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#E8725A] transition-colors placeholder-white/30" />
+        </div>
+      </div>
+
+      {error && <p className="text-red-400 text-sm">{error}</p>}
+
+      <div className="text-center pt-4">
+        <button
+          type="submit"
+          disabled={submitting}
+          className="bg-[#E8725A] hover:bg-[#d4654f] disabled:opacity-50 text-white px-10 py-4 rounded-full font-medium text-lg transition-all hover:shadow-xl hover:shadow-[#E8725A]/30 inline-flex items-center gap-2"
+        >
+          {submitting ? "Submitting..." : "Join Early Access"}
+          {!submitting && <ArrowRight className="w-5 h-5" />}
+        </button>
+        <p className="text-sm text-white/30 mt-4">We&apos;ll never spam you. Unsubscribe anytime.</p>
+      </div>
+    </form>
+  );
+}
 
 export default function Home() {
   return (
@@ -33,7 +227,7 @@ export default function Home() {
             <a href="/for" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">For</a>
             <a href="/use-cases" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">Use Cases</a>
             <a href="#features" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">Features</a>
-            <a href="#pricing" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">Pricing</a>
+            <a href="#pricing" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">Early Access</a>
             <a href="/about" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">About</a>
             <a href="/mission" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">Mission</a>
           </div>
@@ -526,120 +720,22 @@ export default function Home() {
       </section>
       */}
 
-      {/* Pricing Section */}
+      {/* Early Access Survey Section */}
       <section id="pricing" className="py-24 bg-[#2D2D2D] px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <span className="inline-block px-4 py-2 rounded-full bg-[#E8725A]/20 text-[#E8725A] text-sm font-medium mb-4">
-              Pricing
+              Early Access
             </span>
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Simple, transparent pricing
+              Help us build the perfect tool for your church
             </h2>
             <p className="text-lg text-white/60 max-w-xl mx-auto">
-              Process your first sermon completely free. See your clips in minutes.
-            </p>
-            <p className="text-sm text-white/40">
-              No contracts. No surprises. Cancel anytime.
+              Tell us what matters most to you. Early access members get priority when we launch — plus a founding member discount.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {/* Starter */}
-            <div className="p-8 rounded-3xl bg-white/5 border border-white/10">
-              <h3 className="text-xl font-bold text-white mb-1">Starter</h3>
-              <p className="text-white/50 text-sm mb-6">For small churches</p>
-              <div className="mb-8">
-                <span className="text-5xl font-bold text-white">$29</span>
-                <span className="text-white/50">/mo</span>
-              </div>
-              <ul className="space-y-4 mb-8">
-                {[
-                  "4 sermons/month",
-                  "3 clips per sermon",
-                  "1 format (vertical)",
-                  "Dynamic captions",
-                  "AI moment detection",
-                  "Audio enhancement",
-                ].map((item, i) => (
-                  <li key={i} className="flex items-center gap-3 text-white/70 text-sm">
-                    <CheckCircle2 className="w-5 h-5 text-[#E8725A] flex-shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <a href="/sign-up" className="block w-full py-3 rounded-full border border-white/20 text-white hover:bg-white/10 transition-colors font-medium text-center">
-                Try Free — No Card Required
-              </a>
-            </div>
-
-            {/* Growth - Featured */}
-            <div className="p-8 rounded-3xl bg-[#E8725A] relative scale-105 shadow-2xl shadow-[#E8725A]/30">
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-white text-[#E8725A] text-xs font-bold rounded-full uppercase tracking-wider">
-                Most Popular
-              </div>
-              <h3 className="text-xl font-bold text-white mb-1">Growth</h3>
-              <p className="text-white/70 text-sm mb-6">For growing churches</p>
-              <div className="mb-8">
-                <span className="text-5xl font-bold text-white">$59</span>
-                <span className="text-white/70">/mo</span>
-              </div>
-              <ul className="space-y-4 mb-8">
-                {[
-                  "8 sermons/month",
-                  "5 clips per sermon",
-                  "3 formats (9:16, 16:9, 1:1)",
-                  "AI B-Roll & background music",
-                  "Dynamic zoom & color correction",
-                  "Branded intro/outro & watermark",
-                  "Silence & filler removal",
-                  "Processing templates",
-                ].map((item, i) => (
-                  <li key={i} className="flex items-center gap-3 text-white text-sm">
-                    <CheckCircle2 className="w-5 h-5 text-white flex-shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <a href="/sign-up" className="block w-full py-3 rounded-full bg-white text-[#E8725A] hover:bg-white/90 transition-colors font-bold text-center">
-                Try Free — No Card Required
-              </a>
-            </div>
-
-            {/* Auto-Pilot */}
-            <div className="p-8 rounded-3xl bg-white/5 border border-white/10">
-              <h3 className="text-xl font-bold text-white mb-1">Auto-Pilot</h3>
-              <p className="text-white/50 text-sm mb-6">Full automation</p>
-              <div className="mb-8">
-                <span className="text-5xl font-bold text-white">$149</span>
-                <span className="text-white/50">/mo</span>
-              </div>
-              <ul className="space-y-4 mb-8">
-                {[
-                  "Unlimited sermons",
-                  "10+ clips per sermon",
-                  "All formats + montage builder",
-                  "YouTube auto-trigger",
-                  "Auto-posting to 6 platforms",
-                  "Drip scheduling",
-                  "AI voiceover & avatar",
-                  "30+ language translation",
-                ].map((item, i) => (
-                  <li key={i} className="flex items-center gap-3 text-white/70 text-sm">
-                    <CheckCircle2 className="w-5 h-5 text-[#E8725A] flex-shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <a href="/sign-up" className="block w-full py-3 rounded-full border border-white/20 text-white hover:bg-white/10 transition-colors font-medium text-center">
-                Try Free — No Card Required
-              </a>
-            </div>
-          </div>
-
-          <p className="text-center text-white/50 mt-10">
-            Your first sermon is free — no credit card required
-          </p>
+          <SurveyForm />
         </div>
       </section>
 
@@ -749,7 +845,7 @@ export default function Home() {
               <ul className="space-y-3 text-sm">
                 <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
                 <li><a href="#how-it-works" className="hover:text-white transition-colors">How It Works</a></li>
-                <li><a href="#pricing" className="hover:text-white transition-colors">Pricing</a></li>
+                <li><a href="#pricing" className="hover:text-white transition-colors">Early Access</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Examples</a></li>
               </ul>
             </div>
