@@ -567,22 +567,22 @@ export default function Home() {
                 icon: Church,
                 title: "Small Churches",
                 pain: "No media team? No budget for a video editor?",
-                solution: "Upload your sermon and get polished clips in minutes. No expertise needed. Starting at $29/mo.",
-                cta: "See Starter Plan",
+                solution: "Upload your sermon and get polished clips in minutes. No expertise needed.",
+                cta: "Join Early Access",
               },
               {
                 icon: Users,
                 title: "Growing Churches",
                 pain: "Multiple services, multiple pastors, one overwhelmed comms person?",
                 solution: "Dynamic zoom, color correction, branded intros, and 5 clips per sermon across 3 formats. Scale without hiring.",
-                cta: "See Growth Plan",
+                cta: "Join Early Access",
               },
               {
                 icon: Megaphone,
                 title: "Comms Directors",
                 pain: "Need auto-posting, scheduling, and full automation?",
                 solution: "Auto-Pilot handles everything — YouTube auto-trigger, drip scheduling, auto-posting to 6 platforms, and 10+ clips per sermon.",
-                cta: "See Auto-Pilot Plan",
+                cta: "Join Early Access",
               },
             ].map((useCase, i) => (
               <div key={i} className="p-8 rounded-3xl bg-white border border-[#E8E4DC] hover:border-[#E8725A]/30 hover:shadow-xl transition-all flex flex-col">
