@@ -223,7 +223,7 @@ export default function Home() {
           <div className="hidden md:flex items-center gap-10">
             <a href="/for" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">For</a>
             <a href="/use-cases" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">Use Cases</a>
-            <a href="#features" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">Features</a>
+            <a href="#how-it-works" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">How It Works</a>
             <a href="#pricing" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">Early Access</a>
             <a href="/about" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">About</a>
             <a href="/mission" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">Mission</a>
@@ -465,124 +465,6 @@ export default function Home() {
                 ))}
               </ul>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Platform Features Grid */}
-      <section id="features" className="py-24 bg-[#2D2D2D]">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <span className="inline-block px-4 py-2 rounded-full bg-[#E8725A]/20 text-[#E8725A] text-sm font-medium mb-4">
-              Platform Features
-            </span>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Everything your media team wishes they had
-            </h2>
-            <p className="text-lg text-white/60 max-w-2xl mx-auto">
-              30+ AI-powered tools built specifically for sermon content.
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              {
-                icon: Brain,
-                title: "AI Moment Detection",
-                desc: "AI watches your entire sermon and flags the most clip-worthy moments — emotional peaks, quotable lines, and key takeaways."
-              },
-              {
-                icon: Type,
-                title: "Dynamic Captions",
-                desc: "Word-perfect captions with custom colors, fonts, and positioning. Styled to match the energy of each moment."
-              },
-              {
-                icon: Maximize2,
-                title: "Multi-Format Export",
-                desc: "One upload — vertical (9:16), landscape (16:9), and square (1:1) clips. Smart reframing keeps the speaker centered."
-              },
-              {
-                icon: Film,
-                title: "AI B-Roll",
-                desc: "Automatically add visuals that match your dialogue from 30,000+ stock assets. No more static talking heads."
-              },
-              {
-                icon: Music,
-                title: "AI Background Music",
-                desc: "AI-composed soundtracks matched to mood, genre, and BPM. From reverent to uplifting — no licensing headaches."
-              },
-              {
-                icon: Volume2,
-                title: "Audio Enhancement",
-                desc: "AI noise removal makes even phone recordings and gym-turned-sanctuary audio sound studio-quality."
-              },
-              {
-                icon: Video,
-                title: "Dynamic Zoom",
-                desc: "Speaker-tracking zoom for static camera shots. Adds professional movement and energy to any footage."
-              },
-              {
-                icon: Palette,
-                title: "Color Correction",
-                desc: "One-click presets: Golden Hour, Filmic, Vibrant, Cool Tones, Neutral Clean. Instant cinematic look."
-              },
-              {
-                icon: Layers,
-                title: "Motion Graphics",
-                desc: "Animated overlays and lower thirds that make your clips pop. Professional polish without After Effects."
-              },
-              {
-                icon: Scissors,
-                title: "Silence & Filler Removal",
-                desc: "Automatically cuts 'um', 'uh', and dead air. Tighter pacing, better watch time."
-              },
-              {
-                icon: Sliders,
-                title: "Rough Cut Editing",
-                desc: "Prompt-guided editing with target duration and mood. Tell the AI what you want and it builds the cut."
-              },
-              {
-                icon: Mic,
-                title: "AI Voiceover & Avatar",
-                desc: "Generate voiceovers in multiple languages with voice selection, or create AI avatar presentations."
-              },
-              {
-                icon: LayoutGrid,
-                title: "Montage Builder",
-                desc: "Combine multiple clips with transitions into sermon highlight reels. Perfect for series recaps."
-              },
-              {
-                icon: Languages,
-                title: "30+ Language Translation",
-                desc: "AI dubbing and translation to reach your global congregation in their native language."
-              },
-              {
-                icon: Youtube,
-                title: "YouTube Auto-Trigger",
-                desc: "Connect your YouTube channel and clips are generated automatically when new sermons upload. Zero manual work."
-              },
-              {
-                icon: Share2,
-                title: "Social Publishing",
-                desc: "Post directly to TikTok, Instagram, YouTube, Facebook, X, and LinkedIn. Review first or auto-publish."
-              },
-              {
-                icon: CalendarClock,
-                title: "Drip Scheduling",
-                desc: "Auto-space clips across days and platforms. Keep your feeds active all week from one Sunday sermon."
-              },
-              {
-                icon: Settings,
-                title: "Processing Templates",
-                desc: "Save your preferred settings and reuse them. Consistent branding across every clip, every week."
-              },
-            ].map((feature, i) => (
-              <div key={i} className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-[#E8725A]/30 transition-all hover:bg-white/[0.07] group">
-                <feature.icon className="w-8 h-8 text-[#E8725A] mb-4 group-hover:scale-110 transition-transform" />
-                <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
-                <p className="text-white/50 text-sm leading-relaxed">{feature.desc}</p>
-              </div>
-            ))}
           </div>
         </div>
       </section>
