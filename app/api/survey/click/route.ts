@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 
-const TALLY_FORM_URL = process.env.TALLY_FORM_URL || 'https://tally.so/r/ZjNRPy';
+const TALLY_FORM_URL = process.env.TALLY_FORM_URL || 'https://tally.so/r/9qWJpY';
 
 export async function GET(req: NextRequest) {
   const userId = req.nextUrl.searchParams.get('uid');
