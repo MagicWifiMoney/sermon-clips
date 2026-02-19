@@ -22,20 +22,30 @@ export async function POST(req: NextRequest) {
     const budget = getField('budget');
 
     if (email) {
-      await prisma.user.upsert({
-        where: { email },
-        update: {
-          name: name || undefined,
-          surveyClickedAt: new Date(),
-          surveyData: JSON.stringify({ role, churchSize, currentMethod, painPoint, topFeatures, budget }),
-        },
-        create: {
-          email,
-          name: name || null,
-          surveyClickedAt: new Date(),
-          surveyData: JSON.stringify({ role, churchSize, currentMethod, painPoint, topFeatures, budget }),
-        },
-      });
+      const surveyJson = JSON.stringify({ role, churchSize, currentMethod, painPoint, topFeatures, budget });
+
+      // Try to update existing user first; if not found, create with a placeholder clerkId
+      const existing = await prisma.user.findUnique({ where: { email } });
+      if (existing) {
+        await prisma.user.update({
+          where: { email },
+          data: {
+            name: name || undefined,
+            surveyClickedAt: new Date(),
+            surveyData: surveyJson,
+          },
+        });
+      } else {
+        await prisma.user.create({
+          data: {
+            clerkId: `tally_${Date.now()}`,
+            email,
+            name: name || null,
+            surveyClickedAt: new Date(),
+            surveyData: surveyJson,
+          },
+        });
+      }
     }
 
     return NextResponse.json({ ok: true });
