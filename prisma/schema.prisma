@@ -26,6 +26,10 @@ model User {
   montages                Montage[]
   campuses                Campus[]
   courses                 Course[]
+  surveyClickedAt         DateTime?
+  surveyCompletedAt       DateTime?
+  surveyRemindersSent     Int                  @default(0)
+  lastSurveyReminderAt    DateTime?
   createdAt               DateTime             @default(now())
   updatedAt               DateTime             @updatedAt
 }
