@@ -1,9 +1,10 @@
 import { prisma } from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 
+const TALLY_FORM_URL = process.env.TALLY_FORM_URL || 'https://tally.so/r/ZjNRPy';
+
 export async function GET(req: NextRequest) {
   const userId = req.nextUrl.searchParams.get('uid');
-  const surveyUrl = process.env.SURVEY_URL || 'https://forms.gle/placeholder';
 
   if (userId) {
     await prisma.user.update({
@@ -12,5 +13,5 @@ export async function GET(req: NextRequest) {
     }).catch(() => {}); // don't block redirect on DB errors
   }
 
-  return NextResponse.redirect(surveyUrl);
+  return NextResponse.redirect(TALLY_FORM_URL);
 }
