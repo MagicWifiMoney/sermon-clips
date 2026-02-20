@@ -31,6 +31,7 @@ model User {
   surveyRemindersSent     Int                  @default(0)
   surveyData              String?
   lastSurveyReminderAt    DateTime?
+  surveyResponses         SurveyResponse[]
   createdAt               DateTime             @default(now())
   updatedAt               DateTime             @updatedAt
 }
@@ -283,6 +284,26 @@ model SuggestedClip {
   createdAt DateTime @default(now())
 
   @@index([sermonId])
+}
+
+model SurveyResponse {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  name           String?
+  role           String?
+  churchSize     String?
+  currentMethod  String?
+  painPoint      String?
+  topFeatures    String?
+  budget         String?
+  source         String   @default("tally")
+  userId         String?
+  user           User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([email])
+  @@index([userId])
 }
 
 model Course {
