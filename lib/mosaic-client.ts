@@ -56,8 +56,10 @@ async function mosaicFetch<T = unknown>(
 export interface RunAgentParams {
   video_urls: string[];
   video_ids?: string[];
+  node_render_ids?: string[];
   callback_url?: string;
   update_params?: Record<string, unknown>;
+  ignore_nodes?: string[];
 }
 
 export interface RunAgentResponse {
@@ -70,13 +72,17 @@ export async function runAgent(
   videoUrls: string[],
   callbackUrl?: string,
   updateParams?: Record<string, unknown>,
-  videoIds?: string[]
+  videoIds?: string[],
+  nodeRenderIds?: string[],
+  ignoreNodes?: string[]
 ): Promise<RunAgentResponse> {
   const payload: Record<string, unknown> = {};
   if (videoUrls.length > 0) payload.video_urls = videoUrls;
   if (videoIds && videoIds.length > 0) payload.video_ids = videoIds;
+  if (nodeRenderIds && nodeRenderIds.length > 0) payload.node_render_ids = nodeRenderIds;
   if (callbackUrl) payload.callback_url = callbackUrl;
   if (updateParams) payload.update_params = updateParams;
+  if (ignoreNodes && ignoreNodes.length > 0) payload.ignore_nodes = ignoreNodes;
 
   const res = await mosaicFetch<Record<string, unknown>>(`/agent/${agentId}/run`, {
     method: "POST",

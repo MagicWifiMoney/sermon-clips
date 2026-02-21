@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
-import { startSermonProcessing } from "@/lib/mosaic";
+import { buildMosaicWebhookCallback, startSermonProcessing } from "@/lib/mosaic";
 import type { BrandingConfig, ProcessingOptions, PublishMode } from "@/types";
 
 // POST /api/sermons/[id]/retry — re-trigger processing
@@ -46,7 +46,7 @@ export async function POST(
       },
     });
 
-    const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/mosaic`;
+    const callbackUrl = buildMosaicWebhookCallback("stage1");
     const run = await startSermonProcessing(sermon.sourceUrl, callbackUrl, {
       processingOptions: processingOptions ?? undefined,
       publishMode: (sermon.publishMode as PublishMode) ?? "review",

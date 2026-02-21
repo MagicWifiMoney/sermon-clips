@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
-import type { MosaicWebhookPayload } from "@/lib/mosaic";
+import { buildMosaicWebhookCallback, startBrandingPassFromNodeRenders, type MosaicWebhookPayload } from "@/lib/mosaic";
+import type { BrandingConfig } from "@/types";
 
 // POST /api/webhooks/mosaic — receive processing events from Mosaic
 export async function POST(request: NextRequest) {
   try {
+    const stage = request.nextUrl.searchParams.get("stage") ?? "default";
+
     // Verify webhook signature
     const signature = request.headers.get("X-Mosaic-Signature");
     const webhookSecret = process.env.MOSAIC_WEBHOOK_SECRET;
@@ -58,28 +61,7 @@ export async function POST(request: NextRequest) {
       }
 
       case "RUN_FINISHED":
-        if (status === "completed" && outputs && outputs.length > 0) {
-          const validOutputs = outputs.filter((output) => Boolean(output.video_url));
-          await prisma.$transaction([
-            prisma.sermon.update({
-              where: { id: sermon.id },
-              data: { status: "COMPLETED", progress: 100 },
-            }),
-            prisma.user.update({
-              where: { id: sermon.userId },
-              data: { sermonsProcessed: { increment: 1 } },
-            }),
-            ...validOutputs.map((output) =>
-              prisma.clip.create({
-                data: {
-                  sermonId: sermon.id,
-                  videoUrl: output.video_url as string,
-                  thumbnailUrl: output.thumbnail_url ?? "",
-                },
-              })
-            ),
-          ]);
-        } else {
+        if (!(status === "completed" && outputs && outputs.length > 0)) {
           await prisma.sermon.update({
             where: { id: sermon.id },
             data: {
@@ -88,7 +70,74 @@ export async function POST(request: NextRequest) {
               errorMessage: `Processing failed with status: ${status}`,
             },
           });
+          break;
         }
+
+        const validOutputs = outputs.filter((output) => Boolean(output.video_url));
+
+        if (stage === "stage1") {
+          const nodeRenderIds = outputs
+            .map((output) => output.id)
+            .filter((id): id is string => typeof id === "string" && id.length > 0);
+
+          if (nodeRenderIds.length === 0) {
+            await prisma.sermon.update({
+              where: { id: sermon.id },
+              data: {
+                status: "FAILED",
+                progress: 100,
+                errorMessage: "Stage 1 completed without node render IDs for stage 2",
+              },
+            });
+            break;
+          }
+
+          const user = await prisma.user.findUnique({
+            where: { id: sermon.userId },
+            select: { brandingConfig: true },
+          });
+
+          const processingOptions =
+            (sermon.processingOptions as { applyBranding?: boolean } | null) ?? null;
+          const applyBranding = Boolean(processingOptions?.applyBranding);
+          const branding = applyBranding ? ((user?.brandingConfig as BrandingConfig) ?? null) : null;
+
+          const stage2Run = await startBrandingPassFromNodeRenders(
+            nodeRenderIds,
+            buildMosaicWebhookCallback("stage2"),
+            { branding }
+          );
+
+          await prisma.sermon.update({
+            where: { id: sermon.id },
+            data: {
+              mosaicRunId: stage2Run.run_id,
+              status: "PROCESSING",
+              progress: 96,
+            },
+          });
+          break;
+        }
+
+        await prisma.$transaction([
+          prisma.sermon.update({
+            where: { id: sermon.id },
+            data: { status: "COMPLETED", progress: 100 },
+          }),
+          prisma.user.update({
+            where: { id: sermon.userId },
+            data: { sermonsProcessed: { increment: 1 } },
+          }),
+          ...validOutputs.map((output) =>
+            prisma.clip.create({
+              data: {
+                sermonId: sermon.id,
+                videoUrl: output.video_url as string,
+                thumbnailUrl: output.thumbnail_url ?? "",
+              },
+            })
+          ),
+        ]);
         break;
 
       // --- Future event handlers (for non-Mosaic services) ---

@@ -16,6 +16,56 @@ import type {
   AiVoiceoverConfig,
 } from "@/types";
 
+export type MosaicBrandingNodeIds = {
+  voiceNodeId?: string;
+  watermarkNodeId?: string;
+  introNodeId?: string;
+  outroNodeId?: string;
+};
+
+export type MosaicBrandingPassConfig = {
+  targetLanguage: string;
+  logoImageId?: string;
+  introVideoId?: string;
+  outroVideoId?: string;
+};
+
+export function buildMosaicBrandingUpdateParams(
+  nodeIds: MosaicBrandingNodeIds,
+  config: MosaicBrandingPassConfig
+): Record<string, unknown> {
+  const params: Record<string, unknown> = {};
+
+  if (nodeIds.voiceNodeId) {
+    params[nodeIds.voiceNodeId] = {
+      target_language: config.targetLanguage,
+    };
+  }
+
+  if (nodeIds.watermarkNodeId && config.logoImageId) {
+    params[nodeIds.watermarkNodeId] = {
+      use_custom_logo: "custom",
+      image_id: config.logoImageId,
+    };
+  }
+
+  if (nodeIds.introNodeId && config.introVideoId) {
+    params[nodeIds.introNodeId] = {
+      use_custom_intro: "custom",
+      custom_intro_video_id: config.introVideoId,
+    };
+  }
+
+  if (nodeIds.outroNodeId && config.outroVideoId) {
+    params[nodeIds.outroNodeId] = {
+      use_custom_outro: "custom",
+      custom_outro_video_id: config.outroVideoId,
+    };
+  }
+
+  return params;
+}
+
 /** Convert our clipDuration string to seconds */
 function durationToSeconds(duration: "short" | "medium" | "long"): number {
   switch (duration) {

@@ -19,7 +19,7 @@ Execute an agent workflow. Supports standard video-input workflows and AI-only w
 
 ### Standard Workflows
 
-For workflows starting with a Video Input node, you must provide video URLs. The backend will automatically detect the URL type, download the video, and run the workflow.
+For workflows starting with a Video Input node, provide at least one of: `video_urls`, `video_ids`, or `node_render_ids`. For URL inputs, the backend automatically detects URL type, downloads the video, and runs the workflow.
 
 ```bash
 curl -X POST "https://api.mosaic.so/agent/[agent_id]/run" \
@@ -56,6 +56,7 @@ curl -X POST "https://api.mosaic.so/agent/[agent_id]/run" \
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
 | video_urls | string[] | | Array of video URLs to process. Required if the agent has a video input node. Supports YouTube URLs and signed URLs (HTTP/HTTPS). |
+| node_render_ids | string[] | | Optional list of completed render IDs from prior runs/webhooks. Use this to chain outputs from one Mosaic run into another as Video Input. |
 | callback_url | string | | Optional webhook URL for status updates |
 | update_params | object | | Optional parameters to override node parameters in the agent workflow |
 | ignore_nodes | string[] | | Optional list of `agent_node.id` values to bypass for this run. Mosaic removes each ignored node from the runtime graph and rewires incoming edges directly to its downstream nodes. |
@@ -141,6 +142,23 @@ Some nodes accept **images**, **audio**, or **videos** as parameters. To set the
 ```
 
 See the [Uploads documentation](/api/uploads) for the complete upload flow.
+
+### Chaining Runs with `node_render_ids`
+
+You can feed outputs from a previous run directly into another agent by passing render IDs returned in webhooks or from `GET /agent_run/[run_id]` (`outputs[].id`).
+
+```bash
+curl -X POST "https://api.mosaic.so/agent/[agent_id]/run" \
+  -H "Authorization: Bearer mk_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "node_render_ids": [
+      "7ba7b810-9dad-11d1-80b4-00c04fd430c8",
+      "8cbfd03e-6e85-4f3d-b4b9-8de0b5bfb6a4"
+    ],
+    "callback_url": "https://your-webhook.com/callback"
+  }'
+```
 
 ### Response
 ```json

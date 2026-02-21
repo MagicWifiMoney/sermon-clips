@@ -15,6 +15,20 @@ CLERK_WEBHOOK_SECRET=whsec_xxx
 MOSAIC_API_KEY=mk_xxx
 MOSAIC_WEBHOOK_SECRET=whsk_xxx
 MOSAIC_AGENT_ID=00000000-0000-0000-0000-000000000000
+# Optional if stage 2 branding pass uses a different agent
+MOSAIC_BRANDING_AGENT_ID=00000000-0000-0000-0000-000000000000
+
+# Stage 2 runtime graph bypass (comma-separated agent_node IDs)
+# Ignore any stage 2 nodes you do NOT want to run (e.g. watermark/intro/outro if no custom IDs).
+MOSAIC_STAGE2_IGNORE_NODES=
+# Voice tile language for stage 2 pass (default: english)
+MOSAIC_STAGE2_TARGET_LANGUAGE=english
+
+# Node IDs for stage 2 update_params translation
+MOSAIC_VOICE_AGENT_NODE_ID=
+MOSAIC_WATERMARK_AGENT_NODE_ID=
+MOSAIC_INTRO_AGENT_NODE_ID=
+MOSAIC_OUTRO_AGENT_NODE_ID=
 
 # Analytics (optional)
 NEXT_PUBLIC_POSTHOG_KEY=phc_xxx

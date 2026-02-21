@@ -48,7 +48,7 @@
     "/agent/{agent_id}/run": {
       "post": {
         "summary": "Run an agent",
-        "description": "Execute an agent workflow. Supports standard video-input workflows and AI-only workflows (AI Content Generation or AI Avatar). For standard workflows, `video_urls` or `video_ids` are required. For AI-only workflows, no video inputs should be provided. Note: the public /agent/{agent_id}/run endpoint does not support agents that contain multiple Video Input tiles; it will return 400 in that case.",
+        "description": "Execute an agent workflow. Supports standard video-input workflows and AI-only workflows (AI Content Generation or AI Avatar). For standard workflows, provide at least one of `video_urls`, `video_ids`, or `node_render_ids`. For AI-only workflows, no video inputs should be provided. Note: the public /agent/{agent_id}/run endpoint does not support agents that contain multiple Video Input tiles; it will return 400 in that case.",
         "operationId": "runAgent",
         "tags": ["Agents"],
         "parameters": [
@@ -76,6 +76,13 @@
                       "format": "uri"
                     },
                     "description": "Array of video URLs to process. Required if the agent has a video input node. Supports YouTube URLs and signed URLs (HTTP/HTTPS). YouTube videos max 1 hour, signed URLs max 3 hours / 5 GB per input."
+                  },
+                  "node_render_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Array of completed agent_node_render IDs to use as Video Input for this run. Useful for chaining outputs from webhooks or previous runs into new Mosaic workflows."
                   },
                   "callback_url": {
                     "type": "string",

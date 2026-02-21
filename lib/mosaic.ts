@@ -9,9 +9,21 @@ import {
   addYouTubeChannels,
   removeYouTubeChannels,
 } from "@/lib/mosaic-client";
-import { buildMosaicUpdateParams } from "@/lib/mosaic-params";
+import { buildMosaicUpdateParams, buildMosaicBrandingUpdateParams } from "@/lib/mosaic-params";
 
 const MOSAIC_AGENT_ID = process.env.MOSAIC_AGENT_ID ?? "";
+const MOSAIC_BRANDING_AGENT_ID = process.env.MOSAIC_BRANDING_AGENT_ID ?? MOSAIC_AGENT_ID;
+
+const STAGE2_IGNORE_NODE_IDS = (process.env.MOSAIC_STAGE2_IGNORE_NODES ?? "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+const STAGE2_TARGET_LANGUAGE = (process.env.MOSAIC_STAGE2_TARGET_LANGUAGE ?? "english").toLowerCase();
+
+export function buildMosaicWebhookCallback(stage: "stage1" | "stage2" | "default" = "default"): string {
+  const base = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/mosaic`;
+  return stage === "default" ? base : `${base}?stage=${stage}`;
+}
 
 // ---- TYPES ----
 
@@ -21,6 +33,7 @@ export interface MosaicRunResponse {
 }
 
 export interface MosaicClipOutput {
+  id?: string;
   video_url: string | null;
   thumbnail_url: string | null;
   original_node_id: string | null;
@@ -101,7 +114,72 @@ export async function startSermonProcessing(
   const videoUrls = videoUrl ? [videoUrl] : [];
   const videoIds = videoId ? [videoId] : undefined;
 
-  return runAgent(MOSAIC_AGENT_ID, videoUrls, callbackUrl, updateParams, videoIds);
+  return runAgent(
+    MOSAIC_AGENT_ID,
+    videoUrls,
+    callbackUrl,
+    updateParams,
+    videoIds,
+    undefined
+  );
+}
+
+export async function startBrandingPassFromNodeRenders(
+  nodeRenderIds: string[],
+  callbackUrl: string,
+  options?: {
+    branding?: BrandingConfig | null;
+    languageConfig?: LanguageConfig | null;
+  }
+): Promise<MosaicRunResponse> {
+  const branding = options?.branding ?? null;
+  const languageConfig = options?.languageConfig ?? null;
+  const voiceNodeId = process.env.MOSAIC_VOICE_AGENT_NODE_ID;
+  const watermarkNodeId = process.env.MOSAIC_WATERMARK_AGENT_NODE_ID;
+  const introNodeId = process.env.MOSAIC_INTRO_AGENT_NODE_ID;
+  const outroNodeId = process.env.MOSAIC_OUTRO_AGENT_NODE_ID;
+
+  const updateParams = buildMosaicBrandingUpdateParams(
+    {
+      voiceNodeId,
+      watermarkNodeId,
+      introNodeId,
+      outroNodeId,
+    },
+    {
+      targetLanguage: (languageConfig?.targetLanguages?.[0] ?? STAGE2_TARGET_LANGUAGE).toLowerCase(),
+      logoImageId: branding?.watermarkImageId ?? branding?.logoImageId,
+      introVideoId: branding?.introVideoId,
+      outroVideoId: branding?.outroVideoId,
+    }
+  );
+
+  // If a node exists on stage 2 but no custom asset ID is provided, it must be ignored.
+  if (watermarkNodeId && !updateParams[watermarkNodeId] && !STAGE2_IGNORE_NODE_IDS.includes(watermarkNodeId)) {
+    throw new Error("Watermark node requires branding image ID or inclusion in MOSAIC_STAGE2_IGNORE_NODES.");
+  }
+  if (introNodeId && !updateParams[introNodeId] && !STAGE2_IGNORE_NODE_IDS.includes(introNodeId)) {
+    throw new Error("Intro node requires intro video ID or inclusion in MOSAIC_STAGE2_IGNORE_NODES.");
+  }
+  if (outroNodeId && !updateParams[outroNodeId] && !STAGE2_IGNORE_NODE_IDS.includes(outroNodeId)) {
+    throw new Error("Outro node requires outro video ID or inclusion in MOSAIC_STAGE2_IGNORE_NODES.");
+  }
+
+  if (Object.keys(updateParams).length === 0) {
+    throw new Error(
+      "No branding/voice node IDs configured. Set MOSAIC_VOICE_AGENT_NODE_ID, MOSAIC_WATERMARK_AGENT_NODE_ID, MOSAIC_INTRO_AGENT_NODE_ID, or MOSAIC_OUTRO_AGENT_NODE_ID."
+    );
+  }
+
+  return runAgent(
+    MOSAIC_BRANDING_AGENT_ID,
+    [],
+    callbackUrl,
+    updateParams,
+    undefined,
+    nodeRenderIds,
+    STAGE2_IGNORE_NODE_IDS
+  );
 }
 
 export async function getRunStatus(runId: string): Promise<{ run_id: string; status: string; progress: number }> {
@@ -161,7 +239,7 @@ export async function registerYouTubeTrigger(
   agentId: string,
   channelId: string
 ): Promise<MosaicTriggerResponse> {
-  const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/mosaic`;
+  const callbackUrl = buildMosaicWebhookCallback("stage1");
   const res = await addYouTubeChannels(agentId, [channelId], callbackUrl);
   return {
     trigger_id: res.trigger_id ?? res.channel_ids?.[0] ?? channelId,

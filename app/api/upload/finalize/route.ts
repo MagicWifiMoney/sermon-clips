@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
-import { finalizeUpload, startSermonProcessing } from "@/lib/mosaic";
+import { buildMosaicWebhookCallback, finalizeUpload, startSermonProcessing } from "@/lib/mosaic";
 import type { BrandingConfig, ProcessingOptions, PublishMode } from "@/types";
 
 // POST /api/upload/finalize — complete upload + trigger Mosaic processing
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Trigger Mosaic processing
-    const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/mosaic`;
+    const callbackUrl = buildMosaicWebhookCallback("stage1");
     const run = await startSermonProcessing(
       { videoId: video_id },
       callbackUrl,
