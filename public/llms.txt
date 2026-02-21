@@ -1,0 +1,23 @@
+# Sermon Clips
+
+> AI-powered sermon clip generator. Upload full-length sermons and automatically extract the most impactful, shareable moments for social media and church engagement.
+
+## About
+Sermon Clips uses AI to analyze sermon audio and video, identify key moments, generate transcriptions, and create ready-to-share clips optimized for social media platforms like Instagram, YouTube Shorts, and TikTok.
+
+## Key Features
+
+- [Homepage](https://sermon-clips.com/) - AI sermon clip generation
+- Automatic sermon transcription
+- AI-identified highlight moments
+- Social media-optimized clip formatting
+- Multiple export formats and aspect ratios
+
+## Use Cases
+- Churches creating social media content from weekly sermons
+- Pastors sharing key teaching moments
+- Ministry teams building engagement through short-form video
+- Podcast creators extracting highlights
+
+## Technology
+Built with Next.js and AI-powered audio/video analysis.
