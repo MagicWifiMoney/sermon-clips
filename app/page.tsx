@@ -251,13 +251,13 @@ export default function Home() {
               </div>
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[#2D2D2D] leading-[1.1] tracking-tight mb-6">
-                Turn sermons into
                 <span className="relative">
-                  <span className="relative z-10 text-[#E8725A]"> scroll-stopping clips</span>
+                  <span className="relative z-10 text-[#E8725A]">Sermon clips</span>
                   <svg className="absolute -bottom-2 left-0 w-full h-3 text-[#E8725A]/20" viewBox="0 0 200 12" preserveAspectRatio="none">
                     <path d="M0 6 Q 50 0, 100 6 T 200 6" fill="none" stroke="currentColor" strokeWidth="8" strokeLinecap="round" />
                   </svg>
                 </span>
+                {" "}that stop the scroll
                 <br />
                 <span className="text-[#5c5c5c] text-3xl sm:text-4xl lg:text-5xl font-medium">—no editor required</span>
               </h1>
