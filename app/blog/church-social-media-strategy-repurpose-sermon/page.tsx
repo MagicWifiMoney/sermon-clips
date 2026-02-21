@@ -707,6 +707,31 @@ export default function BlogPost() {
         </div>
       </article>
 
+      {/* Related Posts */}
+      <section className="bg-white py-16 px-6">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-2xl font-bold text-[#2D2D2D] mb-8">Continue Reading</h2>
+          <div className="grid md:grid-cols-2 gap-6">
+            <Link href="/blog/how-to-make-sermon-clips" className="group p-6 rounded-xl border border-[#E8E4DC] hover:border-[#E8725A]/30 transition-all">
+              <p className="text-sm text-[#E8725A] mb-2">Complete Guide</p>
+              <h3 className="font-bold text-[#2D2D2D] group-hover:text-[#E8725A] transition-colors">How to Make Sermon Clips: The Full Workflow</h3>
+            </Link>
+            <Link href="/sermon-transcription" className="group p-6 rounded-xl border border-[#E8E4DC] hover:border-[#E8725A]/30 transition-all">
+              <p className="text-sm text-[#E8725A] mb-2">Feature Guide</p>
+              <h3 className="font-bold text-[#2D2D2D] group-hover:text-[#E8725A] transition-colors">AI Sermon Transcription: Faster Than Any Human Service</h3>
+            </Link>
+            <Link href="/alternatives/opus-clip" className="group p-6 rounded-xl border border-[#E8E4DC] hover:border-[#E8725A]/30 transition-all">
+              <p className="text-sm text-[#E8725A] mb-2">Comparison</p>
+              <h3 className="font-bold text-[#2D2D2D] group-hover:text-[#E8725A] transition-colors">Sermon Clips vs Opus Clip: Which Is Better for Churches?</h3>
+            </Link>
+            <Link href="/easter-2026" className="group p-6 rounded-xl border border-[#E8E4DC] hover:border-[#E8725A]/30 transition-all">
+              <p className="text-sm text-[#E8725A] mb-2">🐣 Seasonal</p>
+              <h3 className="font-bold text-[#2D2D2D] group-hover:text-[#E8725A] transition-colors">Easter 2026 Sermon Clips: Your AI Content Plan</h3>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="bg-[#2D2D2D] text-white py-12 px-6">
         <div className="max-w-4xl mx-auto text-center">

@@ -328,7 +328,7 @@ export default function BlogPost() {
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <h3 className="text-2xl font-bold text-[#2D2D2D]">2. Opus Clip</h3>
-                    <p className="text-[#5c5c5c]">AI-powered viral clip detection</p>
+                    <p className="text-[#5c5c5c]">AI-powered viral clip detection — <Link href="/alternatives/opus-clip" className="text-[#E8725A] hover:underline">see how it compares to Sermon Clips for churches</Link></p>
                   </div>
                   <div className="text-right">
                     <p className="text-2xl font-bold text-[#2D2D2D]">$19-99/mo</p>
@@ -814,6 +814,14 @@ export default function BlogPost() {
             <Link href="/blog/ai-sermon-clip-generator" className="group p-6 rounded-xl border border-[#E8E4DC] hover:border-[#E8725A]/30 transition-all">
               <p className="text-sm text-[#E8725A] mb-2">Related</p>
               <h3 className="font-bold text-[#2D2D2D] group-hover:text-[#E8725A] transition-colors">AI Sermon Clip Generator: Top 7 Tools Compared</h3>
+            </Link>
+            <Link href="/alternatives/opus-clip" className="group p-6 rounded-xl border border-[#E8E4DC] hover:border-[#E8725A]/30 transition-all">
+              <p className="text-sm text-[#E8725A] mb-2">Comparison</p>
+              <h3 className="font-bold text-[#2D2D2D] group-hover:text-[#E8725A] transition-colors">Sermon Clips vs Opus Clip: Which Is Better for Churches?</h3>
+            </Link>
+            <Link href="/easter-2026" className="group p-6 rounded-xl border border-[#E8E4DC] hover:border-[#E8725A]/30 transition-all">
+              <p className="text-sm text-[#E8725A] mb-2">🐣 Seasonal</p>
+              <h3 className="font-bold text-[#2D2D2D] group-hover:text-[#E8725A] transition-colors">Easter 2026 Sermon Clips: Your AI Content Plan</h3>
             </Link>
           </div>
         </div>
