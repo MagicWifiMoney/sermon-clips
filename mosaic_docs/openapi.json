@@ -86,6 +86,13 @@
                     "type": "object",
                     "description": "Optional parameters to override node parameters in the agent workflow. Key is agent_node.id, value is parameter object.",
                     "additionalProperties": true
+                  },
+                  "ignore_nodes": {
+                    "type": "array",
+                    "description": "Optional list of agent_node.id values to bypass for this run. Ignored nodes are removed from the runtime graph and their incoming edges are rewired directly to their downstream nodes.",
+                    "items": {
+                      "type": "string"
+                    }
                   }
                 }
               }

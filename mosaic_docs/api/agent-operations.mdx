@@ -58,6 +58,7 @@ curl -X POST "https://api.mosaic.so/agent/[agent_id]/run" \
 | video_urls | string[] | | Array of video URLs to process. Required if the agent has a video input node. Supports YouTube URLs and signed URLs (HTTP/HTTPS). |
 | callback_url | string | | Optional webhook URL for status updates |
 | update_params | object | | Optional parameters to override node parameters in the agent workflow |
+| ignore_nodes | string[] | | Optional list of `agent_node.id` values to bypass for this run. Mosaic removes each ignored node from the runtime graph and rewires incoming edges directly to its downstream nodes. |
 
 ### Video URL Requirements & Limits
 
@@ -98,6 +99,29 @@ The copied JSON will look like this, where the key is the **Node ID** (UUID) and
 
 Pass this entire object as the `update_params` value in your API request.
 
+### Bypassing Nodes at Runtime
+
+Use `ignore_nodes` to skip one or more nodes for a single run without editing the saved agent template.
+
+For each ignored node:
+- Incoming connections to the node are rewired to its downstream nodes
+- The ignored node is removed from the runtime DAG for that run only
+- The template itself is unchanged
+
+```json
+{
+  "video_urls": ["https://youtube.com/watch?v=..."],
+  "ignore_nodes": [
+    "8cbfd03e-6e85-4f3d-b4b9-8de0b5bfb6a4"
+  ],
+  "update_params": {
+    "35a12345-6789-abcd-ef01-234567890abc": {
+      "audio_id": "your-uploaded-audio-uuid"
+    }
+  }
+}
+```
+
 ### Uploading Media for Node Parameters
 
 Some nodes accept **images**, **audio**, or **videos** as parameters. To set these programmatically, use the [Uploads API](/api/uploads) to upload your files and get their UUIDs:
@@ -106,10 +130,10 @@ Some nodes accept **images**, **audio**, or **videos** as parameters. To set the
 {
   "video_urls": ["https://youtube.com/watch?v=..."],
   "update_params": {
-    "AUDIO_NODE_ID": {
+    "35a12345-6789-abcd-ef01-234567890abc": {
       "audio_id": "your-uploaded-audio-uuid"
     },
-    "IMAGE_NODE_ID": {
+    "76b23456-7890-efab-cd12-345678901bcd": {
       "image_id": "your-uploaded-image-uuid"
     }
   }
