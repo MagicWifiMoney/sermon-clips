@@ -57,6 +57,14 @@ export default function BlogIndex() {
       featured: false,
     },
     {
+      slug: 'ai-sermon-transcription-guide',
+      title: 'AI Sermon Transcription: The Complete Guide for Churches (2026)',
+      excerpt: 'Your pastor pours 10–15 hours into every sermon. AI transcription turns those words into captions, social clips, blog posts, and a searchable archive—automatically. Here\'s everything your church needs to know.',
+      date: 'February 2026',
+      readTime: '11 min read',
+      featured: false,
+    },
+    {
       slug: 'sermon-shots-vs-pulpit-ai-vs-gloo-comparison',
       title: 'Sermon Shots vs Pulpit AI vs Gloo Content Studio: The Complete 2026 Comparison',
       excerpt: 'Struggling to turn Sunday\'s sermon into scroll-stopping social content? Here\'s everything you need to know about the three leading sermon clipping platforms.',
