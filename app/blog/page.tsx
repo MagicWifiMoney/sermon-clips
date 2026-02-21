@@ -9,6 +9,14 @@ export const metadata = {
 export default function BlogIndex() {
   const posts = [
     {
+      slug: 'easter-sermon-clips-content-plan',
+      title: 'Easter Sermon Clips: Your Complete AI Content Plan for Easter 2026',
+      excerpt: '🐣 Easter is April 5 — 6 weeks away. Here\'s exactly how to use AI to turn one Easter sermon into a full month of content: clips, Reels, emails, discussion guides, and more. The churches winning Easter start now.',
+      date: 'February 2026',
+      readTime: '12 min read',
+      featured: true,
+    },
+    {
       slug: 'how-to-make-sermon-clips-for-social-media',
       title: 'How to Make Sermon Clips for Social Media (Step-by-Step Guide for 2026)',
       excerpt: 'Your Sunday sermon reaches 200 people. But what if it could reach 2,000? Or 20,000? This guide shows you exactly how to turn your sermons into engaging social media clips that multiply your message.',
