@@ -20,6 +20,18 @@ export async function POST(request: Request) {
 
     console.log(`New subscriber: ${email}`);
 
+    // Add to Resend audience for survey drip tracking
+    const audienceId = '5425a414-f3d2-4cf4-b3c9-8c46ba877bfe'; // Sermon Clips Signups
+    try {
+      await getResend().contacts.create({
+        audienceId,
+        email,
+        unsubscribed: false,
+      });
+    } catch (e) {
+      console.error('Failed to add to audience (non-fatal):', e);
+    }
+
     const { data, error } = await getResend().emails.send({
       from: 'Sermon Clips <hello@sermon-clips.com>',
       to: [email],

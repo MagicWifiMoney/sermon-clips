@@ -1,5 +1,24 @@
-# https://www.robotstxt.org/robotstxt.html
+# sermon-clips.com robots.txt
 User-agent: *
+Allow: /
+
+# AI Crawlers — explicitly allowed
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Google-Extended
 Allow: /
 
 Sitemap: https://sermon-clips.com/sitemap.xml
