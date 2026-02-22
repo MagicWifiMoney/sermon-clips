@@ -221,12 +221,10 @@ export default function Home() {
           </a>
 
           <div className="hidden md:flex items-center gap-10">
-            <a href="/for" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">For</a>
-            <a href="/use-cases" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">Use Cases</a>
             <a href="#how-it-works" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">How It Works</a>
-            <a href="#pricing" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">Early Access</a>
+            <a href="#pricing" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">Pricing</a>
+            <a href="/blog" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">Blog</a>
             <a href="/about" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">About</a>
-            <a href="/mission" className="text-sm text-[#5c5c5c] hover:text-[#2D2D2D] transition-colors">Mission</a>
           </div>
 
           <div className="flex items-center gap-4">
@@ -240,8 +238,16 @@ export default function Home() {
         </nav>
       </header>
 
+      {/* Easter Announcement Bar */}
+      <div className="bg-[#E8725A] text-white text-center py-2.5 px-6 text-sm font-medium mt-[72px]">
+        🐣 <strong>Easter is April 5</strong> — 6 weeks away. &nbsp;
+        <a href="/blog/easter-sermon-clips-content-plan" className="underline underline-offset-2 hover:no-underline font-semibold">
+          Get your Easter content plan →
+        </a>
+      </div>
+
       {/* Hero Section */}
-      <section className="pt-28 lg:pt-36 pb-20 px-6 lg:px-8 overflow-hidden">
+      <section className="pt-12 lg:pt-16 pb-20 px-6 lg:px-8 overflow-hidden">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <div className="max-w-xl">
@@ -371,18 +377,18 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Early Access Survey Section */}
-      <section id="pricing" className="py-24 bg-[#F5F1EB] px-6 lg:px-8">
+      {/* Survey Section */}
+      <section className="py-24 bg-[#2D2D2D] px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <span className="inline-block px-4 py-2 rounded-full bg-[#E8725A]/10 text-[#E8725A] text-sm font-medium mb-4">
-              Early Access
+            <span className="inline-block px-4 py-2 rounded-full bg-[#E8725A]/20 text-[#E8725A] text-sm font-medium mb-4">
+              Shape the Product
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold text-[#2D2D2D] mb-4">
-              Help us build the perfect tool for your church
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+              Tell us what your church needs
             </h2>
-            <p className="text-lg text-[#5c5c5c] max-w-xl mx-auto">
-              Tell us what matters most. Early access members get priority — plus a founding member discount.
+            <p className="text-lg text-white/60 max-w-xl mx-auto">
+              Your feedback directly shapes what we build next. Takes 2 minutes — founding members get a discount locked in.
             </p>
           </div>
 
@@ -527,6 +533,141 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Pricing Section */}
+      <section id="pricing" className="py-24 px-6 lg:px-8 bg-[#F5F1EB]">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <span className="inline-block px-4 py-2 rounded-full bg-[#E8725A]/10 text-[#E8725A] text-sm font-medium mb-4">
+              Pricing
+            </span>
+            <h2 className="text-3xl md:text-4xl font-bold text-[#2D2D2D] mb-4">
+              Start free. Scale when you&apos;re ready.
+            </h2>
+            <p className="text-lg text-[#5c5c5c] max-w-xl mx-auto">
+              No contracts. No credit card to start. Cancel anytime.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            {[
+              {
+                name: "Free",
+                price: "$0",
+                period: "forever",
+                desc: "Try it with your first sermon.",
+                features: [
+                  "1 sermon upload",
+                  "3 AI-generated clips",
+                  "Animated captions",
+                  "Download clips",
+                  "All aspect ratios",
+                ],
+                cta: "Start Free",
+                href: "/sign-up",
+                highlighted: false,
+              },
+              {
+                name: "Starter",
+                price: "$29",
+                period: "/ month",
+                desc: "For small churches getting consistent.",
+                features: [
+                  "4 sermons / month",
+                  "5 clips per sermon",
+                  "Animated captions",
+                  "AI B-roll & music",
+                  "Download all formats",
+                  "Email support",
+                ],
+                cta: "Start Starter",
+                href: "/sign-up",
+                highlighted: false,
+              },
+              {
+                name: "Growth",
+                price: "$59",
+                period: "/ month",
+                desc: "For growing churches ready to scale.",
+                features: [
+                  "Unlimited sermons",
+                  "8 clips per sermon",
+                  "Dynamic zoom & color",
+                  "AI B-roll (30,000+ assets)",
+                  "Branded intro / outro",
+                  "Auto-post to 6 platforms",
+                  "Priority support",
+                ],
+                cta: "Start Growth",
+                href: "/sign-up",
+                highlighted: true,
+              },
+              {
+                name: "Auto-Pilot",
+                price: "$149",
+                period: "/ month",
+                desc: "Full automation. Upload and walk away.",
+                features: [
+                  "Everything in Growth",
+                  "10+ clips per sermon",
+                  "YouTube auto-trigger",
+                  "Drip scheduling",
+                  "30+ language dubbing",
+                  "AI voiceover",
+                  "Multi-campus branding",
+                  "Dedicated support",
+                ],
+                cta: "Start Auto-Pilot",
+                href: "/sign-up",
+                highlighted: false,
+              },
+            ].map((plan) => (
+              <div
+                key={plan.name}
+                className={`rounded-3xl p-7 flex flex-col ${
+                  plan.highlighted
+                    ? "bg-[#2D2D2D] text-white border-2 border-[#E8725A] shadow-2xl shadow-[#E8725A]/10 scale-105"
+                    : "bg-white border border-[#E8E4DC]"
+                }`}
+              >
+                {plan.highlighted && (
+                  <div className="inline-block px-3 py-1 bg-[#E8725A] text-white text-xs font-bold rounded-full mb-4 self-start">
+                    Most Popular
+                  </div>
+                )}
+                <p className={`text-sm font-semibold mb-1 ${plan.highlighted ? "text-white/60" : "text-[#5c5c5c]"}`}>{plan.name}</p>
+                <div className="flex items-baseline gap-1 mb-2">
+                  <span className={`text-4xl font-bold ${plan.highlighted ? "text-white" : "text-[#2D2D2D]"}`}>{plan.price}</span>
+                  <span className={`text-sm ${plan.highlighted ? "text-white/50" : "text-[#5c5c5c]"}`}>{plan.period}</span>
+                </div>
+                <p className={`text-sm mb-6 ${plan.highlighted ? "text-white/60" : "text-[#5c5c5c]"}`}>{plan.desc}</p>
+                <ul className="space-y-2.5 mb-8 flex-1">
+                  {plan.features.map((f) => (
+                    <li key={f} className="flex items-start gap-2">
+                      <CheckCircle2 className={`w-4 h-4 flex-shrink-0 mt-0.5 ${plan.highlighted ? "text-[#E8725A]" : "text-[#E8725A]"}`} />
+                      <span className={`text-sm ${plan.highlighted ? "text-white/80" : "text-[#5c5c5c]"}`}>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <a
+                  href={plan.href}
+                  className={`w-full py-3 rounded-full font-semibold text-sm text-center transition-all ${
+                    plan.highlighted
+                      ? "bg-[#E8725A] hover:bg-[#d4654f] text-white hover:shadow-lg hover:shadow-[#E8725A]/30"
+                      : "bg-[#F5F1EB] hover:bg-[#E8E4DC] text-[#2D2D2D]"
+                  }`}
+                >
+                  {plan.cta}
+                </a>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-center text-sm text-[#5c5c5c] mt-8">
+            All plans include a 7-day free trial &bull; No contracts &bull; Cancel anytime
+          </p>
+        </div>
+      </section>
+
       {/* Stats Bar */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
@@ -567,22 +708,25 @@ export default function Home() {
                 icon: Church,
                 title: "Small Churches",
                 pain: "No media team? No budget for a video editor?",
-                solution: "Upload your sermon and get polished clips in minutes. No expertise needed.",
-                cta: "Join Early Access",
+                solution: "Upload your sermon and get polished clips in minutes. No expertise needed. Free plan includes your first sermon.",
+                cta: "Start Free",
+                href: "/sign-up",
               },
               {
                 icon: Users,
                 title: "Growing Churches",
                 pain: "Multiple services, multiple pastors, one overwhelmed comms person?",
-                solution: "Dynamic zoom, color correction, branded intros, and 5 clips per sermon across 3 formats. Scale without hiring.",
-                cta: "Join Early Access",
+                solution: "Dynamic zoom, color correction, branded intros, and 8 clips per sermon across 3 formats. Scale without hiring.",
+                cta: "Start Growth",
+                href: "/sign-up",
               },
               {
                 icon: Megaphone,
                 title: "Comms Directors",
                 pain: "Need auto-posting, scheduling, and full automation?",
                 solution: "Auto-Pilot handles everything — YouTube auto-trigger, drip scheduling, auto-posting to 6 platforms, and 10+ clips per sermon.",
-                cta: "Join Early Access",
+                cta: "Start Auto-Pilot",
+                href: "/sign-up",
               },
             ].map((useCase, i) => (
               <div key={i} className="p-8 rounded-3xl bg-white border border-[#E8E4DC] hover:border-[#E8725A]/30 hover:shadow-xl transition-all flex flex-col">
@@ -592,7 +736,7 @@ export default function Home() {
                 <h3 className="text-xl font-bold text-[#2D2D2D] mb-3">{useCase.title}</h3>
                 <p className="text-[#5c5c5c] text-sm mb-3 italic">{useCase.pain}</p>
                 <p className="text-[#5c5c5c] text-sm leading-relaxed mb-6 flex-1">{useCase.solution}</p>
-                <a href="#pricing" className="text-[#E8725A] font-medium text-sm inline-flex items-center gap-1 hover:gap-2 transition-all">
+                <a href={useCase.href} className="text-[#E8725A] font-medium text-sm inline-flex items-center gap-1 hover:gap-2 transition-all">
                   {useCase.cta} <ArrowRight className="w-4 h-4" />
                 </a>
               </div>
@@ -722,10 +866,10 @@ export default function Home() {
             <div>
               <h4 className="text-white text-sm font-semibold mb-4">Product</h4>
               <ul className="space-y-3 text-sm">
-                <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
                 <li><a href="#how-it-works" className="hover:text-white transition-colors">How It Works</a></li>
-                <li><a href="#pricing" className="hover:text-white transition-colors">Early Access</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Examples</a></li>
+                <li><a href="#pricing" className="hover:text-white transition-colors">Pricing</a></li>
+                <li><a href="/blog" className="hover:text-white transition-colors">Blog</a></li>
+                <li><a href="/use-cases" className="hover:text-white transition-colors">Use Cases</a></li>
               </ul>
             </div>
             <div>
