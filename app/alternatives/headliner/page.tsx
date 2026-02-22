@@ -97,7 +97,7 @@ const schemaData = {
 };
 
 // ─── Comparison Data ─────────────────────────────────────────────────────────
-const features = [
+const features: { feature: string; sermonClips: boolean | string; headliner: boolean | string }[] = [
   { feature: 'AI moment detection (auto-find best clips)', sermonClips: true, headliner: false },
   { feature: 'Automatic vertical reframing (9:16)', sermonClips: true, headliner: false },
   { feature: 'Speaker-tracking zoom', sermonClips: true, headliner: false },
