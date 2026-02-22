@@ -74,7 +74,7 @@ const jsonLd = {
       '@type': 'HowToTool',
       name: 'Video editing software (CapCut, Descript, or Sermon Clips AI)',
     },
-    { '@type': 'HowToTool', name: 'Transcription tool (sermon-transcription.com)' },
+    { '@type': 'HowToTool', name: 'AI Sermon Transcription tool (Sermon Clips)' },
   ],
   step: [
     {
@@ -331,7 +331,7 @@ export default function HowToMakeSermonClipsPage() {
                   <div className="bg-white rounded-xl p-5 shadow-sm">
                     <p className="font-semibold text-[#2D2D2D] mb-3">Tools for Transcription:</p>
                     <ul className="space-y-2 text-[#5c5c5c] text-sm">
-                      <li><a href="https://sermon-transcription.com" className="text-[#E8725A] underline">sermon-transcription.com</a> — Built specifically for church content with speaker identification</li>
+                      <li><Link href="/sermon-transcription" className="text-[#E8725A] underline">Sermon Clips AI Transcription</Link> — Built specifically for church content, with auto-captions and clip detection</li>
                       <li>Descript — Transcription + editing combo</li>
                       <li>Otter.ai — Fast, affordable transcription</li>
                       <li>YouTube Auto-Captions — Free but requires cleanup</li>
@@ -1162,18 +1162,18 @@ export default function HowToMakeSermonClipsPage() {
               </div>
             </section>
 
-            {/* ── Cross-link to sister site ─────────────────────────────────── */}
+            {/* ── Transcription CTA ─────────────────────────────────────────── */}
             <div className="bg-white rounded-xl p-6 shadow-sm mb-10">
               <h3 className="font-bold text-[#2D2D2D] mb-2">Need to transcribe your sermon first?</h3>
               <p className="text-[#5c5c5c] text-sm mb-3">
-                Transcription is the secret weapon for finding clip-worthy moments fast. Our sister site is built specifically for church content.
+                Transcription is the secret weapon for finding clip-worthy moments fast. Sermon Clips includes AI transcription built specifically for church content.
               </p>
-              <a
-                href="https://sermon-transcription.com"
+              <Link
+                href="/sermon-transcription"
                 className="text-[#E8725A] text-sm font-semibold underline"
               >
-                sermon-transcription.com — Built for churches →
-              </a>
+                AI Sermon Transcription — Built for churches →
+              </Link>
             </div>
 
             {/* ── Related Articles ─────────────────────────────────────────── */}
@@ -1184,11 +1184,8 @@ export default function HowToMakeSermonClipsPage() {
                 <li><Link href="/blog/sermon-clips-for-instagram-reels" className="text-[#E8725A] hover:underline">Best Practices for Instagram Reels (Church Edition)</Link></li>
                 <li><Link href="/blog/best-sermon-clip-maker-software" className="text-[#E8725A] hover:underline">Best Sermon Clip Maker Software 2026</Link></li>
                 <li><Link href="/blog/ai-sermon-clip-generator" className="text-[#E8725A] hover:underline">AI Sermon Clip Generator: How It Works</Link></li>
-                <li>
-                  <a href="https://sermon-transcription.com/blog/how-to-transcribe-sermons-2026" className="text-[#E8725A] hover:underline">
-                    How to Transcribe Sermons (Sister Guide)
-                  </a>
-                </li>
+                <li><Link href="/sermon-transcription" className="text-[#E8725A] hover:underline">AI Sermon Transcription: How It Works</Link></li>
+                <li><Link href="/easter-2026" className="text-[#E8725A] hover:underline">🐣 Easter 2026 Sermon Clips: Your AI Content Plan</Link></li>
               </ul>
             </div>
 

@@ -545,7 +545,7 @@ export default function BlogPost() {
                 </div>
                 <div className="bg-white rounded-xl p-6 shadow-sm">
                   <h4 className="font-bold text-[#2D2D2D] mb-2">Choose Opus Clip if:</h4>
-                  <p className="text-sm text-[#5c5c5c]">You have someone comfortable with AI tools who wants to select and customize clips. Great for teams who want control but still save time on the tedious parts.</p>
+                  <p className="text-sm text-[#5c5c5c]">You have someone comfortable with AI tools who wants to select and customize clips. Great for teams who want control but still save time on the tedious parts. <Link href="/alternatives/opus-clip" className="text-[#E8725A] hover:underline">See how Opus Clip compares to Sermon Clips for churches →</Link></p>
                 </div>
                 <div className="bg-white rounded-xl p-6 shadow-sm">
                   <h4 className="font-bold text-[#2D2D2D] mb-2">Choose Pulpit AI if:</h4>
@@ -655,9 +655,17 @@ export default function BlogPost() {
               <p className="text-sm text-[#E8725A] mb-2">Related Guide</p>
               <h3 className="font-bold text-[#2D2D2D] group-hover:text-[#E8725A] transition-colors">Best Sermon Clip Maker Software for Churches in 2026</h3>
             </Link>
-            <Link href="/blog/church-social-media-strategy" className="group p-6 rounded-xl border border-[#E8E4DC] hover:border-[#E8725A]/30 transition-all">
-              <p className="text-sm text-[#E8725A] mb-2">Pillar Guide</p>
-              <h3 className="font-bold text-[#2D2D2D] group-hover:text-[#E8725A] transition-colors">Church Social Media Strategy: 2026 Complete Guide</h3>
+            <Link href="/alternatives/opus-clip" className="group p-6 rounded-xl border border-[#E8E4DC] hover:border-[#E8725A]/30 transition-all">
+              <p className="text-sm text-[#E8725A] mb-2">Comparison</p>
+              <h3 className="font-bold text-[#2D2D2D] group-hover:text-[#E8725A] transition-colors">Sermon Clips vs Opus Clip: Which Is Better for Churches?</h3>
+            </Link>
+            <Link href="/sermon-transcription" className="group p-6 rounded-xl border border-[#E8E4DC] hover:border-[#E8725A]/30 transition-all">
+              <p className="text-sm text-[#E8725A] mb-2">Feature Guide</p>
+              <h3 className="font-bold text-[#2D2D2D] group-hover:text-[#E8725A] transition-colors">AI Sermon Transcription: Faster Than Any Human Service</h3>
+            </Link>
+            <Link href="/easter-2026" className="group p-6 rounded-xl border border-[#E8E4DC] hover:border-[#E8725A]/30 transition-all">
+              <p className="text-sm text-[#E8725A] mb-2">🐣 Seasonal</p>
+              <h3 className="font-bold text-[#2D2D2D] group-hover:text-[#E8725A] transition-colors">Easter 2026 Sermon Clips: Your AI Content Plan</h3>
             </Link>
           </div>
         </div>

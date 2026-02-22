@@ -21,4 +21,4 @@ Allow: /
 User-agent: Google-Extended
 Allow: /
 
-Sitemap: https://sermon-clips.com/sitemap.xml
+Sitemap: https://sermonclips.com/sitemap.xml

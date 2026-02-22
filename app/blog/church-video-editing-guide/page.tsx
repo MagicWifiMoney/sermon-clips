@@ -713,9 +713,11 @@ export default function BlogPost() {
                 <div className="bg-white rounded-xl p-6 shadow-sm">
                   <h3 className="font-bold text-[#2D2D2D] mb-3">📚 Reading</h3>
                   <ul className="text-[#5c5c5c] space-y-2 text-sm">
-                    <li>• <Link href="/blog/how-to-make-sermon-clips-for-social-media" className="text-[#E8725A] underline">How to Make Sermon Clips</Link> (this blog)</li>
-                    <li>• <Link href="/blog/church-social-media-strategy-repurpose-sermon" className="text-[#E8725A] underline">Church Social Media Strategy</Link> (this blog)</li>
-                    <li>• Pro Church Tools blog — Church-specific content strategy</li>
+                    <li>• <Link href="/blog/how-to-make-sermon-clips-for-social-media" className="text-[#E8725A] underline">How to Make Sermon Clips</Link></li>
+                    <li>• <Link href="/blog/church-social-media-strategy-repurpose-sermon" className="text-[#E8725A] underline">Church Social Media Strategy</Link></li>
+                    <li>• <Link href="/sermon-transcription" className="text-[#E8725A] underline">AI Sermon Transcription: How It Works</Link></li>
+                    <li>• <Link href="/alternatives/opus-clip" className="text-[#E8725A] underline">Sermon Clips vs Opus Clip for Churches</Link></li>
+                    <li>• <Link href="/easter-2026" className="text-[#E8725A] underline">🐣 Easter 2026 AI Content Plan</Link></li>
                   </ul>
                 </div>
 
