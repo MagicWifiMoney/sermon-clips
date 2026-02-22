@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { MOSAIC_CLIPPING_AGENT_ID } from "@/lib/mosaic-constants";
 import { registerYouTubeTrigger } from "@/lib/mosaic";
-
-const MOSAIC_AGENT_ID = process.env.MOSAIC_AGENT_ID ?? "";
 
 // POST /api/integrations/youtube/connect — connect a YouTube channel + register Mosaic trigger
 export async function POST(request: NextRequest) {
@@ -15,9 +14,6 @@ export async function POST(request: NextRequest) {
 
   const { channelUrl } = await request.json();
   if (!channelUrl) return NextResponse.json({ error: "Channel URL required" }, { status: 400 });
-  if (!MOSAIC_AGENT_ID) {
-    return NextResponse.json({ error: "MOSAIC_AGENT_ID is not configured" }, { status: 500 });
-  }
 
   // Extract channel identifier from URL
   const channelName = channelUrl.includes("@")
@@ -32,7 +28,7 @@ export async function POST(request: NextRequest) {
   let triggerId: string;
   let triggerStatus: string;
   try {
-    const triggerRes = await registerYouTubeTrigger(MOSAIC_AGENT_ID, channelId);
+    const triggerRes = await registerYouTubeTrigger(MOSAIC_CLIPPING_AGENT_ID, channelId);
     triggerId = triggerRes.trigger_id;
     triggerStatus = triggerRes.status;
   } catch (error) {

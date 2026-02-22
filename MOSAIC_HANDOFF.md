@@ -252,7 +252,6 @@ The complete mapping lives in `lib/mosaic-params.ts`. Here's the reference:
 |---|---|---|
 | `MOSAIC_API_KEY` | `mk_...` | Vercel + `.env.local` |
 | `MOSAIC_WEBHOOK_SECRET` | `whsk_...` | Vercel + `.env.local` |
-| `MOSAIC_AGENT_ID` | UUID | Vercel + `.env.local` |
 | `NEXT_PUBLIC_APP_URL` | `https://sermon-clips.com` | Vercel (already set) |
 
 ---

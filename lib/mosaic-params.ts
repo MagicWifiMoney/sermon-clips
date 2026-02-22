@@ -24,7 +24,7 @@ export type MosaicBrandingNodeIds = {
 };
 
 export type MosaicBrandingPassConfig = {
-  targetLanguage: string;
+  targetLanguage?: string;
   logoImageId?: string;
   introVideoId?: string;
   outroVideoId?: string;
@@ -36,7 +36,7 @@ export function buildMosaicBrandingUpdateParams(
 ): Record<string, unknown> {
   const params: Record<string, unknown> = {};
 
-  if (nodeIds.voiceNodeId) {
+  if (nodeIds.voiceNodeId && config.targetLanguage) {
     params[nodeIds.voiceNodeId] = {
       target_language: config.targetLanguage,
     };
