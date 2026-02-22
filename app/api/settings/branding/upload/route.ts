@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
       ? await finalizeVideoUpload(mosaicUpload.id)
       : await finalizeImageUpload(mosaicUpload.id);
 
-    const mosaicAssetId = isVideo ? finalized.video_id : finalized.image_id;
+    const mosaicAssetId = finalized.id;
 
     // 3) Persist both our Blob view URL (for UI) and Mosaic asset ID (for update_params).
     const currentConfig = (user.brandingConfig as BrandingConfig) ?? {};
@@ -159,7 +159,7 @@ export async function PUT(request: NextRequest) {
       : await finalizeImageUpload(assetId);
 
     // Upload finalize returns IDs; store those for update_params usage.
-    const finalizedAssetId = isVideo ? result.video_id : result.image_id;
+    const finalizedAssetId = result.id;
 
     // Update the user's branding config with the new asset ID
     const currentConfig = (user.brandingConfig as BrandingConfig) ?? {};
