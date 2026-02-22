@@ -9,6 +9,14 @@ export const metadata = {
 export default function BlogIndex() {
   const posts = [
     {
+      slug: 'repurpose-sermon-content',
+      title: 'How to Repurpose One Sermon Into 30+ Pieces of Content (2026)',
+      excerpt: 'A 45-minute sermon is raw material for 30+ content pieces — video clips, podcast, blog post, email, quote graphics, discussion guide, and more. Here\'s the complete system with a weekly workflow.',
+      date: 'February 2026',
+      readTime: '10 min read',
+      featured: true,
+    },
+    {
       slug: 'how-to-make-sermon-clips-for-social-media',
       title: 'How to Make Sermon Clips for Social Media (Step-by-Step Guide for 2026)',
       excerpt: 'Your Sunday sermon reaches 200 people. But what if it could reach 2,000? Or 20,000? This guide shows you exactly how to turn your sermons into engaging social media clips that multiply your message.',
