@@ -54,35 +54,17 @@ export function BrandingSettings({ initialConfig }: BrandingSettingsProps) {
   const handleFileUpload = async (assetType: "logo" | "watermark" | "intro" | "outro", file: File) => {
     setUploading(assetType);
     try {
-      // Step 1: Get presigned upload URL
-      const startRes = await fetch("/api/settings/branding/upload", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ assetType }),
-      });
-      if (!startRes.ok) throw new Error("Failed to get upload URL");
-      const { data } = await startRes.json();
-
-      // Step 2: Upload the file
       const formData = new FormData();
-      if (data.uploadFields) {
-        Object.entries(data.uploadFields).forEach(([key, value]) => {
-          formData.append(key, value as string);
-        });
-      }
+      formData.append("assetType", assetType);
       formData.append("file", file);
 
-      const uploadRes = await fetch(data.uploadUrl, { method: "POST", body: formData });
-      if (!uploadRes.ok) throw new Error("Upload failed");
-
-      // Step 3: Finalize
-      const finalizeRes = await fetch("/api/settings/branding/upload", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ assetId: data.assetId, assetType }),
+      // Backend flow: upload to Blob -> mirror upload to Mosaic -> finalize -> persist IDs/URL.
+      const uploadRes = await fetch("/api/settings/branding/upload", {
+        method: "POST",
+        body: formData,
       });
-      if (!finalizeRes.ok) throw new Error("Finalize failed");
-      const { data: result } = await finalizeRes.json();
+      if (!uploadRes.ok) throw new Error("Upload failed");
+      const { data: result } = await uploadRes.json();
 
       // Update local state
       const idFieldMap: Record<string, keyof BrandingConfig> = {
@@ -91,7 +73,16 @@ export function BrandingSettings({ initialConfig }: BrandingSettingsProps) {
         intro: "introVideoId",
         outro: "outroVideoId",
       };
-      update({ [idFieldMap[assetType]]: result.assetId });
+      const urlFieldMap: Record<string, keyof BrandingConfig> = {
+        logo: "logoUrl",
+        watermark: "watermarkUrl",
+        intro: "introVideoUrl",
+        outro: "outroVideoUrl",
+      };
+      update({
+        [idFieldMap[assetType]]: result.assetId,
+        [urlFieldMap[assetType]]: result.url,
+      });
       toast.success(`${assetType} uploaded!`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Upload failed");

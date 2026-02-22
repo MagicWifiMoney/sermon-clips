@@ -259,6 +259,34 @@ console.log(`Run ID: ${run.run_id}`);
 
 ---
 
+## Get Asset View URL
+
+Returns a short-lived signed URL for viewing an uploaded asset (inline, not forced download).
+
+```bash
+curl -X POST "https://api.mosaic.so/uploads/get_view_url" \
+  -H "Authorization: Bearer mk_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "asset_type": "video",
+    "asset_id": "7f8d9c2b-4a6e-8b3f-1d5c-9e2f3a4b5c6d"
+  }'
+```
+
+```json
+{
+  "asset_type": "video",
+  "asset_id": "7f8d9c2b-4a6e-8b3f-1d5c-9e2f3a4b5c6d",
+  "signed_url": "https://storage.googleapis.com/...",
+  "thumbnail_url": "https://storage.googleapis.com/..."
+}
+```
+
+- `asset_type` must be one of: `video`, `audio`, `image`
+- Asset must belong to your organization workspace scope
+
+---
+
 ## Supported Formats
 
 | Type | Formats | Max Size | Max Duration |

@@ -15,6 +15,9 @@ export async function POST(request: NextRequest) {
 
   const { channelUrl } = await request.json();
   if (!channelUrl) return NextResponse.json({ error: "Channel URL required" }, { status: 400 });
+  if (!MOSAIC_AGENT_ID) {
+    return NextResponse.json({ error: "MOSAIC_AGENT_ID is not configured" }, { status: 500 });
+  }
 
   // Extract channel identifier from URL
   const channelName = channelUrl.includes("@")
@@ -25,16 +28,23 @@ export async function POST(request: NextRequest) {
     ? `@${channelName}`
     : channelUrl;
 
-  // Register the YouTube trigger with Mosaic
-  let triggerId: string | undefined;
-  let triggerStatus = "pending";
+  // Register the YouTube trigger with Mosaic. If this fails, do not save local config.
+  let triggerId: string;
+  let triggerStatus: string;
   try {
     const triggerRes = await registerYouTubeTrigger(MOSAIC_AGENT_ID, channelId);
     triggerId = triggerRes.trigger_id;
     triggerStatus = triggerRes.status;
   } catch (error) {
     console.error("[YouTube Connect] Failed to register Mosaic trigger:", error);
-    // Still save the config — trigger can be retried
+    const message = error instanceof Error ? error.message : "Failed to register YouTube trigger in Mosaic";
+    return NextResponse.json(
+      {
+        error: "Failed to connect YouTube channel with Mosaic",
+        details: message,
+      },
+      { status: 502 }
+    );
   }
 
   const config = {

@@ -216,6 +216,13 @@ async function createSermon(request: NextRequest, userId: string) {
         data: { status: "FAILED", errorMessage: "Failed to start processing" },
       });
       sermon.status = "FAILED";
+      return NextResponse.json(
+        {
+          error: "Failed to start processing with Mosaic",
+          data: sermon,
+        },
+        { status: 502 }
+      );
     }
   }
 
