@@ -522,7 +522,7 @@ export default function BlogPost() {
                 {[
                   {
                     step: '01',
-                    title: 'Upload Sunday's Sermon',
+                    title: "Upload Sunday's Sermon",
                     time: '1 min',
                     description: 'Drop the video file (or paste a YouTube/Vimeo link) into Sermon Clips. Transcription starts automatically.',
                     output: 'Accurate timestamped transcript',
