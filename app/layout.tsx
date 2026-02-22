@@ -26,12 +26,12 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Sermon Clips — Every Message, Multiplied",
-  description: "Transform your weekly sermons into scroll-stopping social clips. Professional sermon clipping service for churches. Get your first clips free.",
-  keywords: "sermon clips, church social media, video clips for churches, sermon repurposing, church marketing",
+  title: "Sermon Clips — AI-Powered Sermon Clips for Churches",
+  description: "AI-powered sermon clips for churches. Upload your sermon, get 5 scroll-stopping clips with captions in minutes. Sermon transcription, reframing, and social publishing included. Free to start.",
+  keywords: "sermon clips, sermon clip maker, ai sermon clips, church video clips, sermon transcription, church social media, sermon highlights, sermon shorts, church content creator",
   openGraph: {
-    title: "Sermon Clips — Every Message, Multiplied",
-    description: "Transform your weekly sermons into scroll-stopping social clips. Professional sermon clipping service for churches.",
+    title: "Sermon Clips — AI-Powered Sermon Clips for Churches",
+    description: "Upload your sermon. Get 5 scroll-stopping clips with captions in minutes. Free to start — no editor required.",
     type: "website",
   },
 };
