@@ -1,0 +1,272 @@
+---
+title: "Agents"
+description: "Run AI-powered video editing agents and track their progress"
+---
+
+## Overview
+
+Agents are pre-built workflows that process your videos with AI-powered editing capabilities. Each agent is designed for specific tasks like generating captions, creating shorts, or enhancing audio.
+
+### Creating Agents
+
+First, create an agent on [edit.mosaic.so](https://edit.mosaic.so). Once created, you can find the agent ID in the URL when viewing your agent.
+
+---
+
+## POST /agent/[agent_id]/run
+
+Execute an agent workflow. Supports standard video-input workflows and AI-only workflows (AI Content Generation or AI Avatar).
+
+### Standard Workflows
+
+For workflows starting with a Video Input node, provide at least one of: `video_urls`, `video_ids`, or `node_render_ids`. For URL inputs, the backend automatically detects URL type, downloads the video, and runs the workflow.
+
+```bash
+curl -X POST "https://api.mosaic.so/agent/[agent_id]/run" \
+  -H "Authorization: Bearer mk_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "video_urls": [
+      "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+    ],
+    "callback_url": "https://your-webhook.com/callback"
+  }'
+```
+
+### AI-Only Workflows
+
+For workflows starting with AI Content Generation or AI Avatar nodes (and no Video Input node), no video inputs should be provided. These agents generate video content based on the parameters configured in the agent.
+
+```bash
+curl -X POST "https://api.mosaic.so/agent/[agent_id]/run" \
+  -H "Authorization: Bearer mk_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "callback_url": "https://your-webhook.com/callback",
+    "update_params": {
+      "NODE_ID": {
+        "prompt": "A futuristic city in the style of cyberpunk"
+      }
+    }
+  }'
+```
+
+### Parameters
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| video_urls | string[] | | Array of video URLs to process. Required if the agent has a video input node. Supports YouTube URLs and signed URLs (HTTP/HTTPS). |
+| node_render_ids | string[] | | Optional list of completed render IDs from prior runs/webhooks. Use this to chain outputs from one Mosaic run into another as Video Input. |
+| callback_url | string | | Optional webhook URL for status updates |
+| update_params | object | | Optional parameters to override node parameters in the agent workflow |
+| ignore_nodes | string[] | | Optional list of `agent_node.id` values to bypass for this run. Mosaic removes each ignored node from the runtime graph and rewires incoming edges directly to its downstream nodes. |
+
+### Video URL Requirements & Limits
+
+The `video_urls` field supports two types of URLs:
+
+**YouTube URLs:**
+- Supports standard YouTube video URLs (e.g., `https://www.youtube.com/watch?v=VIDEO_ID`)
+- **Maximum duration**: 1 hour per video
+- The system automatically validates the video exists and checks duration before processing
+
+**Signed URLs (HTTP/HTTPS):**
+- Must be HTTP or HTTPS URLs pointing to video files
+- **Maximum file size**: 5 GB per video
+- **Maximum duration**: 3 hours per video
+
+### Modifying Node Parameters
+
+You can override specific parameters for any node in your agent workflow using the `update_params` field. This allows you to dynamically change behavior (like clip duration, prompt text, or number of clips) at runtime.
+
+To find the correct parameters:
+1. Open your agent in the [Mosaic Dashboard](https://edit.mosaic.so)
+2. Click the settings menu on the node you want to modify
+3. Scroll down to the **API info** dropdown
+4. Open the dropdown to find the `Agent node ID`
+5. Click **Copy params** to get the JSON structure
+
+The copied JSON will look like this, where the key is the **Node ID** (UUID) and the value object contains the parameters you can override:
+
+```json
+{
+  "bf750792-a2e9-48c2-9d39-24f892772f6a": {
+    "num_clips": 10,
+    "target_duration": 60
+  }
+}
+```
+
+Pass this entire object as the `update_params` value in your API request.
+
+### Bypassing Nodes at Runtime
+
+Use `ignore_nodes` to skip one or more nodes for a single run without editing the saved agent template.
+
+For each ignored node:
+- Incoming connections to the node are rewired to its downstream nodes
+- The ignored node is removed from the runtime DAG for that run only
+- The template itself is unchanged
+
+```json
+{
+  "video_urls": ["https://youtube.com/watch?v=..."],
+  "ignore_nodes": [
+    "8cbfd03e-6e85-4f3d-b4b9-8de0b5bfb6a4"
+  ],
+  "update_params": {
+    "35a12345-6789-abcd-ef01-234567890abc": {
+      "audio_id": "your-uploaded-audio-uuid"
+    }
+  }
+}
+```
+
+### Uploading Media for Node Parameters
+
+Some nodes accept **images**, **audio**, or **videos** as parameters. To set these programmatically, use the [Uploads API](/api/uploads) to upload your files and get their UUIDs:
+
+```json
+{
+  "video_urls": ["https://youtube.com/watch?v=..."],
+  "update_params": {
+    "35a12345-6789-abcd-ef01-234567890abc": {
+      "audio_id": "your-uploaded-audio-uuid"
+    },
+    "76b23456-7890-efab-cd12-345678901bcd": {
+      "image_id": "your-uploaded-image-uuid"
+    }
+  }
+}
+```
+
+See the [Uploads documentation](/api/uploads) for the complete upload flow.
+
+### Chaining Runs with `node_render_ids`
+
+You can feed outputs from a previous run directly into another agent by passing render IDs returned in webhooks or from `GET /agent_run/[run_id]` (`outputs[].id`).
+
+```bash
+curl -X POST "https://api.mosaic.so/agent/[agent_id]/run" \
+  -H "Authorization: Bearer mk_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "node_render_ids": [
+      "7ba7b810-9dad-11d1-80b4-00c04fd430c8",
+      "8cbfd03e-6e85-4f3d-b4b9-8de0b5bfb6a4"
+    ],
+    "callback_url": "https://your-webhook.com/callback"
+  }'
+```
+
+### Response
+```json
+{
+  "run_id": "7f8d9c2b-4a6e-8b3f-1d5c-9e2f3a4b5c6d"
+}
+```
+
+The `run_id` is used to track the progress of your agent run.
+
+---
+
+## GET /agent_run/[run_id]
+
+Poll this endpoint to check the status of your agent run and retrieve outputs.
+
+### Request
+```bash
+curl -X GET "https://api.mosaic.so/agent_run/[run_id]" \
+  -H "Authorization: Bearer mk_your_api_key"
+```
+
+### Response
+```json
+{
+  "agent_id": "123e4567-e89b-12d3-a456-789012345678",
+  "started_at": "2025-01-10T14:30:00Z",
+  "status": "completed",
+  "status_message": null,
+  "node_status_counts": {
+    "completed": 10,
+    "in_progress": 0,
+    "failed": 0
+  },
+  "inputs": [
+    {
+      "video_url": "https://storage.googleapis.com/mosaic-inputs/...",
+      "thumbnail_url": "https://storage.googleapis.com/mosaic-inputs/..."
+    }
+  ],
+  "outputs": [
+    {
+      "id": "7ba7b810-9dad-11d1-80b4-00c04fd430c8",
+      "video_url": "https://storage.googleapis.com/mosaic-outputs/...",
+      "thumbnail_url": "https://storage.googleapis.com/mosaic-thumbnails/...",
+      "completed_at": "2025-01-10T14:35:30Z",
+      "original_node_id": "2ba7b810-9dad-11d1-80b4-00c04fd430c8"
+    }
+  ]
+}
+```
+
+### Output Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `string` | Unique identifier for this output render |
+| `video_url` | `string` | Signed URL to download the rendered video (valid for 7 days) |
+| `thumbnail_url` | `string \| null` | Signed URL to download the video thumbnail |
+| `completed_at` | `string` | ISO 8601 timestamp when this output finished rendering |
+| `original_node_id` | `string \| null` | Template agent_node_id this output originated from. Use this to map outputs to specific nodes in your agent. |
+
+<Tip>
+**Tracking outputs**: Use `original_node_id` to identify which node in your agent template produced each output. This allows you to consistently map outputs to your application logic across multiple runs.
+</Tip>
+```
+
+### Status Values
+
+| Status | Description |
+| --- | --- |
+| running | Agent is processing your videos |
+| completed | Processing finished successfully |
+| partial_complete | Some outputs finished successfully, but others failed |
+| failed | The entire run failed, no outputs generated |
+| cancelled | The run was cancelled by the user |
+
+---
+
+## POST /agent_run/[run_id]/cancel
+
+Cancel an ongoing agent run. This stops all running tasks and prevents downstream nodes from starting.
+
+### Request
+```bash
+curl -X POST "https://api.mosaic.so/agent_run/[run_id]/cancel" \
+  -H "Authorization: Bearer mk_your_api_key"
+```
+
+### Response
+```json
+{
+  "success": true,
+  "run_id": "7f8d9c2b-4a6e-8b3f-1d5c-9e2f3a4b5c6d",
+  "tasks_cancelled": 2,
+  "nodes_reset": 3,
+  "message": "Agent run cancelled successfully"
+}
+```
+
+---
+
+## Webhook Callbacks
+
+If you provide a `callback_url` when running an agent, Mosaic will send POST requests to notify you of status changes. See the [Webhooks](/api/webhooks) section for complete webhook documentation.
+
+---
+
+## Next Steps
+
+- [Set up triggers](/api/triggers) to automatically run agents on new videos
+- [Configure webhooks](/api/webhooks) for real-time notifications

@@ -1,0 +1,49 @@
+---
+title: "4.2 Input Tiles"
+description: "Tiles for importing your footage"
+icon: "upload"
+---
+
+Input tiles are the starting point of every Mosaic workflow. Upload the footage you want to work with, from your desired input source.
+
+![Input Tiles Overview](/images/input-tiles-overview.png)
+
+---
+
+## Video Input
+
+Drag and drop or browse to upload your footage directly. You can also paste a link to import videos from YouTube and other sources.
+
+| | Details |
+|---|---|
+| **Max file size** | 20 GB |
+| **Max duration** | 300 minutes |
+| **Sources** | Local upload, Paste Link (YouTube, etc.) |
+
+---
+
+## YouTube Trigger
+
+Watches a YouTube channel and automatically triggers your workflow when a new video is published. Add a channel by handle (e.g. `@mkbhd`) or URL, and optionally set a **Callback URL** to receive webhook notifications.
+
+Best for automating clipping from a creator or channel.
+
+---
+
+## Google Drive Trigger
+
+Connect a Google Drive folder and Mosaic will monitor it for new files. When a new video lands in the folder, your workflow kicks off automatically.
+
+<Tip>If you have duplicate folder names, use **Browse...** to pick the exact folder.</Tip>
+
+---
+
+## AWS S3 Trigger
+
+Connect an AWS S3 bucket to automatically trigger workflows when new files are uploaded. Ideal for teams with cloud-based media pipelines.
+
+---
+
+![Input Tiles UI](/images/input-tiles-ui.png)
+
+<Note>Google Drive and AWS S3 triggers are available on certain plans. [Manage your subscription](/how-to/manage-subscription) to unlock automated triggers.</Note>

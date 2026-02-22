@@ -1,6 +1,6 @@
 /**
  * Maps our ProcessingOptions → Mosaic update_params for tile configuration.
- * Everything flows through `update_params` on POST /v1/agents/{id}/runs.
+ * Everything flows through `update_params` on POST /agent/{id}/run.
  */
 import type {
   ProcessingOptions,
@@ -15,6 +15,56 @@ import type {
   AiAugmentConfig,
   AiVoiceoverConfig,
 } from "@/types";
+
+export type MosaicBrandingNodeIds = {
+  voiceNodeId?: string;
+  watermarkNodeId?: string;
+  introNodeId?: string;
+  outroNodeId?: string;
+};
+
+export type MosaicBrandingPassConfig = {
+  targetLanguage?: string;
+  logoImageId?: string;
+  introVideoId?: string;
+  outroVideoId?: string;
+};
+
+export function buildMosaicBrandingUpdateParams(
+  nodeIds: MosaicBrandingNodeIds,
+  config: MosaicBrandingPassConfig
+): Record<string, unknown> {
+  const params: Record<string, unknown> = {};
+
+  if (nodeIds.voiceNodeId && config.targetLanguage) {
+    params[nodeIds.voiceNodeId] = {
+      target_language: config.targetLanguage,
+    };
+  }
+
+  if (nodeIds.watermarkNodeId && config.logoImageId) {
+    params[nodeIds.watermarkNodeId] = {
+      use_custom_logo: "custom",
+      image_id: config.logoImageId,
+    };
+  }
+
+  if (nodeIds.introNodeId && config.introVideoId) {
+    params[nodeIds.introNodeId] = {
+      use_custom_intro: "custom",
+      custom_intro_video_id: config.introVideoId,
+    };
+  }
+
+  if (nodeIds.outroNodeId && config.outroVideoId) {
+    params[nodeIds.outroNodeId] = {
+      use_custom_outro: "custom",
+      custom_outro_video_id: config.outroVideoId,
+    };
+  }
+
+  return params;
+}
 
 /** Convert our clipDuration string to seconds */
 function durationToSeconds(duration: "short" | "medium" | "long"): number {
@@ -208,24 +258,35 @@ export function buildMosaicUpdateParams(
   }
 
   // --- Watermark tile (from branding) ---
-  if (branding?.watermarkUrl) {
-    params.watermark = {
-      image_url: branding.watermarkUrl,
+  if (branding?.watermarkImageId || branding?.watermarkUrl) {
+    const watermarkParams: Record<string, unknown> = {
       position: branding.watermarkPosition ?? "bottom-right",
       ...(branding.watermarkSize != null ? { size_percent: branding.watermarkSize } : {}),
       ...(branding.watermarkOpacity != null ? { opacity: branding.watermarkOpacity } : {}),
       ...(branding.watermarkMargin != null ? { margin_px: branding.watermarkMargin } : {}),
     };
+
+    if (branding.watermarkImageId) {
+      watermarkParams.image_id = branding.watermarkImageId;
+    } else if (branding.watermarkUrl) {
+      watermarkParams.image_url = branding.watermarkUrl;
+    }
+
+    params.watermark = watermarkParams;
   }
 
   // --- Intro tile (from branding) ---
-  if (branding?.introVideoUrl) {
-    params.intro = { intro_video_url: branding.introVideoUrl };
+  if (branding?.introVideoId || branding?.introVideoUrl) {
+    params.intro = branding.introVideoId
+      ? { video_id: branding.introVideoId }
+      : { intro_video_url: branding.introVideoUrl };
   }
 
   // --- Outro tile (from branding) ---
-  if (branding?.outroVideoUrl) {
-    params.outro = { outro_video_url: branding.outroVideoUrl };
+  if (branding?.outroVideoId || branding?.outroVideoUrl) {
+    params.outro = branding.outroVideoId
+      ? { video_id: branding.outroVideoId }
+      : { outro_video_url: branding.outroVideoUrl };
   }
 
   // --- Destination tile (social publishing) ---

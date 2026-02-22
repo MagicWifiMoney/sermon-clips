@@ -1,0 +1,171 @@
+---
+title: "Triggers"
+description: "Automatically run agents when new content is available"
+---
+
+## Overview
+
+Triggers allow you to automatically run agents when new videos are uploaded to external platforms. Currently, Mosaic supports YouTube channel monitoring.
+
+When a trigger detects new content, it automatically starts an agent run with the new video, making it perfect for content creators who want to automate their video editing workflows.
+
+<Note>
+Each agent can have multiple YouTube trigger nodes, and each trigger node can monitor multiple channels. The GET endpoint returns all triggers configured for the agent.
+</Note>
+
+---
+
+## YouTube Triggers
+
+Monitor YouTube channels and automatically process new videos as they're uploaded.
+
+### GET /agent/[agent_id]/triggers
+
+Retrieve all YouTube triggers configured for an agent.
+
+```bash
+curl -X GET "https://api.mosaic.so/agent/[agent_id]/triggers" \
+  -H "Authorization: Bearer mk_your_api_key"
+```
+
+### Response
+```json
+[
+  {
+    "id": "8f7d6c5b-4a3e-2b1f-9d8c-1a2b3c4d5e6f",
+    "type": "youtube",
+    "youtube_channels": [
+      "UCxxxxxxxxxxxxxx",
+      "UCyyyyyyyyyyyyyy"
+    ],
+    "youtube_channel_details": [
+      {
+        "channel_id": "UCxxxxxxxxxxxxxx",
+        "channel_name": "Marques Brownlee",
+        "channel_handle": "@mkbhd",
+        "thumbnail_url": "https://yt3.googleusercontent.com/...",
+        "subscriber_count": 19200000
+      },
+      {
+        "channel_id": "UCyyyyyyyyyyyyyy",
+        "channel_name": "Cinematic Clips",
+        "channel_handle": "@cinematicclips",
+        "thumbnail_url": null,
+        "subscriber_count": null
+      }
+    ],
+    "callback_url": "https://your-app.com/webhooks/trigger"
+  }
+]
+```
+
+Returns an empty array `[]` if no triggers are configured. Each trigger represents a trigger node with its associated YouTube channels.
+
+<Note>
+`youtube_channel_details` includes `channel_name`, `channel_handle`, `thumbnail_url`, and `subscriber_count`. Some fields may be `null` if Mosaic has not yet refreshed metadata for a channel. Always fall back to `youtube_channels` when details are unavailable.
+</Note>
+
+---
+
+## Managing YouTube Channels
+
+### Add Channels
+
+To monitor new YouTube channels, use the `add_youtube_channels` endpoint. This operation is **additive**—new channels are merged with your existing list. You do not need to resend previously added channels.
+
+**Behavior:**
+- Creates a new trigger if none exists
+- Merges new channels into the existing trigger if one exists
+- Updates the webhook URL if `trigger_callback_url` is provided
+
+### POST /agent/[agent_id]/triggers/add_youtube_channels
+
+```bash
+curl -X POST "https://api.mosaic.so/agent/[agent_id]/triggers/add_youtube_channels" \
+  -H "Authorization: Bearer mk_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "youtube_channels": [
+      "UCxxxxxxxxxxxxxx",
+      "https://www.youtube.com/@mkbhd"
+    ],
+    "trigger_callback_url": "https://your-app.com/webhooks/youtube-trigger"
+  }'
+```
+
+### Response
+
+```json
+{
+  "message": "YouTube channels added successfully",
+  "channel_ids": [
+    "UCxxxxxxxxxxxxxx",
+    "UCyyyyyyyyyyyyyy"
+  ],
+  "channels": [
+    {
+      "input": "UCxxxxxxxxxxxxxx",
+      "channel_id": "UCxxxxxxxxxxxxxx"
+    },
+    {
+      "input": "https://www.youtube.com/@mkbhd",
+      "channel_id": "UCyyyyyyyyyyyyyy"
+    }
+  ],
+  "youtube_channel_details": [
+    {
+      "channel_id": "UCxxxxxxxxxxxxxx",
+      "channel_name": "Channel Name",
+      "channel_handle": null,
+      "thumbnail_url": null,
+      "subscriber_count": null
+    },
+    {
+      "channel_id": "UCyyyyyyyyyyyyyy",
+      "channel_name": "Marques Brownlee",
+      "channel_handle": "@mkbhd",
+      "thumbnail_url": "https://yt3.googleusercontent.com/...",
+      "subscriber_count": 19200000
+    }
+  ]
+}
+```
+
+### Parameters
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| youtube_channels | string[] | ✅ | List of **new** YouTube channel IDs or URLs to add |
+| trigger_callback_url | string \| null | | Optional webhook URL. If provided, it **replaces** the existing webhook URL. Set to `null` to remove. |
+
+<Note>
+**Duplicate Handling**: If you add a channel that is already being monitored, it will be ignored (no duplicates are created).
+</Note>
+
+---
+
+### Remove Channels
+
+To stop monitoring specific channels, use the `remove_youtube_channels` endpoint. This operation is **subtractive**—it only removes the channels you specify, leaving all other monitored channels intact.
+
+**Behavior:**
+- Removes specified channels from the trigger
+- If all channels are removed, the trigger itself is deleted
+- Does not affect channels that are not specified
+
+### POST /agent/[agent_id]/triggers/remove_youtube_channels
+
+```bash
+curl -X POST "https://api.mosaic.so/agent/[agent_id]/triggers/remove_youtube_channels" \
+  -H "Authorization: Bearer mk_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "youtube_channels": ["UCxxxxxxxxxxxxxx"]
+  }'
+```
+
+---
+
+## Trigger Webhooks
+
+When a trigger detects new content and starts an agent run, webhooks are sent to your configured `callback_url` (if provided when running the agent). See the [Webhooks](/api/webhooks) section for complete webhook documentation.

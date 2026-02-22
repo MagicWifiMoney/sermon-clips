@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
-import { finalizeUpload, startSermonProcessing } from "@/lib/mosaic";
+import { buildMosaicWebhookCallback, finalizeUpload, startSermonProcessing } from "@/lib/mosaic";
 import type { BrandingConfig, ProcessingOptions, PublishMode } from "@/types";
 
 // POST /api/upload/finalize — complete upload + trigger Mosaic processing
@@ -32,8 +32,8 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // Finalize the upload to get the video URL
-    const { video_url } = await finalizeUpload(videoId);
+    // Finalize upload and get stable Mosaic video ID for run inputs.
+    const { video_id } = await finalizeUpload(videoId);
 
     // Fetch branding if applyBranding is enabled
     const processingOptions = sermon.processingOptions as ProcessingOptions | null;
@@ -44,19 +44,23 @@ export async function POST(request: NextRequest) {
     }
 
     // Trigger Mosaic processing
-    const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/mosaic`;
-    const run = await startSermonProcessing(video_url, callbackUrl, {
+    const callbackUrl = buildMosaicWebhookCallback("stage1");
+    const run = await startSermonProcessing(
+      { videoId: video_id },
+      callbackUrl,
+      {
       processingOptions: processingOptions ?? undefined,
       publishMode: sermon.publishMode as PublishMode,
       branding,
       clipPrompt: processingOptions?.clipPrompt,
-    });
+      }
+    );
 
     // Update sermon with run ID and status
     await prisma.sermon.update({
       where: { id: sermon.id },
       data: {
-        sourceUrl: video_url,
+        sourceUrl: sermon.sourceUrl,
         mosaicRunId: run.run_id,
         status: "PROCESSING",
         progress: 0,
@@ -64,7 +68,7 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({
-      data: { videoUrl: video_url, runId: run.run_id },
+      data: { videoId: video_id, runId: run.run_id },
     });
   } catch (error) {
     console.error("[Upload Finalize]", error);

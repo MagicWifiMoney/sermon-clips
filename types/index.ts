@@ -211,11 +211,15 @@ export type PublishMode = "auto" | "review" | "draft";
 
 export type BrandingConfig = {
   logoUrl?: string;
+  logoImageId?: string;
   primaryColor?: string;
   secondaryColor?: string;
   introVideoUrl?: string;
+  introVideoId?: string;
   outroVideoUrl?: string;
+  outroVideoId?: string;
   watermarkUrl?: string;
+  watermarkImageId?: string;
   watermarkPosition?: WatermarkPosition;
   watermarkOpacity?: number;
   watermarkSize?: number;

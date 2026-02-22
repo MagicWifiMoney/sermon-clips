@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { startSermonProcessing } from "@/lib/mosaic";
+import { buildMosaicWebhookCallback, startSermonProcessing } from "@/lib/mosaic";
 import type { BrandingConfig, ProcessingOptions, PublishMode } from "@/types";
 
 const captionConfigSchema = z.object({
@@ -196,7 +196,7 @@ async function createSermon(request: NextRequest, userId: string) {
         branding = (user?.brandingConfig as BrandingConfig) ?? null;
       }
 
-      const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/mosaic`;
+      const callbackUrl = buildMosaicWebhookCallback("stage1");
       const run = await startSermonProcessing(sourceUrl, callbackUrl, {
         processingOptions: processingOptions as ProcessingOptions | undefined,
         publishMode: publishMode as PublishMode | undefined,
@@ -216,6 +216,13 @@ async function createSermon(request: NextRequest, userId: string) {
         data: { status: "FAILED", errorMessage: "Failed to start processing" },
       });
       sermon.status = "FAILED";
+      return NextResponse.json(
+        {
+          error: "Failed to start processing with Mosaic",
+          data: sermon,
+        },
+        { status: 502 }
+      );
     }
   }
 

@@ -1,0 +1,84 @@
+---
+title: "7. Motion Graphics"
+description: "Add motion graphics and animations to your video to emphasize information, highlight talking points, or create engaging visual storytelling."
+icon: "shapes"
+---
+
+Add motion graphics and animations to your video to emphasize information, highlight talking points, or create a more engaging visual storytelling style.
+
+Motion graphics are AI-generated based on your instructions. They can appear as overlays during speech, fullscreen explainer slides, or contextual inserts depending on how you configure the tile.
+
+## How It Works
+
+The Motion Graphics tile takes in your video and a **prompt describing the type of motion graphics you want**, then generates visual elements that match your style and intent.
+
+![Mogr](/images/mogr.png)
+
+## Input Fields & Controls
+
+### Style Prompt (Required)
+
+Describe the **visual style** and **function** of the graphics.
+
+Examples:
+
+- "Cinematic Vox-style graphics that explain the talking points"
+- "Minimal tech UI diagrams with arrows and labels"
+- "Playful YouTube-style pop-up text for comedic emphasis"
+- "Infographic overlays using bold colors and icons"
+
+### Full Screen Toggle (Optional)
+
+When **enabled**, motion graphics appear as fullscreen slides — the speaker video may cut away entirely. Best for explainers, charts, and data slides.
+
+When **disabled** (default), graphics appear as overlays on top of your video. Ideal for speaking-head, narrative, or commentary videos.
+
+### Reference Links (Optional)
+
+Comma-separated URLs the AI will research for factual content (e.g., product pages, Wikipedia articles, docs).
+
+### Style Reference Video (Optional)
+
+Paste a **YouTube link** to replicate a specific visual style. Mosaic analyzes typography, color schemes, transitions, and layout from the reference.
+
+### Style Suggestions (Quick Buttons)
+
+Common presets like **VOX Style** and **Ali Abdaal Style** that instantly fill the prompt for you.
+
+<Note>For longer videos (over ~1–2 minutes), this tile may time out. We're actively working on removing this limitation. For now, it works best with **short clips, intros, and explainers**.</Note>
+
+## Best Use Cases
+
+Motion Graphics works great for explainers, educational content, product breakdowns, tutorials, commentary videos, and infographic storytelling. It boosts retention when explaining complex topics.
+
+<AccordionGroup>
+
+<Accordion title="Pro Tips" icon="lightbulb">
+
+- Provide **functional intent** (e.g. "help explain talking points", "highlight key stats")
+- Provide **style** + **context** instead of just style alone
+- Use reference videos for best results
+- Enable fullscreen mode for heavy infographic content
+- Recommended prompt structure: `[Style] + [Function] + [Tone] + [Timeline Behavior]`
+
+</Accordion>
+
+<Accordion title="Example Prompts" icon="pen">
+
+**Explainer style:**
+> "Clean vector infographic overlays with labels and arrows, educational tone."
+
+**YouTube short:**
+> "Fast-paced kinetic text and icons, playful tone, highlight key punchlines."
+
+**Product tutorial:**
+> "UI-style overlays showing click targets and step-by-step labels, minimal style."
+
+**Vox-style:**
+> "Vox-style infographic overlays that highlight statistics during key sentences, clean modern typography, minimal color palette, educational tone."
+
+</Accordion>
+
+</AccordionGroup>
+
+Motion Graphics pairs well with [Rough Cut](/tiles/rough-cut) (condense first, then add graphics), [Reframe](/tiles/reframe) (adapt for different platforms), and [Captions](/tiles/captions) (add subtitles on top).

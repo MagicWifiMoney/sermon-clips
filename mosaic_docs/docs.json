@@ -1,0 +1,176 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Mosaic API Docs",
+  "colors": {
+    "primary": "#8B5CF6",
+    "light": "#8B5CF6",
+    "dark": "#8B5CF6"
+  },
+  "favicon": "/favicon.svg",
+  "css": "/custom.css",
+  "js": "/custom.js",
+  "navigation": {
+    "global": {
+      "anchors": [
+        {
+          "anchor": "Discord Community",
+          "icon": "discord",
+          "href": "https://discord.gg/26SAZzBTaP"
+        }
+      ]
+    },
+    "tabs": [
+      {
+        "tab": "Mosaic Docs",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "icon": "house",
+            "pages": [
+              "welcome"
+            ]
+          },
+          {
+            "group": "2. Quickstart",
+            "icon": "rocket",
+            "pages": [
+              "quickstart/creative-process",
+              "quickstart/sign-up",
+              "quickstart/video-canvas"
+            ]
+          },
+          {
+            "group": "3. Mosaic Philosophy",
+            "icon": "brain",
+            "pages": [
+              "mosaic-concepts/product-philosophy"
+            ]
+          },
+          {
+            "group": "4. Tiles",
+            "icon": "grid-2",
+            "pages": [
+              "tiles/how-tiles-work",
+              "tiles/input-tiles",
+              {
+                "group": "4.3 Action Tiles",
+                "icon": "bolt",
+                "pages": [
+                  "tiles/ai-avatar",
+                  "tiles/ai-broll",
+                  "tiles/ai-voiceover",
+                  "tiles/ai-music",
+                  "tiles/ai-content-generation",
+                  "tiles/cinematic-captions",
+                  "tiles/motion-graphics",
+                  "tiles/rough-cut",
+                  "tiles/clips",
+                  "tiles/montage",
+                  "tiles/reframe",
+                  "tiles/silence-removal",
+                  "tiles/intro",
+                  "tiles/outro",
+                  "tiles/watermark",
+                  "tiles/ai-augment",
+                  "tiles/color-correction",
+                  "tiles/mirror",
+                  "tiles/audio-enhance",
+                  "tiles/voice",
+                  "tiles/captions",
+                  "tiles/captions-with-emojis",
+                  "tiles/destination"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "5. Canvas",
+            "icon": "object-group",
+            "pages": [
+              "canvas/toolbar",
+              "canvas/share",
+              "canvas/feedback",
+              "canvas/rename",
+              "canvas/credits"
+            ]
+          },
+          {
+            "group": "6. Models",
+            "icon": "robot",
+            "pages": [
+              "models"
+            ]
+          },
+          {
+            "group": "7. How To",
+            "icon": "book",
+            "pages": [
+              "how-to/manage-subscription",
+              "how-to/affiliate-program",
+              "how-to/faqs",
+              "how-to/templates"
+            ]
+          },
+          {
+            "group": "8. More",
+            "icon": "ellipsis",
+            "pages": [
+              "more/api",
+              "more/community",
+              "more/enterprise"
+            ]
+          },
+          {
+            "group": "9. Trust Center",
+            "icon": "shield-check",
+            "href": "https://trust.mosaic.so/"
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "api/index",
+              "api/introduction",
+              "api/agent-operations",
+              "api/uploads",
+              "api/triggers",
+              "api/webhooks"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Support",
+        "href": "mailto:adish@mosaic.so"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Dashboard",
+      "href": "https://edit.mosaic.so"
+    }
+  },
+  "footer": {
+    "socials": {
+      "x": "https://x.com/usemosaic_ai",
+      "linkedin": "https://www.linkedin.com/company/use-mosaic-ai/"
+    }
+  },
+  "feedback": {
+    "enabled": true,
+    "thumbsRating": true
+  }
+}

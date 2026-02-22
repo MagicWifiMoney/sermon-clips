@@ -1,0 +1,1348 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Mosaic AI API",
+    "description": "Professional-grade video editing workflows powered by AI agents",
+    "version": "2.0.0",
+    "contact": {
+      "email": "adish@mosaic.so"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.mosaic.so"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    },
+    {
+      "apiKeyAuth": []
+    }
+  ],
+  "paths": {
+    "/whoami": {
+      "get": {
+        "summary": "Get current user info",
+        "description": "Get information about the current user based on the API key.",
+        "operationId": "whoAmI",
+        "tags": ["Auth"],
+        "responses": {
+          "200": {
+            "description": "User information retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      }
+    },
+    "/agent/{agent_id}/run": {
+      "post": {
+        "summary": "Run an agent",
+        "description": "Execute an agent workflow. Supports standard video-input workflows and AI-only workflows (AI Content Generation or AI Avatar). For standard workflows, provide at least one of `video_urls`, `video_ids`, or `node_render_ids`. For AI-only workflows, no video inputs should be provided. Note: the public /agent/{agent_id}/run endpoint does not support agents that contain multiple Video Input tiles; it will return 400 in that case.",
+        "operationId": "runAgent",
+        "tags": ["Agents"],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the agent to run",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "video_urls": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "description": "Array of video URLs to process. Required if the agent has a video input node. Supports YouTube URLs and signed URLs (HTTP/HTTPS). YouTube videos max 1 hour, signed URLs max 3 hours / 5 GB per input."
+                  },
+                  "node_render_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Array of completed agent_node_render IDs to use as Video Input for this run. Useful for chaining outputs from webhooks or previous runs into new Mosaic workflows."
+                  },
+                  "callback_url": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "Optional webhook URL for status updates"
+                  },
+                  "update_params": {
+                    "type": "object",
+                    "description": "Optional parameters to override node parameters in the agent workflow. Key is agent_node.id, value is parameter object.",
+                    "additionalProperties": true
+                  },
+                  "ignore_nodes": {
+                    "type": "array",
+                    "description": "Optional list of agent_node.id values to bypass for this run. Ignored nodes are removed from the runtime graph and their incoming edges are rewired directly to their downstream nodes.",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Agent run started successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "run_id": {
+                      "type": "string",
+                      "description": "Unique identifier for this agent run"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLargeError"
+          }
+        }
+      }
+    },
+    "/agent/{agent_id}": {
+      "get": {
+        "summary": "Get agent metadata",
+        "description": "Retrieve agent metadata, nodes, and connections for wrapper applications.",
+        "operationId": "getAgentMetadata",
+        "tags": ["Agents"],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the agent",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Agent metadata retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentMetadataResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/agent/{agent_id}/runs": {
+      "get": {
+        "summary": "List agent runs",
+        "description": "List recent runs for an agent with optional filtering.",
+        "operationId": "listAgentRuns",
+        "tags": ["Agents"],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the agent",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated statuses to filter by",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "description": "ISO timestamp for earliest run",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "description": "ISO timestamp for latest run",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Number of runs to return (max 100)",
+            "schema": {
+              "type": "integer",
+              "default": 25
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Cursor for pagination (created_at timestamp)",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Agent runs retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentRunsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/agent_run/{run_id}": {
+      "get": {
+        "summary": "Get agent run status",
+        "description": "Retrieve the current status and outputs of an agent run",
+        "operationId": "getAgentRunStatus",
+        "tags": ["Agents"],
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the agent run",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Agent run status retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentRunStatus"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/agent_run/{run_id}/cancel": {
+      "post": {
+        "summary": "Cancel agent run",
+        "description": "Cancel an ongoing agent run",
+        "operationId": "cancelAgentRun",
+        "tags": ["Agents"],
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the agent run to cancel",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Agent run cancelled successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "run_id": {
+                      "type": "string"
+                    },
+                    "tasks_cancelled": {
+                      "type": "number"
+                    },
+                    "nodes_reset": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/agent/{agent_id}/triggers": {
+      "get": {
+        "summary": "Get agent trigger",
+        "description": "Retrieve the YouTube trigger configured for an agent",
+        "operationId": "getAgentTriggers",
+        "tags": ["Triggers"],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the agent",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Triggers retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Trigger"
+                  },
+                  "description": "Array of triggers configured for the agent. Returns empty array if no triggers are configured."
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/agent/{agent_id}/triggers/add_youtube_channels": {
+      "post": {
+        "summary": "Add YouTube channel listeners",
+        "description": "Add YouTube channels to monitor for new videos. Creates a trigger if none exist or adds to the existing trigger.",
+        "operationId": "addYoutubeListeners",
+        "tags": ["Triggers"],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the agent",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "youtube_channels": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Array of YouTube channel IDs or URLs to monitor"
+                  },
+                  "trigger_callback_url": {
+                    "type": ["string", "null"],
+                    "description": "Webhook URL for trigger notifications"
+                  }
+                },
+                "required": ["youtube_channels"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Listeners added successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "channel_ids": {
+                      "type": "array",
+                      "items": { "type": "string" },
+                      "description": "Canonical YouTube channel IDs derived from the provided inputs (e.g. URLs/handles)."
+                    },
+                    "channels": {
+                      "type": "array",
+                      "description": "Stable mapping of each provided input to its resolved canonical channel_id.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "input": { "type": "string" },
+                          "channel_id": { "type": "string" }
+                        },
+                        "required": ["input", "channel_id"]
+                      }
+                    },
+                    "youtube_channel_details": {
+                      "type": "array",
+                      "description": "Detailed information for each added channel including subscriber count and thumbnail.",
+                      "items": {
+                        "$ref": "#/components/schemas/YouTubeChannelDetail"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/agent/{agent_id}/triggers/remove_youtube_channels": {
+      "post": {
+        "summary": "Remove YouTube channel listeners",
+        "description": "Remove YouTube channels from monitoring",
+        "operationId": "removeYoutubeListeners",
+        "tags": ["Triggers"],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the agent",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "youtube_channels": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Array of YouTube channel IDs or URLs to stop monitoring"
+                  }
+                },
+                "required": ["youtube_channels"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Listeners removed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/uploads/video/get_upload_url": {
+      "post": {
+        "summary": "Get video upload URL",
+        "description": "Get a pre-signed URL for video upload. Use this to upload videos for node parameters. Max 5GB, 1 hour duration. After uploading, call `/uploads/video/finalize_upload` to get the video UUID.",
+        "operationId": "getVideoUploadUrl",
+        "tags": ["Uploads"],
+        "responses": {
+          "200": {
+            "description": "Upload URL generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VideoUploadUrlResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      }
+    },
+    "/uploads/video/finalize_upload": {
+      "post": {
+        "summary": "Finalize video upload",
+        "description": "Finalize a video upload after the file has been uploaded. Returns the video UUID which you can use in agent `update_params`.",
+        "operationId": "finalizeVideoUpload",
+        "tags": ["Uploads"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "video_id": {
+                    "type": "string",
+                    "description": "The video ID returned from get_upload_url"
+                  }
+                },
+                "required": ["video_id"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Video finalized successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VideoUploadFinalizeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/uploads/audio/get_upload_url": {
+      "post": {
+        "summary": "Get audio upload URL",
+        "description": "Get a pre-signed URL for audio upload. Use this to upload audio for node parameters (e.g., background music). Max 100MB, 1 hour duration. After uploading, call `/uploads/audio/finalize_upload` to get the audio UUID.",
+        "operationId": "getAudioUploadUrl",
+        "tags": ["Uploads"],
+        "responses": {
+          "200": {
+            "description": "Upload URL generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AudioUploadUrlResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      }
+    },
+    "/uploads/audio/finalize_upload": {
+      "post": {
+        "summary": "Finalize audio upload",
+        "description": "Finalize an audio upload after the file has been uploaded. Returns the audio UUID which you can use in agent `update_params`.",
+        "operationId": "finalizeAudioUpload",
+        "tags": ["Uploads"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "audio_id": {
+                    "type": "string",
+                    "description": "The audio ID returned from get_upload_url"
+                  }
+                },
+                "required": ["audio_id"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Audio finalized successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AudioUploadFinalizeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/uploads/image/get_upload_url": {
+      "post": {
+        "summary": "Get image upload URL",
+        "description": "Get a pre-signed URL for image upload. Use this to upload images for node parameters (e.g., logos, watermarks). Max 50MB. After uploading, call `/uploads/image/finalize_upload` to get the image UUID.",
+        "operationId": "getImageUploadUrl",
+        "tags": ["Uploads"],
+        "responses": {
+          "200": {
+            "description": "Upload URL generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImageUploadUrlResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      }
+    },
+    "/uploads/image/finalize_upload": {
+      "post": {
+        "summary": "Finalize image upload",
+        "description": "Finalize an image upload after the file has been uploaded. Returns the image UUID which you can use in agent `update_params`.",
+        "operationId": "finalizeImageUpload",
+        "tags": ["Uploads"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "image_id": {
+                    "type": "string",
+                    "description": "The image ID returned from get_upload_url"
+                  }
+                },
+                "required": ["image_id"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Image finalized successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImageUploadFinalizeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "description": "Unique identifier for the user"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true,
+            "description": "User's email address"
+          },
+          "is_admin": {
+            "type": "boolean",
+            "description": "Whether the user has admin privileges"
+          },
+          "api_key_id": {
+            "type": "string",
+            "description": "ID of the API key used for the request"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "When the API key was created"
+          },
+          "last_used_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "When the API key was last used"
+          }
+        }
+      },
+      "AgentRunStatus": {
+        "type": "object",
+        "properties": {
+          "agent_id": {
+            "type": "string",
+            "description": "ID of the agent that was run"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the agent run started"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["running", "completed", "failed", "partial_complete", "cancelled"],
+            "description": "Current status of the agent run"
+          },
+          "status_message": {
+            "type": "string",
+            "nullable": true,
+            "description": "Optional message providing details about the current status"
+          },
+          "node_status_counts": {
+            "$ref": "#/components/schemas/NodeStatusCounts"
+          },
+          "inputs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VideoInput"
+            },
+            "description": "Array of input videos"
+          },
+          "outputs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgentOutput"
+            },
+            "description": "Array of output videos"
+          }
+        }
+      },
+      "UpdatedNode": {
+        "type": "object",
+        "properties": {
+          "original_node_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "Template agent_node_id this runtime node was cloned from"
+          },
+          "status": {
+            "type": "string",
+            "description": "Current status of the node"
+          },
+          "status_message": {
+            "type": "string",
+            "nullable": true,
+            "description": "Optional human-readable status message"
+          },
+          "outputs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgentOutput"
+            },
+            "description": "Optional list of outputs produced by this node in this update"
+          }
+        }
+      },
+      "RunProgressWebhook": {
+        "type": "object",
+        "properties": {
+          "flag": {
+            "type": "string",
+            "enum": ["RUN_PROGRESS"]
+          },
+          "agent_id": {
+            "type": "string",
+            "description": "UUID of the agent being executed"
+          },
+          "run_id": {
+            "type": "string",
+            "description": "UUID of the agent run (same as agent_state_id)"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["running"]
+          },
+          "node_status_counts": {
+            "$ref": "#/components/schemas/NodeStatusCounts"
+          },
+          "updated_nodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UpdatedNode"
+            },
+            "description": "Optional list of nodes that changed status in this batch"
+          },
+          "triggered_by": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": true
+          }
+        }
+      },
+      "AgentRunsResponse": {
+        "type": "object",
+        "properties": {
+          "runs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgentRunSummary"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Pagination cursor for the next page"
+          }
+        }
+      },
+      "AgentRunSummary": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string"
+          },
+          "agent_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["running", "completed", "failed", "partial_complete", "cancelled"]
+          },
+          "status_message": {
+            "type": "string",
+            "nullable": true
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "node_status_counts": {
+            "$ref": "#/components/schemas/NodeStatusCounts"
+          },
+          "inputs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VideoInput"
+            }
+          },
+          "outputs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgentOutput"
+            }
+          },
+          "triggered_by": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": true
+          }
+        }
+      },
+      "AgentMetadataResponse": {
+        "type": "object",
+        "properties": {
+          "agent": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "description": { "type": "string" },
+              "created_at": { "type": "string", "format": "date-time" },
+              "updated_at": { "type": "string", "format": "date-time" }
+            }
+          },
+          "nodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgentNodeSummary"
+            }
+          },
+          "connections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgentConnection"
+            }
+          },
+          "update_params_template": {
+            "type": "object",
+            "description": "Default update_params map keyed by agent_node_id",
+            "additionalProperties": true
+          }
+        }
+      },
+      "AgentNodeSummary": {
+        "type": "object",
+        "properties": {
+          "agent_node_id": { "type": "string" },
+          "node_id": { "type": "string" },
+          "position_x": { "type": "number", "nullable": true },
+          "position_y": { "type": "number", "nullable": true },
+          "params_used": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "node": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string", "nullable": true },
+              "description": { "type": "string", "nullable": true },
+              "hidden": { "type": "boolean" },
+              "is_input": { "type": "boolean" },
+              "is_output": { "type": "boolean" },
+              "is_trigger_node": { "type": "boolean" },
+              "metadata": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "param_schema": {
+                "type": "object",
+                "description": "Parameter schema or defaults for update_params",
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      },
+      "AgentConnection": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "agent_id": { "type": "string" },
+          "agent_state_id": { "type": "string", "nullable": true },
+          "source_agent_node_id": { "type": "string" },
+          "target_agent_node_id": { "type": "string" }
+        }
+      },
+      "NodeStatusCounts": {
+        "type": "object",
+        "properties": {
+          "completed": {
+            "type": "integer",
+            "description": "Number of nodes that finished successfully (completed, partial_complete)"
+          },
+          "in_progress": {
+            "type": "integer",
+            "description": "Number of nodes currently processing or waiting (running, queued)"
+          },
+          "failed": {
+            "type": "integer",
+            "description": "Number of nodes that failed or are blocked (failed, blocked)"
+          }
+        }
+      },
+      "AgentOutput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for this output render"
+          },
+          "video_url": {
+            "type": "string",
+            "nullable": true,
+            "description": "Signed URL to download the output video (valid for 7 days). Null if render failed."
+          },
+          "thumbnail_url": {
+            "type": "string",
+            "nullable": true,
+            "description": "Signed URL for the video thumbnail (valid for 7 days)"
+          },
+          "completed_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp when this output finished rendering"
+          },
+          "original_node_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "Template agent_node_id this output originated from. Use this to map outputs to specific nodes in your agent."
+          }
+        }
+      },
+      "Trigger": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the trigger"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["youtube"],
+            "description": "Type of trigger"
+          },
+          "youtube_channels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of YouTube channel IDs"
+          },
+          "youtube_channel_details": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/YouTubeChannelDetail"
+            },
+            "description": "Optional expanded channel details for the configured YouTube channels"
+          },
+          "callback_url": {
+            "type": "string",
+            "nullable": true,
+            "description": "Webhook URL for trigger notifications"
+          }
+        }
+      },
+      "YouTubeChannelDetail": {
+        "type": "object",
+        "properties": {
+          "channel_id": {
+            "type": "string",
+            "description": "YouTube channel ID"
+          },
+          "channel_name": {
+            "type": "string",
+            "description": "Display name for the YouTube channel"
+          },
+          "channel_handle": {
+            "type": "string",
+            "nullable": true,
+            "description": "YouTube channel handle (if available)"
+          },
+          "thumbnail_url": {
+            "type": "string",
+            "nullable": true,
+            "description": "URL for the channel profile picture (if available)"
+          },
+          "subscriber_count": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Number of subscribers for the channel (if available)"
+          }
+        }
+      },
+      "VideoInput": {
+        "type": "object",
+        "properties": {
+          "video_url": {
+            "type": "string",
+            "description": "URL of the input video"
+          },
+          "thumbnail_url": {
+            "type": "string",
+            "nullable": true,
+            "description": "URL of the input video thumbnail"
+          }
+        }
+      },
+      "VideoUploadUrlResponse": {
+        "type": "object",
+        "properties": {
+          "video_id": {
+            "type": "string",
+            "description": "UUID for the video. Use this to call finalize_upload and in update_params."
+          },
+          "upload_url": {
+            "type": "string",
+            "description": "URL to POST the file to"
+          },
+          "upload_fields": {
+            "type": "object",
+            "description": "Form fields to include before the file in the POST request",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "max_file_size_bytes": {
+            "type": "integer",
+            "description": "Maximum file size (5GB)"
+          }
+        }
+      },
+      "VideoUploadFinalizeResponse": {
+        "type": "object",
+        "properties": {
+          "video_id": {
+            "type": "string",
+            "description": "UUID for the video. Use this in update_params when running agents."
+          }
+        }
+      },
+      "AudioUploadUrlResponse": {
+        "type": "object",
+        "properties": {
+          "audio_id": {
+            "type": "string",
+            "description": "UUID for the audio. Use this to call finalize_upload and in update_params."
+          },
+          "upload_url": {
+            "type": "string",
+            "description": "URL to POST the file to"
+          },
+          "upload_fields": {
+            "type": "object",
+            "description": "Form fields to include before the file in the POST request",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "max_file_size_bytes": {
+            "type": "integer",
+            "description": "Maximum file size (100MB)"
+          }
+        }
+      },
+      "AudioUploadFinalizeResponse": {
+        "type": "object",
+        "properties": {
+          "audio_id": {
+            "type": "string",
+            "description": "UUID for the audio. Use this in update_params when running agents."
+          }
+        }
+      },
+      "ImageUploadUrlResponse": {
+        "type": "object",
+        "properties": {
+          "image_id": {
+            "type": "string",
+            "description": "UUID for the image. Use this to call finalize_upload and in update_params."
+          },
+          "upload_url": {
+            "type": "string",
+            "description": "URL to POST the file to"
+          },
+          "upload_fields": {
+            "type": "object",
+            "description": "Form fields to include before the file in the POST request",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "max_file_size_bytes": {
+            "type": "integer",
+            "description": "Maximum file size (50MB)"
+          }
+        }
+      },
+      "ImageUploadFinalizeResponse": {
+        "type": "object",
+        "properties": {
+          "image_id": {
+            "type": "string",
+            "description": "UUID for the image. Use this in update_params when running agents."
+          }
+        }
+      }
+    },
+    "responses": {
+      "UnauthorizedError": {
+        "description": "Authentication failed",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "detail": {
+                  "type": "string",
+                  "example": "Invalid or missing API key"
+                }
+              }
+            }
+          }
+        }
+      },
+      "BadRequestError": {
+        "description": "Invalid request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "detail": {
+                  "type": "string",
+                  "example": "Validation error message"
+                }
+              }
+            }
+          }
+        }
+      },
+      "NotFoundError": {
+        "description": "Resource not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "detail": {
+                  "type": "string",
+                  "example": "Resource not found"
+                }
+              }
+            }
+          }
+        }
+      },
+      "PayloadTooLargeError": {
+        "description": "Payload too large",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "detail": {
+                  "type": "string",
+                  "example": "File size exceeds limit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Use your API key prefixed with 'Bearer'"
+      },
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key",
+        "description": "Use your API key in the X-API-Key header"
+      }
+    }
+  }
+}

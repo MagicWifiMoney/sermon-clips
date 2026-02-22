@@ -9,21 +9,33 @@ import {
   addYouTubeChannels,
   removeYouTubeChannels,
 } from "@/lib/mosaic-client";
-import { buildMosaicUpdateParams } from "@/lib/mosaic-params";
+import { buildMosaicUpdateParams, buildMosaicBrandingUpdateParams } from "@/lib/mosaic-params";
+import {
+  MOSAIC_BRANDING_AGENT_ID,
+  MOSAIC_CLIPPING_AGENT_ID,
+  MOSAIC_INTRO_AGENT_NODE_ID,
+  MOSAIC_OUTRO_AGENT_NODE_ID,
+  MOSAIC_VOICE_AGENT_NODE_ID,
+  MOSAIC_WATERMARK_AGENT_NODE_ID,
+} from "@/lib/mosaic-constants";
 
-const MOSAIC_AGENT_ID = process.env.MOSAIC_AGENT_ID ?? "";
+export function buildMosaicWebhookCallback(stage: "stage1" | "stage2" | "default" = "default"): string {
+  const base = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/mosaic`;
+  return stage === "default" ? base : `${base}?stage=${stage}`;
+}
 
 // ---- TYPES ----
 
 export interface MosaicRunResponse {
   run_id: string;
-  status: string;
+  status?: string;
 }
 
 export interface MosaicClipOutput {
-  video_url: string;
-  thumbnail_url: string;
-  original_node_id: string;
+  id?: string;
+  video_url: string | null;
+  thumbnail_url: string | null;
+  original_node_id: string | null;
 }
 
 export interface MosaicWebhookPayload {
@@ -74,7 +86,7 @@ export interface MosaicPublishResponse {
 // ---- LIVE: Agent Runs (via Mosaic API) ----
 
 export async function startSermonProcessing(
-  videoUrl: string,
+  input: string | { videoUrl?: string; videoId?: string },
   callbackUrl: string,
   options?: {
     processingOptions?: ProcessingOptions;
@@ -96,7 +108,74 @@ export async function startSermonProcessing(
     );
   }
 
-  return runAgent(MOSAIC_AGENT_ID, [videoUrl], callbackUrl, updateParams);
+  const videoUrl = typeof input === "string" ? input : input.videoUrl;
+  const videoId = typeof input === "string" ? undefined : input.videoId;
+  const videoUrls = videoUrl ? [videoUrl] : [];
+  const videoIds = videoId ? [videoId] : undefined;
+
+  return runAgent(
+    MOSAIC_CLIPPING_AGENT_ID,
+    videoUrls,
+    callbackUrl,
+    updateParams,
+    videoIds,
+    undefined
+  );
+}
+
+export async function startBrandingPassFromNodeRenders(
+  nodeRenderIds: string[],
+  callbackUrl: string,
+  options?: {
+    branding?: BrandingConfig | null;
+    languageConfig?: LanguageConfig | null;
+  }
+): Promise<MosaicRunResponse> {
+  const branding = options?.branding ?? null;
+  const languageConfig = options?.languageConfig ?? null;
+  const selectedTargetLanguage = languageConfig?.targetLanguages?.[0]?.trim().toLowerCase();
+  const voiceNodeId = MOSAIC_VOICE_AGENT_NODE_ID;
+  const watermarkNodeId = MOSAIC_WATERMARK_AGENT_NODE_ID;
+  const introNodeId = MOSAIC_INTRO_AGENT_NODE_ID;
+  const outroNodeId = MOSAIC_OUTRO_AGENT_NODE_ID;
+
+  const updateParams = buildMosaicBrandingUpdateParams(
+    {
+      voiceNodeId,
+      watermarkNodeId,
+      introNodeId,
+      outroNodeId,
+    },
+    {
+      targetLanguage: selectedTargetLanguage || undefined,
+      logoImageId: branding?.watermarkImageId ?? branding?.logoImageId,
+      introVideoId: branding?.introVideoId,
+      outroVideoId: branding?.outroVideoId,
+    }
+  );
+
+  // Stage 2 nodes without custom asset IDs should be skipped automatically.
+  const ignoreNodes: string[] = [];
+  if (voiceNodeId && !updateParams[voiceNodeId]) ignoreNodes.push(voiceNodeId);
+  if (watermarkNodeId && !updateParams[watermarkNodeId]) ignoreNodes.push(watermarkNodeId);
+  if (introNodeId && !updateParams[introNodeId]) ignoreNodes.push(introNodeId);
+  if (outroNodeId && !updateParams[outroNodeId]) ignoreNodes.push(outroNodeId);
+
+  if (Object.keys(updateParams).length === 0) {
+    throw new Error(
+      "No stage 2 nodes were configured for branding/voice processing."
+    );
+  }
+
+  return runAgent(
+    MOSAIC_BRANDING_AGENT_ID,
+    [],
+    callbackUrl,
+    updateParams,
+    undefined,
+    nodeRenderIds,
+    ignoreNodes
+  );
 }
 
 export async function getRunStatus(runId: string): Promise<{ run_id: string; status: string; progress: number }> {
@@ -105,7 +184,7 @@ export async function getRunStatus(runId: string): Promise<{ run_id: string; sta
   const total = counts.completed + counts.in_progress + counts.failed;
   const progress = total > 0 ? Math.round((counts.completed / total) * 100) : 0;
 
-  return { run_id: run.run_id, status: run.status, progress };
+  return { run_id: run.run_id ?? runId, status: run.status, progress };
 }
 
 // ---- LIVE: Uploads (via Mosaic API) ----
@@ -125,9 +204,9 @@ export async function getUploadUrl(): Promise<{
   };
 }
 
-export async function finalizeUpload(videoId: string): Promise<{ video_url: string }> {
+export async function finalizeUpload(videoId: string): Promise<{ video_id: string }> {
   const res = await finalizeVideoUpload(videoId);
-  return { video_url: res.video_url };
+  return { video_id: res.video_id };
 }
 
 export async function getAudioUploadUrlWrapper(): Promise<{
@@ -145,9 +224,9 @@ export async function getAudioUploadUrlWrapper(): Promise<{
   };
 }
 
-export async function finalizeAudioUploadWrapper(audioId: string): Promise<{ audio_url: string }> {
+export async function finalizeAudioUploadWrapper(audioId: string): Promise<{ audio_id: string }> {
   const res = await finalizeAudioUpload(audioId);
-  return { audio_url: res.audio_url };
+  return { audio_id: res.audio_id };
 }
 
 // ---- LIVE: YouTube Triggers (via Mosaic API) ----
@@ -156,9 +235,12 @@ export async function registerYouTubeTrigger(
   agentId: string,
   channelId: string
 ): Promise<MosaicTriggerResponse> {
-  const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/mosaic`;
+  const callbackUrl = buildMosaicWebhookCallback("stage1");
   const res = await addYouTubeChannels(agentId, [channelId], callbackUrl);
-  return { trigger_id: res.trigger_id, status: res.status };
+  return {
+    trigger_id: res.trigger_id ?? res.channel_ids?.[0] ?? channelId,
+    status: res.status ?? "configured",
+  };
 }
 
 export async function removeYouTubeTrigger(
@@ -175,7 +257,7 @@ export async function removeYouTubeTrigger(
 
 /** Get the URL to Mosaic's social account management portal */
 export function getMosaicSocialPortalUrl(): string {
-  return `https://app.mosaic.so/agents/${MOSAIC_AGENT_ID}/destinations`;
+  return `https://app.mosaic.so/agents/${MOSAIC_CLIPPING_AGENT_ID}/destinations`;
 }
 
 // ---- STUBS: AI Content Generation (needs OpenAI/Anthropic) ----
@@ -203,7 +285,7 @@ export async function createClipFromTimestamps(
   options?: { title?: string }
 ): Promise<MosaicRunResponse> {
   const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/mosaic`;
-  return runAgent(MOSAIC_AGENT_ID, [videoUrl], callbackUrl, {
+  return runAgent(MOSAIC_CLIPPING_AGENT_ID, [videoUrl], callbackUrl, {
     clips: {
       number_of_clips: 1,
       timestamps: [{ start: startTime, end: endTime }],
@@ -222,7 +304,7 @@ export async function createMontage(
   options: { transitionStyle?: TransitionStyle; title?: string }
 ): Promise<MosaicRunResponse> {
   const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/mosaic`;
-  return runAgent(MOSAIC_AGENT_ID, clipUrls, callbackUrl, {
+  return runAgent(MOSAIC_CLIPPING_AGENT_ID, clipUrls, callbackUrl, {
     montage: {
       enabled: true,
       transition_style: options.transitionStyle ?? "crossfade",

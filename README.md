@@ -424,7 +424,6 @@ npx prisma studio
 | `DIRECT_URL` | Neon Postgres direct connection string |
 | `MOSAIC_API_KEY` | Mosaic API key (`mk_` prefix) |
 | `MOSAIC_WEBHOOK_SECRET` | Mosaic webhook secret (`whsk_` prefix) |
-| `MOSAIC_AGENT_ID` | Mosaic agent UUID |
 | `NEXT_PUBLIC_POSTHOG_KEY` | PostHog project API key |
 | `NEXT_PUBLIC_POSTHOG_HOST` | PostHog API host (default: `https://us.i.posthog.com`) |
 
