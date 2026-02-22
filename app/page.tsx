@@ -247,7 +247,7 @@ export default function Home() {
             <div className="max-w-xl">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#2D2D2D]/5 mb-6">
                 <Sparkles className="w-4 h-4 text-[#E8725A]" />
-                <span className="text-sm text-[#2D2D2D]/70">Your AI media team — ready in minutes</span>
+                <span className="text-sm text-[#2D2D2D]/70">Trusted by growing churches — clips ready in under 10 min</span>
               </div>
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[#2D2D2D] leading-[1.1] tracking-tight mb-6">
@@ -263,7 +263,7 @@ export default function Home() {
               </h1>
 
               <p className="text-lg text-[#5c5c5c] leading-relaxed mb-8">
-                Upload your sermon. AI finds the best moments, adds captions, B-roll, music, and formats for every platform. Download or auto-post — all in under 10 minutes.
+                Upload your sermon. AI finds the best moments, adds captions, B-roll, music, and formats for every platform. Download or auto-post in under 10 minutes. <strong className="text-[#2D2D2D]">Your Monday just got 4 hours back.</strong>
               </p>
 
               <div className="space-y-6">
@@ -356,10 +356,10 @@ export default function Home() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { icon: Clock, title: "No Time", desc: "Who has 4 hours every Monday to edit clips? Your team is already stretched thin." },
+              { icon: Clock, title: "4 Hours Gone", desc: "Manual clip editing eats your entire Monday morning. Your team is already stretched thin — and that's before captions, formatting, and posting." },
               { icon: Wand2, title: "No Expertise", desc: "Captions, hooks, pacing—it's a craft your volunteers don't have time to learn." },
               { icon: Sparkles, title: "Algorithm Demands Clips", desc: "The algorithm doesn't care how good your sermon was. It wants short clips." },
-              { icon: Share2, title: "Platform Chaos", desc: "TikTok wants vertical. YouTube wants landscape. Instagram wants square. It's exhausting." },
+              { icon: Share2, title: "Platform Chaos", desc: "TikTok wants vertical. YouTube wants landscape. Instagram wants square. Meanwhile your message sits unseen while competitors post 3× a week." },
             ].map((item, i) => (
               <div key={i} className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-[#E8725A]/30 transition-colors">
                 <item.icon className="w-8 h-8 text-[#E8725A] mb-4" />
@@ -382,7 +382,7 @@ export default function Home() {
               Help us build the perfect tool for your church
             </h2>
             <p className="text-lg text-[#5c5c5c] max-w-xl mx-auto">
-              Tell us what matters most. Early access members get priority — plus a founding member discount.
+              Tell us what matters most. Founding members lock in <strong className="text-[#E8725A]">30% off forever</strong> — plus priority access before we open to the public.
             </p>
           </div>
 
@@ -534,7 +534,7 @@ export default function Home() {
             {[
               { num: "30+", label: "Languages Supported" },
               { num: "30,000+", label: "B-Roll Assets" },
-              { num: "5", label: "Export Formats" },
+              { num: "4+ hrs", label: "Saved Every Monday" },
               { num: "6", label: "Social Platforms" },
             ].map((stat, i) => (
               <div key={i} className="p-6">
@@ -691,7 +691,7 @@ export default function Home() {
             Your message is too powerful to stay on the shelf.
           </h2>
           <p className="text-lg text-[#5c5c5c] mb-10 max-w-xl mx-auto">
-            AI-powered editing. Professional results. Under 10 minutes.
+            Upload Sunday&apos;s sermon. Share clips by noon. Repeat every week — automatically.
           </p>
 
           <a href="/sign-up" className="bg-[#E8725A] hover:bg-[#d4654f] text-white px-10 py-4 rounded-full font-medium text-lg transition-all hover:shadow-xl hover:shadow-[#E8725A]/30 inline-flex items-center gap-2">
